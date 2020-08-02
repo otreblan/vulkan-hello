@@ -1,0 +1,52 @@
+# Maintainer: Otreblan <otreblain@gmail.com>
+
+pkgname=hello-git
+pkgver=v4.0.r15.g6b20940
+pkgrel=1
+epoch=
+pkgdesc="A C++ template"
+arch=('x86_64')
+url="https://github.com/otreblan/hello"
+license=('GPL3')
+groups=()
+depends=('gcc-libs')
+makedepends=('git' 'cmake')
+checkdepends=()
+optdepends=()
+provides=(${pkgname%-git})
+conflicts=(${pkgname%-git})
+_gitrepo=$(git rev-parse --show-toplevel)
+_headcommit=$(git rev-parse HEAD)
+source=("$pkgname::git+file://$_gitrepo#commit=$_headcommit")
+md5sums=('SKIP')
+
+prepare() {
+	mkdir -p "$srcdir/$pkgname/build"
+}
+
+pkgver() {
+	cd "$srcdir/$pkgname"
+	( set -o pipefail
+	git describe --long 2>/dev/null | sed 's/^v-//;s/\([^-]*-g\)/r\1/;s/-/./g' ||
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+	)
+}
+
+build() {
+	cd "$srcdir/$pkgname/build"
+
+	cmake \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_UNITY_BUILD=ON \
+		-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
+		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+		..
+
+	make
+	make doc
+}
+
+package() {
+	cd "$srcdir/$pkgname/build"
+	make DESTDIR="$pkgdir/" install
+}

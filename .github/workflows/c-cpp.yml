@@ -1,0 +1,93 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ammaraskar/gcc-problem-matcher@master
+
+    - name: deps
+      run: sudo apt install asciidoctor g++-10
+
+    - name: configure
+      run: CXXFLAGS="-O2 -pipe -fno-plt -Wall -Wextra" cmake
+        -DCMAKE_CXX_COMPILER=g++-10
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_PREFIX=/usr
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+        -B build
+
+    - name: build
+      run: |
+          export MAKEFLAGS=-j$(nproc)
+          cmake --build build
+          cmake --build build --target doc
+
+    - name: deb
+      run: |
+          strip --strip-all $(find build -maxdepth 1 -executable -type f)
+          cmake --build build --target package
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ubuntu_package
+        path: build/*.deb
+
+  arch-linux:
+    runs-on: ubuntu-latest
+    container: oblique/archlinux-yay
+
+    steps:
+    - name: Syu
+      run: sudo -u aur yay -Syu --noconfirm jq
+
+    - name: Get last tag
+      id: tag
+      env:
+        url: https://api.github.com/repos/${{ github.repository }}/tags
+      run: |
+          set -o pipefail
+          echo ::set-output name=tag::$(curl \
+              --silent \
+              --header 'authorization: Bearer ${{ github.token }}' \
+              --url $url | \
+              jq --raw-output '.[].name' | \
+              head --lines=1 \
+          )
+
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ steps.tag.outputs.tag }}
+
+    - name: Checkout repo head
+      env:
+        REF: ${{ github.ref }}
+      run: |
+          git fetch origin ${REF#refs/heads/}
+          git checkout FETCH_HEAD
+          git log --decorate=on
+
+    - name: Zstd
+      run: sed -i 's/tar\.xz/tar.zst/' /etc/makepkg.conf
+
+    - name: chown
+      run: chown --recursive aur pkg/arch
+
+    - name: makepkg
+      working-directory: ./pkg/arch
+      run: |
+          export MAKEFLAGS=-j$(nproc)
+          sudo -Eu aur makepkg -s --noconfirm
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: arch_package
+        path: pkg/arch/*.pkg.tar.*
