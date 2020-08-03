@@ -36,7 +36,7 @@ add_executable(${PROJECT_NAME})
 # C++ version
 set_target_properties(${PROJECT_NAME}
 	PROPERTIES
-		CXX_STANDARD 17
+		CXX_STANDARD 20
 )
 
 # Headers
@@ -81,7 +81,7 @@ target_compile_definitions(${PROJECT_NAME}
 
 # Default flags
 if(UNIX AND NOT DEFINED ENV{CXXFLAGS})
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -g")
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-missing-field-initializers -g")
 endif()
 
 # Install target

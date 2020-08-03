@@ -29,8 +29,12 @@ private:
 	const int width = 800;
 	const int heigth = 600;
 
+	VkInstance instance;
+
 	void initWindow();
 	void initVulkan();
 	void mainLoop();
 	void cleanup();
+
+	void createInstance();
 };

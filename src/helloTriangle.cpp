@@ -16,6 +16,10 @@
 
 //#include <vulkan/vulkan.h>
 
+#include <stdexcept>
+#include <iostream>
+#include <vector>
+
 #include <helloTriangle.hpp>
 
 void HelloTriangle::run()
@@ -38,6 +42,7 @@ void HelloTriangle::initWindow()
 
 void HelloTriangle::initVulkan()
 {
+	createInstance();
 }
 
 void HelloTriangle::mainLoop()
@@ -50,6 +55,50 @@ void HelloTriangle::mainLoop()
 
 void HelloTriangle::cleanup()
 {
+	vkDestroyInstance(instance, nullptr);
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
+}
+
+void HelloTriangle::createInstance()
+{
+	VkApplicationInfo appInfo
+	{
+		.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+		.pApplicationName   = "Hello triangle",
+		.applicationVersion = VK_MAKE_VERSION(0, 0, 0),
+		.pEngineName        = "No engine",
+		.engineVersion      = VK_MAKE_VERSION(0, 0, 0),
+		.apiVersion         = VK_API_VERSION_1_2
+	};
+
+	uint32_t glfwExtensionCount = 0;
+	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	VkInstanceCreateInfo createInfo
+	{
+		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+		.pApplicationInfo        = &appInfo,
+		.enabledLayerCount       = 0,
+		.enabledExtensionCount   = glfwExtensionCount,
+		.ppEnabledExtensionNames = glfwExtensions
+	};
+
+	if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+	{
+		throw std::runtime_error("Can't create instance");
+	}
+
+	uint32_t extensionCount = 0;
+	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+	std::vector<VkExtensionProperties> extensions(extensionCount);
+
+	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+	for(const auto& i: extensions)
+	{
+		std::cout << '\t' << i.extensionName << '\n';
+	}
 }
