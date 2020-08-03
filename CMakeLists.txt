@@ -52,22 +52,30 @@ add_subdirectory(pkg) # Packaging
 pkg_check_modules(shared
 	REQUIRED IMPORTED_TARGET
 		vulkan
+		glfw3
 )
 
-## Header only libraries
-#pkg_check_modules(header_only
-#	REQUIRED IMPORTED_TARGET
-#		libfoo3
-#		libfoo4
-#)
+# Header only libraries
+pkg_check_modules(header_only
+	REQUIRED IMPORTED_TARGET
+		glm
+)
 
 # Linking
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		PkgConfig::shared
 
-#	INTERFACE
-#		PkgConfig::header_only
+	INTERFACE
+		PkgConfig::header_only
+)
+
+# Defining some macros
+target_compile_definitions(${PROJECT_NAME}
+	PRIVATE
+		GLFW_INCLUDE_VULKAN
+		GLM_FORCE_RADIANS
+		GLM_FORCE_DEPTH_ZERO_TO_ONE
 )
 
 # Default flags

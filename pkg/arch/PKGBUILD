@@ -1,7 +1,7 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
 pkgname=hello-git
-pkgver=v4.0.r15.g6b20940
+pkgver=r1.3c72e3e
 pkgrel=1
 epoch=
 pkgdesc="A C++ template"
@@ -43,7 +43,6 @@ build() {
 		..
 
 	make
-	make doc
 }
 
 package() {
