@@ -1,16 +1,16 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
-pkgname=hello-git
-pkgver=r1.3c72e3e
+pkgname=vulkan-hello-git
+pkgver=r2.4e58a67
 pkgrel=1
 epoch=
-pkgdesc="A C++ template"
+pkgdesc="Vulkan"
 arch=('x86_64')
 url="https://github.com/otreblan/hello"
 license=('GPL3')
 groups=()
-depends=('gcc-libs')
-makedepends=('git' 'cmake')
+depends=('vulkan-icd-loader' 'glfw')
+makedepends=('git' 'cmake' 'vulkan-headers' 'glm')
 checkdepends=()
 optdepends=()
 provides=(${pkgname%-git})

@@ -15,7 +15,7 @@ jobs:
     - uses: ammaraskar/gcc-problem-matcher@master
 
     - name: deps
-      run: sudo apt install asciidoctor g++-10
+      run: sudo apt install libvulkan-dev libglm-dev libglfw3-dev g++-10
 
     - name: configure
       run: CXXFLAGS="-O2 -pipe -fno-plt -Wall -Wextra" cmake

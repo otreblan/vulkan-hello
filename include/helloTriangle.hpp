@@ -14,13 +14,4 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <vulkan/vulkan.h>
-//#include <GLFW/glfw3.h>
-
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
-
-int main()
-{
-	return 0;
-}
+#pragma once
