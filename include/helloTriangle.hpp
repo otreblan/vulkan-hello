@@ -15,3 +15,22 @@
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
+
+#include <GLFW/glfw3.h>
+
+class HelloTriangle
+{
+public:
+	void run();
+
+private:
+	GLFWwindow* window;
+
+	const int width = 800;
+	const int heigth = 600;
+
+	void initWindow();
+	void initVulkan();
+	void mainLoop();
+	void cleanup();
+};

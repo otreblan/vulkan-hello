@@ -14,28 +14,42 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+//#include <vulkan/vulkan.h>
 
 #include <helloTriangle.hpp>
 
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
-
-int main()
+void HelloTriangle::run()
 {
-	HelloTriangle app;
+	initWindow();
+	initVulkan();
+	mainLoop();
+	cleanup();
+}
 
-	try
-	{
-		app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		exit(EXIT_FAILURE);
-	}
+void HelloTriangle::initWindow()
+{
+	glfwInit();
 
-	exit(EXIT_SUCCESS);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+	window = glfwCreateWindow(width, heigth, "Vulkan", glfwGetPrimaryMonitor(), nullptr);
+}
+
+void HelloTriangle::initVulkan()
+{
+}
+
+void HelloTriangle::mainLoop()
+{
+	while (!glfwWindowShouldClose(window))
+	{
+		glfwPollEvents();
+	}
+}
+
+void HelloTriangle::cleanup()
+{
+	glfwDestroyWindow(window);
+	glfwTerminate();
 }
