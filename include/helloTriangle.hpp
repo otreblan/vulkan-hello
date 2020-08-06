@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <GLFW/glfw3.h>
 
 class HelloTriangle
@@ -29,6 +31,16 @@ private:
 	const int width = 800;
 	const int heigth = 600;
 
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+
+#ifdef DEBUG
+	const bool enableValidationLayers = true;
+#else
+	const bool enableValidationLayers = false;
+#endif
+
 	VkInstance instance;
 
 	void initWindow();
@@ -37,4 +49,6 @@ private:
 	void cleanup();
 
 	void createInstance();
+	bool checkValidationLayerSupport();
+	std::vector<const char*> getRequiredExtensions();
 };

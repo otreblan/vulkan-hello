@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <vector>
+#include <cstring>
 
 #include <helloTriangle.hpp>
 
@@ -37,7 +38,7 @@ void HelloTriangle::initWindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	window = glfwCreateWindow(width, heigth, "Vulkan", glfwGetPrimaryMonitor(), nullptr);
+	window = glfwCreateWindow(width, heigth, "Vulkan", nullptr, nullptr);
 }
 
 void HelloTriangle::initVulkan()
@@ -63,6 +64,13 @@ void HelloTriangle::cleanup()
 
 void HelloTriangle::createInstance()
 {
+#ifdef DEBUG
+	if (!checkValidationLayerSupport())
+	{
+		throw std::runtime_error("validation layers requested, but not available!");
+	}
+#endif
+
 	VkApplicationInfo appInfo
 	{
 		.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -73,16 +81,21 @@ void HelloTriangle::createInstance()
 		.apiVersion         = VK_API_VERSION_1_2
 	};
 
-	uint32_t glfwExtensionCount = 0;
-	const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+	auto glfwExtensions = getRequiredExtensions();
 
 	VkInstanceCreateInfo createInfo
 	{
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
 		.pApplicationInfo        = &appInfo,
+#ifdef DEBUG
+		.enabledLayerCount       = static_cast<uint32_t>(validationLayers.size()),
+		.ppEnabledLayerNames     = validationLayers.data(),
+#else
 		.enabledLayerCount       = 0,
-		.enabledExtensionCount   = glfwExtensionCount,
-		.ppEnabledExtensionNames = glfwExtensions
+		.ppEnabledLayerNames     = nullptr,
+#endif
+		.enabledExtensionCount   = static_cast<uint32_t>(glfwExtensions.size()),
+		.ppEnabledExtensionNames = glfwExtensions.data()
 	};
 
 	if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
@@ -101,4 +114,49 @@ void HelloTriangle::createInstance()
 	{
 		std::cout << '\t' << i.extensionName << '\n';
 	}
+}
+
+bool HelloTriangle::checkValidationLayerSupport() {
+	uint32_t layerCount;
+	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+	std::vector<VkLayerProperties> availableLayers(layerCount);
+	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+	for(const char* layerName : validationLayers)
+	{
+		bool layerFound = false;
+
+		for(const auto& layerProperties : availableLayers)
+		{
+			if(strcmp(layerName, layerProperties.layerName) == 0)
+			{
+				layerFound = true;
+				break;
+			}
+		}
+
+		if(!layerFound)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+std::vector<const char*> HelloTriangle::getRequiredExtensions()
+{
+	uint32_t glfwExtensionCount = 0;
+	const char** glfwExtensions;
+	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+
+#ifdef DEBUG
+	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#endif
+
+	return extensions;
 }

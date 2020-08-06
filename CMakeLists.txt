@@ -79,9 +79,13 @@ target_compile_definitions(${PROJECT_NAME}
 		#VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d
 )
 
-# Default flags
+# Default flags and macros
 if(UNIX AND NOT DEFINED ENV{CXXFLAGS})
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-missing-field-initializers -g")
+	target_compile_definitions(${PROJECT_NAME}
+		PRIVATE
+			DEBUG
+	)
 endif()
 
 # Install target
