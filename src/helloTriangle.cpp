@@ -89,9 +89,19 @@ void HelloTriangle::createInstance()
 
 	auto glfwExtensions = getRequiredExtensions();
 
+#ifdef DEBUG
+	auto debugCreateInfo = populateDebugMessengerCreateInfo();
+#endif
+
 	VkInstanceCreateInfo createInfo
 	{
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+#ifdef DEBUG
+		.pNext = &debugCreateInfo,
+#else
+		.pNext = nullptr,
+#endif
+
 		.pApplicationInfo        = &appInfo,
 #ifdef DEBUG
 		.enabledLayerCount       = static_cast<uint32_t>(validationLayers.size()),
@@ -100,6 +110,7 @@ void HelloTriangle::createInstance()
 		.enabledLayerCount       = 0,
 		.ppEnabledLayerNames     = nullptr,
 #endif
+
 		.enabledExtensionCount   = static_cast<uint32_t>(glfwExtensions.size()),
 		.ppEnabledExtensionNames = glfwExtensions.data()
 	};
@@ -184,20 +195,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL HelloTriangle::debugCallback(
 
 void HelloTriangle::setupDebugMessenger()
 {
-	VkDebugUtilsMessengerCreateInfoEXT createInfo
-	{
-		.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-		.messageSeverity =
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-		.messageType     =
-			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-		.pfnUserCallback = debugCallback,
-		.pUserData       = this
-	};
+	VkDebugUtilsMessengerCreateInfoEXT createInfo = populateDebugMessengerCreateInfo();
 
 	if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
 		throw std::runtime_error("failed to set up debug messenger!");
@@ -230,5 +228,22 @@ void HelloTriangle::DestroyDebugUtilsMessengerEXT(VkInstance instance,
 	{
 		func(instance, debugMessenger, pAllocator);
 	}
+}
+VkDebugUtilsMessengerCreateInfoEXT HelloTriangle::populateDebugMessengerCreateInfo()
+{
+	return
+	{
+		.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+		.messageSeverity =
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+		.messageType     =
+			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+		.pfnUserCallback = debugCallback,
+		.pUserData       = this
+	};
 }
 #endif

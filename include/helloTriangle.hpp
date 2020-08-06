@@ -54,6 +54,8 @@ private:
 	void DestroyDebugUtilsMessengerEXT(VkInstance instance,
 		VkDebugUtilsMessengerEXT debugMessenger,
 		const VkAllocationCallbacks* pAllocator);
+
+	VkDebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo();
 #else
 	const bool enableValidationLayers = false;
 #endif
