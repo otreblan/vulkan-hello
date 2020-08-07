@@ -20,6 +20,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <queueFamilyIndices.hpp>
+
 class HelloTriangle
 {
 public:
@@ -61,6 +63,7 @@ private:
 #endif
 
 	VkInstance instance;
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
 	void initWindow();
 	void initVulkan();
@@ -71,4 +74,7 @@ private:
 	bool checkValidationLayerSupport();
 	std::vector<const char*> getRequiredExtensions();
 
+	void pickPhysicalDevice();
+	bool isDeviceSuitable(VkPhysicalDevice device);
+	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 };
