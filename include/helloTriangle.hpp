@@ -66,6 +66,8 @@ private:
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkDevice device;
 	VkQueue graphicsQueue;
+	VkSurfaceKHR surface;
+	VkQueue presentQueue;
 
 	void initWindow();
 	void initVulkan();
@@ -81,4 +83,6 @@ private:
 	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 	void createLogicalDevice();
+
+	void createSurface();
 };

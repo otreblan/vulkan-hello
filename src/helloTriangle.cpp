@@ -16,10 +16,11 @@
 
 //#include <vulkan/vulkan.h>
 
-#include <stdexcept>
-#include <iostream>
-#include <vector>
 #include <cstring>
+#include <iostream>
+#include <set>
+#include <stdexcept>
+#include <vector>
 
 #include <helloTriangle.hpp>
 
@@ -47,6 +48,7 @@ void HelloTriangle::initVulkan()
 #ifdef DEBUG
 	setupDebugMessenger();
 #endif
+	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
 }
@@ -65,6 +67,7 @@ void HelloTriangle::cleanup()
 #ifdef DEBUG
 	DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 #endif
+	vkDestroySurfaceKHR(instance, surface, nullptr);
 	vkDestroyInstance(instance, nullptr);
 
 	glfwDestroyWindow(window);
@@ -289,10 +292,16 @@ QueueFamilyIndices HelloTriangle::findQueueFamilies(VkPhysicalDevice device)
 	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
 	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
-	for (int i = 0; const auto& queueFamily : queueFamilies)
+	for(int i = 0; const auto& queueFamily : queueFamilies)
 	{
-		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 			indices.graphicsFamily = i;
+
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+
+		if(presentSupport)
+			indices.presentFamily = i;
 
 		if(indices.isComplete())
 			break;
@@ -308,34 +317,46 @@ void HelloTriangle::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+
 	float queuePriority = 1.0f;
 
-	VkDeviceQueueCreateInfo queueCreateInfo{
-		.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-		.queueFamilyIndex = indices.graphicsFamily.value(),
-		.queueCount       = 1,
-		.pQueuePriorities = &queuePriority
-	};
+	for (uint32_t queueFamily : uniqueQueueFamilies) {
+		queueCreateInfos.push_back({
+			.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+			.queueFamilyIndex = queueFamily,
+			.queueCount       = 1,
+			.pQueuePriorities = &queuePriority
+		});
+	}
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 	VkDeviceCreateInfo createInfo
 	{
-		.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-		.queueCreateInfoCount = 1,
-		.pQueueCreateInfos = &queueCreateInfo,
+		.sType                 = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+		.queueCreateInfoCount  = static_cast<uint32_t>(queueCreateInfos.size()),
+		.pQueueCreateInfos     = queueCreateInfos.data(),
 #ifdef DEBUG
-		.enabledLayerCount = static_cast<uint32_t>(validationLayers.size()),
-		.ppEnabledLayerNames = validationLayers.data(),
+		.enabledLayerCount     = static_cast<uint32_t>(validationLayers.size()),
+		.ppEnabledLayerNames   = validationLayers.data(),
 #else
-		.enabledLayerCount = 0,
-		.ppEnabledLayerNames = nullptr,
+		.enabledLayerCount     = 0,
+		.ppEnabledLayerNames   = nullptr,
 #endif
 		.enabledExtensionCount = 0,
-		.pEnabledFeatures = &deviceFeatures
+		.pEnabledFeatures      = &deviceFeatures
 	};
 
 	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
 		throw std::runtime_error("failed to create logical device!");
 
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+}
+
+void HelloTriangle::createSurface()
+{
+	if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+		throw std::runtime_error("failed to create window surface!");
 }
