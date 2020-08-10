@@ -55,6 +55,7 @@ void HelloTriangle::initVulkan()
 	createLogicalDevice();
 	createSwapChain();
 	createImageViews();
+	createGraphicsPipeline();
 }
 
 void HelloTriangle::mainLoop()
@@ -559,4 +560,8 @@ void HelloTriangle::createImageViews()
 			throw std::runtime_error("failed to create image views!");
 	}
 
+}
+
+void HelloTriangle::createGraphicsPipeline()
+{
 }
