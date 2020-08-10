@@ -21,6 +21,7 @@
 #include <GLFW/glfw3.h>
 
 #include <queueFamilyIndices.hpp>
+#include <swapChainSupportDetails.hpp>
 
 class HelloTriangle
 {
@@ -31,15 +32,21 @@ private:
 	GLFWwindow* window;
 
 	const int width = 800;
-	const int heigth = 600;
+	const int height = 600;
 
-	const std::vector<const char*> validationLayers = {
-		"VK_LAYER_KHRONOS_validation"
+	const std::vector<const char*> deviceExtensions = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
 #ifdef DEBUG
 	const bool enableValidationLayers = true;
 	VkDebugUtilsMessengerEXT debugMessenger;
+
+	const std::vector<const char*> validationLayers = {
+		"VK_LAYER_KHRONOS_validation"
+	};
+
+	bool checkValidationLayerSupport();
 	void setupDebugMessenger();
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
@@ -68,6 +75,10 @@ private:
 	VkQueue graphicsQueue;
 	VkSurfaceKHR surface;
 	VkQueue presentQueue;
+	VkSwapchainKHR swapChain;
+	std::vector<VkImage> swapChainImages;
+	VkFormat swapChainImageFormat;
+	VkExtent2D swapChainExtent;
 
 	void initWindow();
 	void initVulkan();
@@ -75,7 +86,6 @@ private:
 	void cleanup();
 
 	void createInstance();
-	bool checkValidationLayerSupport();
 	std::vector<const char*> getRequiredExtensions();
 
 	void pickPhysicalDevice();
@@ -85,4 +95,11 @@ private:
 	void createLogicalDevice();
 
 	void createSurface();
+
+	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	void createSwapChain();
 };
