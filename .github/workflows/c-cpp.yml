@@ -7,7 +7,6 @@ on:
     branches: [ '*' ]
 
 jobs:
-  ubuntu:
   arch-linux:
     runs-on: ubuntu-latest
     container: oblique/archlinux-yay
