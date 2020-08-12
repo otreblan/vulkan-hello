@@ -10,25 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Wait Ubuntu build
-      uses: fountainhead/action-wait-for-check@v1.0.0
-      with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: "ubuntu"
-
     - name: Wait Arch Linux build
       uses: fountainhead/action-wait-for-check@v1.0.0
       with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: "arch-linux"
-
-    - name: Download Ubuntu package
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        workflow: c-cpp.yml
-        name: ubuntu_package
-        commit: ${{ github.sha }}
 
     - name: Download Arch Linux package
       uses: dawidd6/action-download-artifact@v2
@@ -49,23 +35,9 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Get deb name
-      id: ubuntu
-      run: echo ::set-output name=ubuntu::$(ls *.deb)
-
     - name: Get Arch name
       id: arch
       run: echo ::set-output name=arch::$(ls *.pkg.tar.*)
-
-    - name: Upload Ubuntu package
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.ubuntu.outputs.ubuntu }}
-        asset_name: ${{ steps.ubuntu.outputs.ubuntu }}
-        asset_content_type: application/vnd.debian.binary-package
 
     - name: Upload Arch Linux package
       uses: actions/upload-release-asset@v1

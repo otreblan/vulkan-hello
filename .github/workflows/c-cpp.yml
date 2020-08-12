@@ -8,38 +8,6 @@ on:
 
 jobs:
   ubuntu:
-    runs-on: ubuntu-20.04
-
-    steps:
-    - uses: actions/checkout@v2
-    - uses: ammaraskar/gcc-problem-matcher@master
-
-    - name: deps
-      run: sudo apt install libvulkan-dev libglm-dev libglfw3-dev g++-10
-
-    - name: configure
-      run: CXXFLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers" cmake
-        -DCMAKE_CXX_COMPILER=g++-10
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_INSTALL_PREFIX=/usr
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
-        -B build
-
-    - name: build
-      run: |
-          export MAKEFLAGS=-j$(nproc)
-          cmake --build build
-
-    - name: deb
-      run: |
-          strip --strip-all $(find build -maxdepth 1 -executable -type f)
-          cmake --build build --target package
-
-    - uses: actions/upload-artifact@v2
-      with:
-        name: ubuntu_package
-        path: build/*.deb
-
   arch-linux:
     runs-on: ubuntu-latest
     container: oblique/archlinux-yay
