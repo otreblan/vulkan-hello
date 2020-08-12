@@ -46,6 +46,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 add_subdirectory(src) # Sources list
+add_subdirectory(include)
 
 # Shared libraries
 pkg_check_modules(shared

@@ -14,31 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#pragma once
 
-#include <helloTriangle.hpp>
-#include <config.hpp>
+#include <string_view>
 
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
-
-int main()
-{
-	HelloTriangle app;
-
-	std::cout << Config::dataDir << '\n';
-
-	try
-	{
-		app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		exit(EXIT_FAILURE);
-	}
-
-	exit(EXIT_SUCCESS);
-}
+static constexpr std::string_view dataDir = "@CMAKE_INSTALL_FULL_DATAROOTDIR@";
