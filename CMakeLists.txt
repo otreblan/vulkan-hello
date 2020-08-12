@@ -55,6 +55,12 @@ pkg_check_modules(shared
 		glfw3
 )
 
+find_package(XdgUtils REQUIRED
+	COMPONENTS
+		DesktopEntry
+		BaseDir
+)
+
 # Header only libraries
 pkg_check_modules(header_only
 	REQUIRED IMPORTED_TARGET
@@ -65,6 +71,8 @@ pkg_check_modules(header_only
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		PkgConfig::shared
+		XdgUtils::DesktopEntry
+		XdgUtils::BaseDir
 
 	INTERFACE
 		PkgConfig::header_only
@@ -76,7 +84,6 @@ target_compile_definitions(${PROJECT_NAME}
 		GLFW_INCLUDE_VULKAN
 		GLM_FORCE_RADIANS
 		GLM_FORCE_DEPTH_ZERO_TO_ONE
-		#VK_LAYER_PATH=/usr/share/vulkan/explicit_layer.d
 )
 
 # Default flags and macros
