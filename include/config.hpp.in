@@ -20,5 +20,5 @@
 
 struct Config
 {
-	static constexpr std::string_view dataDir = "@CMAKE_INSTALL_FULL_DATAROOTDIR@";
+	static constexpr std::string_view dataDir = "@DATA_DIR@";
 };

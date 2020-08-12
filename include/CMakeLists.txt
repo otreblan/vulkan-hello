@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+set(DATA_DIR "${CMAKE_INSTALL_FULL_DATADIR}/${PROJECT_NAME}")
+
 configure_file(config.hpp.in
 	${CMAKE_CURRENT_SOURCE_DIR}/config.hpp
 	@ONLY
