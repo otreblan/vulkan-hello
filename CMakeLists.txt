@@ -87,7 +87,7 @@ target_compile_definitions(${PROJECT_NAME}
 )
 
 # Default flags and macros
-if(UNIX AND NOT DEFINED ENV{CXXFLAGS})
+if(UNIX AND NOT (DEFINED ENV{CXXFLAGS} OR CMAKE_CXX_FLAGS))
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-missing-field-initializers -g")
 	target_compile_definitions(${PROJECT_NAME}
 		PRIVATE
