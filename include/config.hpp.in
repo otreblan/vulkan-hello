@@ -18,7 +18,14 @@
 
 #include <string_view>
 
-struct Config
+
+namespace Config
 {
-	static constexpr std::string_view dataDir = "@DATA_DIR@";
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
+	constexpr std::string_view dataDir = "@DATA_DIR@";
+
+#pragma GCC diagnostic pop
 };
+
