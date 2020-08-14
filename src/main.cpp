@@ -19,7 +19,6 @@
 #include <stdexcept>
 
 #include <helloTriangle.hpp>
-#include <config.hpp>
 
 //#include <glm/vec4.hpp>
 //#include <glm/mat4x4.hpp>
@@ -27,8 +26,6 @@
 int main()
 {
 	HelloTriangle app;
-
-	std::cout << Config::dataDir << '\n';
 
 	try
 	{

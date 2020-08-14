@@ -24,8 +24,11 @@ namespace Config
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
-	constexpr std::string_view dataDir = "@DATA_DIR@";
+#ifdef DEBUG
+	constexpr std::string_view shadersDir = "@CMAKE_BINARY_DIR@/share/shaders";
+#else
+	constexpr std::string_view shadersDir = "@DATA_DIR@/shaders";
+#endif
 
 #pragma GCC diagnostic pop
 };
-

@@ -47,6 +47,9 @@ target_include_directories(${PROJECT_NAME}
 
 add_subdirectory(src) # Sources list
 add_subdirectory(include)
+add_subdirectory(share)
+
+add_dependencies(${PROJECT_NAME} shaders)
 
 # Shared libraries
 pkg_check_modules(shared

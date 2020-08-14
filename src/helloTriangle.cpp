@@ -22,7 +22,9 @@
 #include <limits>
 #include <set>
 #include <stdexcept>
+#include <sys/stat.h>
 #include <vector>
+#include <fstream>
 
 #include <helloTriangle.hpp>
 
@@ -564,4 +566,39 @@ void HelloTriangle::createImageViews()
 
 void HelloTriangle::createGraphicsPipeline()
 {
+}
+
+std::vector<std::byte> HelloTriangle::readFile(std::string_view filepath)
+{
+	struct stat st;
+
+	if(stat(filepath.data(), &st) != 0)
+		throw std::runtime_error("failed to open file!");
+
+	std::vector<std::byte> buffer(st.st_size);
+	std::basic_ifstream<std::byte> file(filepath.data(), std::ios::binary);
+
+	if (!file.is_open())
+		throw std::runtime_error("failed to open file!");
+
+	file.read(buffer.data(), st.st_size);
+	file.close();
+
+	return buffer;
+}
+
+VkShaderModule HelloTriangle::createShaderModule(std::span<std::byte> code)
+{
+	VkShaderModuleCreateInfo createInfo
+	{
+		.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+		.codeSize = code.size(),
+		.pCode    = reinterpret_cast<const uint32_t*>(code.data())
+	};
+
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		throw std::runtime_error("failed to create shader module!");
+
+	return shaderModule;
 }

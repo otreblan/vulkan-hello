@@ -16,6 +16,9 @@
 
 #pragma once
 
+#include <cstddef>
+#include <span>
+#include <string_view>
 #include <vector>
 
 #include <GLFW/glfw3.h>
@@ -105,4 +108,6 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createGraphicsPipeline();
+	static std::vector<std::byte> readFile(std::string_view filepath);
+	VkShaderModule createShaderModule(std::span<std::byte> code);
 };
