@@ -14,28 +14,47 @@
 # You should have received a copy of the GNU General Public License
 # along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+function(add_spirv_target)
+	set(options)
+	set(oneValueArgs TARGET)
+	set(multiValueArgs SOURCES)
 
-set(SHADER_SOURCES
-	shader.frag
-	shader.vert
-)
-
-foreach(SOURCE IN LISTS SHADER_SOURCES)
-	get_filename_component(SRC_EXT ${SOURCE} LAST_EXT)
-	string(SUBSTRING ${SRC_EXT} 1 -1 SRC_EXT)
-	set(SPIRV ${SRC_EXT}.spv)
-
-	add_custom_command(OUTPUT "${SPIRV}"
-		DEPENDS "${SOURCE}"
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-		COMMAND glslc "${SOURCE}" -o "${CMAKE_CURRENT_BINARY_DIR}/${SPIRV}"
-		COMMENT "${SOURCE} -> ${SPIRV}"
+	cmake_parse_arguments(ADD_SPIRV_TARGET
+		"${options}"
+		"${oneValueArgs}"
+		"${multiValueArgs}"
+		${ARGN}
 	)
 
-	list(APPEND SHADER_BINARIES "${SPIRV}")
-endforeach()
+	foreach(SOURCE IN LISTS ADD_SPIRV_TARGET_SOURCES)
+		get_filename_component(SRC_EXT ${SOURCE} LAST_EXT)
+		string(SUBSTRING ${SRC_EXT} 1 -1 SRC_EXT)
+		set(SPIRV ${SRC_EXT}.spv)
 
-add_custom_target(shaders ALL
-	DEPENDS
-		"${SHADER_BINARIES}"
+		add_custom_command(OUTPUT "${SPIRV}"
+			DEPENDS "${SOURCE}"
+			WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+			COMMAND glslc "${SOURCE}" -o "${CMAKE_CURRENT_BINARY_DIR}/${SPIRV}"
+			COMMENT "${SOURCE} -> ${SPIRV}"
+		)
+
+		list(APPEND ADD_SPIRV_TARGET_SHADER_BINARIES "${SPIRV}")
+
+		install(FILES
+			"${CMAKE_CURRENT_BINARY_DIR}/${SPIRV}"
+			DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/"
+		)
+	endforeach()
+
+	add_custom_target("${ADD_SPIRV_TARGET_TARGET}"
+		DEPENDS
+			"${ADD_SPIRV_TARGET_SHADER_BINARIES}"
+	)
+
+endfunction()
+
+add_spirv_target(TARGET shaders
+	SOURCES
+		shader.frag
+		shader.vert
 )
