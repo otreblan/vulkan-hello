@@ -38,7 +38,7 @@ function(add_spirv_target)
 			COMMENT "${SOURCE} -> ${SPIRV}"
 		)
 
-		list(APPEND ADD_SPIRV_TARGET_SHADER_BINARIES "${SPIRV}")
+		list(APPEND SHADER_BINARIES "${SPIRV}")
 
 		install(FILES
 			"${CMAKE_CURRENT_BINARY_DIR}/${SPIRV}"
@@ -48,7 +48,7 @@ function(add_spirv_target)
 
 	add_custom_target("${ADD_SPIRV_TARGET_TARGET}"
 		DEPENDS
-			"${ADD_SPIRV_TARGET_SHADER_BINARIES}"
+			"${SHADER_BINARIES}"
 	)
 
 endfunction()
