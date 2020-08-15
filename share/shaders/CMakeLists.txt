@@ -16,7 +16,7 @@
 
 function(add_spirv_target)
 	set(options)
-	set(oneValueArgs TARGET)
+	set(oneValueArgs TARGET DESTINATION)
 	set(multiValueArgs SOURCES)
 
 	cmake_parse_arguments(ADD_SPIRV_TARGET
@@ -42,7 +42,7 @@ function(add_spirv_target)
 
 		install(FILES
 			"${CMAKE_CURRENT_BINARY_DIR}/${SPIRV}"
-			DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/"
+			DESTINATION "${ADD_SPIRV_TARGET_DESTINATION}"
 		)
 	endforeach()
 
@@ -54,6 +54,7 @@ function(add_spirv_target)
 endfunction()
 
 add_spirv_target(TARGET shaders
+	DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/shaders/"
 	SOURCES
 		shader.frag
 		shader.vert
