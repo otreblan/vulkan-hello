@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include <helloTriangle.hpp>
+#include <config.hpp>
 
 void HelloTriangle::run()
 {
@@ -565,14 +566,44 @@ void HelloTriangle::createImageViews()
 
 void HelloTriangle::createGraphicsPipeline()
 {
+	auto vertShaderCode = readFile(shadersDir/"vert.spv");
+	auto fragShaderCode = readFile(shadersDir/"frag.spv");
+
+	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
+	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
+
+	VkPipelineShaderStageCreateInfo vertShaderStageInfo
+	{
+		.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+		.stage  = VK_SHADER_STAGE_VERTEX_BIT,
+		.module = vertShaderModule,
+		.pName  = "main"
+	};
+
+	VkPipelineShaderStageCreateInfo fragShaderStageInfo
+	{
+		.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+		.stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
+		.module = fragShaderModule,
+		.pName  = "main"
+	};
+
+	VkPipelineShaderStageCreateInfo shaderStages[] =
+	{
+		vertShaderStageInfo,
+		fragShaderStageInfo
+	};
+
+	vkDestroyShaderModule(device, fragShaderModule, nullptr);
+	vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-std::vector<std::byte> HelloTriangle::readFile(const path& filepath)
+std::vector<char> HelloTriangle::readFile(const path& filepath)
 {
 	uintmax_t size = std::filesystem::file_size(filepath);
 
-	std::vector<std::byte> buffer(size);
-	std::basic_ifstream<std::byte> file(filepath, std::ios::binary);
+	std::vector<char> buffer(size);
+	std::ifstream file(filepath, std::ios::binary);
 
 	if(!file.is_open())
 		throw std::runtime_error("failed to open file!");
@@ -583,7 +614,7 @@ std::vector<std::byte> HelloTriangle::readFile(const path& filepath)
 	return buffer;
 }
 
-VkShaderModule HelloTriangle::createShaderModule(std::span<std::byte> code)
+VkShaderModule HelloTriangle::createShaderModule(std::span<char> code)
 {
 	VkShaderModuleCreateInfo createInfo
 	{

@@ -111,6 +111,6 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createGraphicsPipeline();
-	static std::vector<std::byte> readFile(const path& filepath);
-	VkShaderModule createShaderModule(std::span<std::byte> code);
+	static std::vector<char> readFile(const path& filepath);
+	VkShaderModule createShaderModule(std::span<char> code);
 };
