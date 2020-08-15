@@ -22,7 +22,6 @@
 #include <limits>
 #include <set>
 #include <stdexcept>
-#include <sys/stat.h>
 #include <vector>
 #include <fstream>
 
@@ -568,20 +567,17 @@ void HelloTriangle::createGraphicsPipeline()
 {
 }
 
-std::vector<std::byte> HelloTriangle::readFile(std::string_view filepath)
+std::vector<std::byte> HelloTriangle::readFile(const path& filepath)
 {
-	struct stat st;
+	uintmax_t size = std::filesystem::file_size(filepath);
 
-	if(stat(filepath.data(), &st) != 0)
+	std::vector<std::byte> buffer(size);
+	std::basic_ifstream<std::byte> file(filepath, std::ios::binary);
+
+	if(!file.is_open())
 		throw std::runtime_error("failed to open file!");
 
-	std::vector<std::byte> buffer(st.st_size);
-	std::basic_ifstream<std::byte> file(filepath.data(), std::ios::binary);
-
-	if (!file.is_open())
-		throw std::runtime_error("failed to open file!");
-
-	file.read(buffer.data(), st.st_size);
+	file.read(buffer.data(), size);
 	file.close();
 
 	return buffer;

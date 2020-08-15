@@ -20,6 +20,7 @@
 #include <span>
 #include <string_view>
 #include <vector>
+#include <filesystem>
 
 #include <GLFW/glfw3.h>
 
@@ -28,6 +29,8 @@
 
 class HelloTriangle
 {
+	using path = std::filesystem::path;
+
 public:
 	void run();
 
@@ -108,6 +111,6 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createGraphicsPipeline();
-	static std::vector<std::byte> readFile(std::string_view filepath);
+	static std::vector<std::byte> readFile(const path& filepath);
 	VkShaderModule createShaderModule(std::span<std::byte> code);
 };
