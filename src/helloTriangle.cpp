@@ -71,6 +71,7 @@ void HelloTriangle::mainLoop()
 
 void HelloTriangle::cleanup()
 {
+	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 	for(auto imageView: swapChainImageViews)
@@ -713,6 +714,29 @@ void HelloTriangle::createGraphicsPipeline()
 
 	if(vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		throw std::runtime_error("failed to create pipeline layout!");
+
+	VkGraphicsPipelineCreateInfo pipelineInfo
+	{
+		.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+		.stageCount          = 2,
+		.pStages             = shaderStages,
+		.pVertexInputState   = &vertexInputInfo,
+		.pInputAssemblyState = &inputAssembly,
+		.pViewportState      = &viewportState,
+		.pRasterizationState = &rasterizer,
+		.pMultisampleState   = &multisampling,
+		.pDepthStencilState  = nullptr,
+		.pColorBlendState    = &colorBlending,
+		.pDynamicState       = nullptr,
+		.layout              = pipelineLayout,
+		.renderPass          = renderPass,
+		.subpass             = 0,
+		.basePipelineHandle  = VK_NULL_HANDLE,
+		.basePipelineIndex   = -1,
+	};
+
+	if(vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+		throw std::runtime_error("failed to create graphics pipeline!");
 
 	vkDestroyShaderModule(device, fragShaderModule, nullptr);
 	vkDestroyShaderModule(device, vertShaderModule, nullptr);
