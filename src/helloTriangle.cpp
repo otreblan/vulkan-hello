@@ -60,6 +60,8 @@ void HelloTriangle::initVulkan()
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
+	createCommandPool();
+	createCommandBuffers();
 }
 
 void HelloTriangle::mainLoop()
@@ -72,6 +74,8 @@ void HelloTriangle::mainLoop()
 
 void HelloTriangle::cleanup()
 {
+	vkDestroyCommandPool(device, commandPool, nullptr);
+
 	for(auto framebuffer : swapChainFramebuffers)
 	{
 		vkDestroyFramebuffer(device, framebuffer, nullptr);
@@ -847,5 +851,72 @@ void HelloTriangle::createFramebuffers()
 
 		if(vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
 			throw std::runtime_error("failed to create framebuffer!");
+	}
+}
+
+void HelloTriangle::createCommandPool()
+{
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+
+	VkCommandPoolCreateInfo poolInfo
+	{
+		.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+		.flags            = 0,
+		.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value()
+	};
+
+	if(vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+		throw std::runtime_error("failed to create command pool!");
+}
+
+void HelloTriangle::createCommandBuffers()
+{
+	commandBuffers.resize(swapChainFramebuffers.size());
+
+	VkCommandBufferAllocateInfo allocInfo
+	{
+		.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+		.commandPool        = commandPool,
+		.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+		.commandBufferCount = (uint32_t)commandBuffers.size()
+	};
+
+	if(vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+		throw std::runtime_error("failed to allocate command buffers!");
+
+	for(size_t i = 0; i < commandBuffers.size(); i++)
+	{
+		VkCommandBufferBeginInfo beginInfo
+		{
+			.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+			.flags            = 0,
+			.pInheritanceInfo = nullptr
+		};
+
+		if(vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS)
+			throw std::runtime_error("failed to begin recording command buffer!");
+
+		VkClearValue clearColor = {.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}};
+		VkRenderPassBeginInfo renderPassInfo
+		{
+			.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+			.renderPass      = renderPass,
+			.framebuffer     = swapChainFramebuffers[i],
+			.renderArea
+			{
+				.offset = {.x = 0, .y = 0},
+				.extent = swapChainExtent
+			},
+			.clearValueCount = 1,
+			.pClearValues    = &clearColor
+		};
+
+		vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+		vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+		vkCmdEndRenderPass(commandBuffers[i]);
+
+		if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
+			throw std::runtime_error("failed to record command buffer!");
 	}
 }
