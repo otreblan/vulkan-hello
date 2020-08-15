@@ -34,3 +34,6 @@
 # More things
 hello
 .deps
+
+# Generated sources
+config.cpp

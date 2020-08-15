@@ -14,8 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with hello.  If not, see <http://www.gnu.org/licenses/>.
 
+configure_file(config.cpp.in
+	${CMAKE_CURRENT_SOURCE_DIR}/config.cpp
+	@ONLY
+)
+
 target_sources(${PROJECT_NAME}
 	PRIVATE
 		main.cpp
 		helloTriangle.cpp
+		config.cpp
 )
