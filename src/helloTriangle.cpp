@@ -62,6 +62,7 @@ void HelloTriangle::initVulkan()
 	createFramebuffers();
 	createCommandPool();
 	createCommandBuffers();
+	createSyncObjects();
 }
 
 void HelloTriangle::mainLoop()
@@ -69,11 +70,20 @@ void HelloTriangle::mainLoop()
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		drawFrame();
 	}
+
+	vkDeviceWaitIdle(device);
 }
 
 void HelloTriangle::cleanup()
 {
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(device, inFlightFences[i], nullptr);
+	}
 	vkDestroyCommandPool(device, commandPool, nullptr);
 
 	for(auto framebuffer : swapChainFramebuffers)
@@ -708,6 +718,7 @@ void HelloTriangle::createGraphicsPipeline()
 		VK_DYNAMIC_STATE_LINE_WIDTH
 	};
 
+	[[maybe_unused]]
 	VkPipelineDynamicStateCreateInfo dynamicState
 	{
 		.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
@@ -814,6 +825,16 @@ void HelloTriangle::createRenderPass()
 		.pColorAttachments    = &colorAttachmentRef
 	};
 
+	VkSubpassDependency dependency
+	{
+		.srcSubpass    = VK_SUBPASS_EXTERNAL,
+		.dstSubpass    = 0,
+		.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		.srcAccessMask = 0,
+		.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+	};
+
 	VkRenderPassCreateInfo renderPassInfo
 	{
 		.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
@@ -821,6 +842,8 @@ void HelloTriangle::createRenderPass()
 		.pAttachments    = &colorAttachment,
 		.subpassCount    = 1,
 		.pSubpasses      = &subpass,
+		.dependencyCount = 1,
+		.pDependencies   = &dependency
 	};
 
 	if(vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
@@ -918,5 +941,91 @@ void HelloTriangle::createCommandBuffers()
 
 		if(vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
 			throw std::runtime_error("failed to record command buffer!");
+	}
+}
+
+void HelloTriangle::drawFrame()
+{
+	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(device,
+		swapChain,
+		std::numeric_limits<uint64_t>::max(),
+		imageAvailableSemaphores[currentFrame],
+		VK_NULL_HANDLE,
+		&imageIndex
+	);
+
+	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+	if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
+		vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+	// Mark the image as now being in use by this frame
+	imagesInFlight[imageIndex] = inFlightFences[currentFrame];
+
+	VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
+	VkSemaphore signalSemaphores[] = {renderFinishedSemaphores[currentFrame]};
+	VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+	VkSubmitInfo submitInfo
+	{
+		.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+		.waitSemaphoreCount   = 1,
+		.pWaitSemaphores      = waitSemaphores,
+		.pWaitDstStageMask    = waitStages,
+		.commandBufferCount   = 1,
+		.pCommandBuffers      = &commandBuffers[imageIndex],
+		.signalSemaphoreCount = 1,
+		.pSignalSemaphores    = signalSemaphores
+	};
+
+	vkResetFences(device, 1, &inFlightFences[currentFrame]);
+
+	if(vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+		throw std::runtime_error("failed to submit draw command buffer!");
+
+	VkSwapchainKHR swapChains[] = {swapChain};
+
+	VkPresentInfoKHR presentInfo
+	{
+		.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+		.waitSemaphoreCount = 1,
+		.pWaitSemaphores    = signalSemaphores,
+		.swapchainCount     = 1,
+		.pSwapchains        = swapChains,
+		.pImageIndices      = &imageIndex,
+		.pResults           = nullptr,
+	};
+
+	vkQueuePresentKHR(presentQueue, &presentInfo);
+	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void HelloTriangle::createSyncObjects()
+{
+	imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+	renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+
+	inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+	imagesInFlight.resize(swapChainImages.size(), VK_NULL_HANDLE);
+
+	VkSemaphoreCreateInfo semaphoreInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO
+	};
+
+	VkFenceCreateInfo fenceInfo
+	{
+		.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+		.flags = VK_FENCE_CREATE_SIGNALED_BIT
+	};
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		if(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+			vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+			vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+			throw std::runtime_error("failed to create sync objects for a frame!");
 	}
 }

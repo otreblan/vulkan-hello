@@ -35,6 +35,7 @@ public:
 	void run();
 
 private:
+	static const int MAX_FRAMES_IN_FLIGHT = 2;
 	GLFWwindow* window;
 
 	const int width = 800;
@@ -92,6 +93,11 @@ private:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
+	mutable std::vector<VkSemaphore> imageAvailableSemaphores;
+	mutable std::vector<VkSemaphore> renderFinishedSemaphores;
+	std::vector<VkFence> inFlightFences;
+	std::vector<VkFence> imagesInFlight;
+	size_t currentFrame = 0;
 
 	void initWindow();
 	void initVulkan();
@@ -123,4 +129,6 @@ private:
 	void createFramebuffers();
 	void createCommandPool();
 	void createCommandBuffers();
+	void drawFrame();
+	void createSyncObjects();
 };
