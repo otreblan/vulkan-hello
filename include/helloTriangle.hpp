@@ -99,6 +99,8 @@ private:
 	std::vector<VkFence> imagesInFlight;
 	size_t currentFrame = 0;
 	bool framebufferResized = false;
+	VkBuffer vertexBuffer;
+	VkDeviceMemory vertexBufferMemory;
 
 	void initWindow();
 	void initVulkan();
@@ -135,4 +137,6 @@ private:
 	void recreateSwapChain();
 	void cleanupSwapChain();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+	void createVertexBuffer();
+	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 };
