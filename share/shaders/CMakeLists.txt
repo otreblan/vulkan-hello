@@ -46,7 +46,7 @@ function(add_spirv_target)
 		)
 	endforeach()
 
-	add_custom_target("${ADD_SPIRV_TARGET_TARGET}"
+	add_custom_target("${ADD_SPIRV_TARGET_TARGET}" ALL
 		DEPENDS
 			"${SHADER_BINARIES}"
 	)
