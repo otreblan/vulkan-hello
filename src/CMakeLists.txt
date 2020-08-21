@@ -21,7 +21,8 @@ configure_file(config.cpp.in
 
 target_sources(${PROJECT_NAME}
 	PRIVATE
-		main.cpp
-		helloTriangle.cpp
 		config.cpp
+		helloTriangle.cpp
+		main.cpp
+		vertex.cpp
 )

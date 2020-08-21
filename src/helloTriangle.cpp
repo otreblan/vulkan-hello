@@ -25,8 +25,9 @@
 #include <vector>
 #include <fstream>
 
-#include <helloTriangle.hpp>
 #include <config.hpp>
+#include <helloTriangle.hpp>
+#include <vertex.hpp>
 
 void HelloTriangle::run()
 {
@@ -580,6 +581,7 @@ void HelloTriangle::createImageViews()
 
 void HelloTriangle::createGraphicsPipeline()
 {
+
 	auto vertShaderCode = readFile(shadersDir/"vert.spv");
 	auto fragShaderCode = readFile(shadersDir/"frag.spv");
 
@@ -608,13 +610,16 @@ void HelloTriangle::createGraphicsPipeline()
 		fragShaderStageInfo
 	};
 
+	auto bindingDescription = Vertex::getBindingDescription();
+	auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
 	VkPipelineVertexInputStateCreateInfo vertexInputInfo
 	{
 		.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-		.vertexBindingDescriptionCount   = 0,
-		.pVertexBindingDescriptions      = nullptr,
-		.vertexAttributeDescriptionCount = 0,
-		.pVertexAttributeDescriptions    = nullptr
+		.vertexBindingDescriptionCount   = 1,
+		.pVertexBindingDescriptions      = &bindingDescription,
+		.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size()),
+		.pVertexAttributeDescriptions    = attributeDescriptions.data()
 	};
 
 	VkPipelineInputAssemblyStateCreateInfo inputAssembly
