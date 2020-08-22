@@ -1,7 +1,7 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
 pkgname=vulkan-hello-git
-pkgver=0.0.0.r37.g7a0088a
+pkgver=0.0.0.r38.gd3aec37
 pkgrel=1
 epoch=
 pkgdesc="Vulkan"

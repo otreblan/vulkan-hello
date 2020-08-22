@@ -101,6 +101,8 @@ private:
 	bool framebufferResized = false;
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
 
 	void initWindow();
 	void initVulkan();
@@ -146,4 +148,5 @@ private:
 		VkDeviceMemory& bufferMemory
 	);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void createIndexBuffer();
 };

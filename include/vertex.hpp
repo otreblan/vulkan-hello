@@ -31,4 +31,5 @@ struct Vertex
 	static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions();
 };
 
-const extern std::vector<Vertex> vertices;
+extern const std::vector<Vertex> vertices;
+extern const std::vector<uint16_t> indices;
