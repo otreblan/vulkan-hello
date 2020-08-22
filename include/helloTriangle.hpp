@@ -88,6 +88,7 @@ private:
 	VkExtent2D swapChainExtent;
 	std::vector<VkImageView> swapChainImageViews;
 	VkRenderPass renderPass;
+	VkDescriptorSetLayout descriptorSetLayout;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 	std::vector<VkFramebuffer> swapChainFramebuffers;
@@ -103,6 +104,8 @@ private:
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
 
 	void initWindow();
 	void initVulkan();
@@ -149,4 +152,7 @@ private:
 	);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void createIndexBuffer();
+	void createDescriptorSetLayout();
+	void createUniformBuffers();
+	void updateUniformBuffer(uint32_t currentImage);
 };

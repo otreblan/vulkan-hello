@@ -14,9 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-//#include <vulkan/vulkan.h>
-
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <cstring>
 #include <fstream>
@@ -26,8 +25,12 @@
 #include <stdexcept>
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <config.hpp>
 #include <helloTriangle.hpp>
+#include <uniformBufferObject.hpp>
 #include <vertex.hpp>
 
 void HelloTriangle::run()
@@ -63,11 +66,13 @@ void HelloTriangle::initVulkan()
 	createSwapChain();
 	createImageViews();
 	createRenderPass();
+	createDescriptorSetLayout();
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
 	createVertexBuffer();
 	createIndexBuffer();
+	createUniformBuffers();
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -86,6 +91,9 @@ void HelloTriangle::mainLoop()
 void HelloTriangle::cleanup()
 {
 	cleanupSwapChain();
+
+	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
 	vkDestroyBuffer(device, indexBuffer, nullptr);
 	vkFreeMemory(device, indexBufferMemory, nullptr);
 
@@ -730,8 +738,8 @@ void HelloTriangle::createGraphicsPipeline()
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo
 	{
 		.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-		.setLayoutCount         = 0,
-		.pSetLayouts            = nullptr,
+		.setLayoutCount         = 1,
+		.pSetLayouts            = &descriptorSetLayout,
 		.pushConstantRangeCount = 0,
 		.pPushConstantRanges    = nullptr
 	};
@@ -970,6 +978,8 @@ void HelloTriangle::drawFrame()
 	else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
 		throw std::runtime_error("failed to acquire swap chain image!");
 
+	updateUniformBuffer(imageIndex);
+
 	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 	if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
 		vkWaitForFences(device, 1, &imagesInFlight[imageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -1072,6 +1082,7 @@ void HelloTriangle::recreateSwapChain()
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
+	createUniformBuffers();
 	createCommandBuffers();
 }
 
@@ -1094,6 +1105,12 @@ void HelloTriangle::cleanupSwapChain()
 	}
 
 	vkDestroySwapchainKHR(device, swapChain, nullptr);
+
+	for(size_t i = 0; i < swapChainImages.size(); i++)
+	{
+		vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+		vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
+	}
 }
 
 void HelloTriangle::framebufferResizeCallback(GLFWwindow* window, int, int)
@@ -1253,4 +1270,68 @@ void HelloTriangle::createIndexBuffer()
 
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void HelloTriangle::createDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding uboLayoutBinding
+	{
+		.binding            = 0,
+		.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		.descriptorCount    = 1,
+		.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT,
+		.pImmutableSamplers = nullptr
+	};
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo
+	{
+		.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+		.bindingCount = 1,
+		.pBindings    = &uboLayoutBinding
+	};
+
+	if(vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
+		throw std::runtime_error("failed to create descriptor set layout!");
+}
+
+void HelloTriangle::createUniformBuffers()
+{
+	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+	uniformBuffers.resize(swapChainImages.size());
+	uniformBuffersMemory.resize(swapChainImages.size());
+
+	for(size_t i = 0; i < swapChainImages.size(); i++)
+	{
+		createBuffer(bufferSize,
+			VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			uniformBuffers[i],
+			uniformBuffersMemory[i]
+		);
+	}
+}
+
+void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
+{
+	using namespace std::chrono;
+
+	static auto startTime = high_resolution_clock::now();
+
+	auto currentTime = high_resolution_clock::now();
+	float time = duration<float, seconds::period>(currentTime - startTime).count();
+
+	UniformBufferObject ubo
+	{
+		.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+		.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+		.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f)
+	};
+
+	ubo.proj[1][1] *= -1;
+
+	void* data;
+	vkMapMemory(device, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+	memcpy(data, &ubo, sizeof(ubo));
+	vkUnmapMemory(device, uniformBuffersMemory[currentImage]);
 }
