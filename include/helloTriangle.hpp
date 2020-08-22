@@ -106,6 +106,8 @@ private:
 	VkDeviceMemory indexBufferMemory;
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
 
 	void initWindow();
 	void initVulkan();
@@ -155,4 +157,6 @@ private:
 	void createDescriptorSetLayout();
 	void createUniformBuffers();
 	void updateUniformBuffer(uint32_t currentImage);
+	void createDescriptorPool();
+	void createDescriptorSets();
 };

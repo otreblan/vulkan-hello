@@ -73,6 +73,8 @@ void HelloTriangle::initVulkan()
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
 	createCommandBuffers();
 	createSyncObjects();
 }
@@ -677,7 +679,9 @@ void HelloTriangle::createGraphicsPipeline()
 		.rasterizerDiscardEnable = VK_FALSE,
 		.polygonMode             = VK_POLYGON_MODE_FILL,
 		.cullMode                = VK_CULL_MODE_BACK_BIT,
-		.frontFace               = VK_FRONT_FACE_CLOCKWISE,
+		// OpenGL -> Vulkan
+		.frontFace               = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+		//.frontFace               = VK_FRONT_FACE_CLOCKWISE,
 		.depthBiasEnable         = VK_FALSE,
 		.depthBiasConstantFactor = 0.0f,
 		.depthBiasClamp          = 0.0f,
@@ -949,6 +953,7 @@ void HelloTriangle::createCommandBuffers()
 		VkDeviceSize offsets[] = {0};
 		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
 		vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 		vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -1083,6 +1088,8 @@ void HelloTriangle::recreateSwapChain()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
 	createCommandBuffers();
 }
 
@@ -1111,6 +1118,8 @@ void HelloTriangle::cleanupSwapChain()
 		vkDestroyBuffer(device, uniformBuffers[i], nullptr);
 		vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
 	}
+
+	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
 }
 
 void HelloTriangle::framebufferResizeCallback(GLFWwindow* window, int, int)
@@ -1315,6 +1324,7 @@ void HelloTriangle::createUniformBuffers()
 void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
 {
 	using namespace std::chrono;
+	using namespace glm;
 
 	static auto startTime = high_resolution_clock::now();
 
@@ -1323,15 +1333,78 @@ void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
 
 	UniformBufferObject ubo
 	{
-		.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-		.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-		.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f)
+		.model = rotate(mat4(1.0f), time * radians(90.0f), vec3(0.0f, 0.0f, 1.0f)),
+		.view  = lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
+		.proj  = perspective(radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f)
 	};
 
+	// OpenGL -> Vulkan
 	ubo.proj[1][1] *= -1;
 
 	void* data;
 	vkMapMemory(device, uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
 	memcpy(data, &ubo, sizeof(ubo));
 	vkUnmapMemory(device, uniformBuffersMemory[currentImage]);
+}
+
+void HelloTriangle::createDescriptorPool()
+{
+	VkDescriptorPoolSize poolSize
+	{
+		.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		.descriptorCount = static_cast<uint32_t>(swapChainImages.size())
+	};
+
+	VkDescriptorPoolCreateInfo poolInfo
+	{
+		.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+		.maxSets       = static_cast<uint32_t>(swapChainImages.size()),
+		.poolSizeCount = 1,
+		.pPoolSizes    = &poolSize
+	};
+
+	if(vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+		throw std::runtime_error("failed to create descriptor pool!");
+}
+
+void HelloTriangle::createDescriptorSets()
+{
+	std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
+
+	VkDescriptorSetAllocateInfo allocInfo
+	{
+		.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+		.descriptorPool     = descriptorPool,
+		.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size()),
+		.pSetLayouts        = layouts.data()
+	};
+
+	descriptorSets.resize(swapChainImages.size());
+	if(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+		throw std::runtime_error("failed to allocate descriptor sets!");
+
+	for(size_t i = 0; i < swapChainImages.size(); i++)
+	{
+		VkDescriptorBufferInfo bufferInfo
+		{
+			.buffer = uniformBuffers[i],
+			.offset = 0,
+			.range  = sizeof(UniformBufferObject)
+		};
+
+		VkWriteDescriptorSet descriptorWrite
+		{
+			.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+			.dstSet           = descriptorSets[i],
+			.dstBinding       = 0,
+			.dstArrayElement  = 0,
+			.descriptorCount  = 1,
+			.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			.pImageInfo       = nullptr,
+			.pBufferInfo      = &bufferInfo,
+			.pTexelBufferView = nullptr
+		};
+
+		vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
+	}
 }
