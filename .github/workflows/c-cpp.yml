@@ -50,6 +50,7 @@ jobs:
     - name: Aur dependencies
       working-directory: ./pkg/arch
       run: |
+          ls
           source PKGBUILD
           sudo -u aur yay -Syu --noconfirm ${makedepends[@]} ${depends[@]}
 
