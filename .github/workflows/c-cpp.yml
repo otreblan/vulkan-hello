@@ -44,13 +44,15 @@ jobs:
     - name: Zstd
       run: sed -i 's/tar\.xz/tar.zst/' /etc/makepkg.conf
 
-    - name: Aur dependencies
-      run: |
-          source ./pkg/arch/PKGBUILD
-          sudo -u aur yay -Syu --noconfirm jq ${makedepends[@]} ${depends[@]}
-
     - name: chown
       run: chown --recursive aur pkg/arch
+
+    - name: Aur dependencies
+      working-directory: ./pkg/arch
+      shell: bash
+      run: |
+          source PKGBUILD
+          sudo -u aur yay -Syu --noconfirm jq ${makedepends[@]} ${depends[@]}
 
     - name: makepkg
       working-directory: ./pkg/arch
