@@ -25,12 +25,12 @@
 
 #include <exePath.hpp>
 
-#define PID_MAX_LENGTH 7
-
 std::filesystem::path exePath()
 {
 	using namespace std::filesystem;
 
+	// Read proc(5).
+	//
 	//    6  7  4  1
 	// /proc/*/exe\0
 	char exeSymLink[6+7+4+1];
