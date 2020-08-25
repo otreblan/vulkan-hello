@@ -14,31 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#pragma once
 
-#include <helloTriangle.hpp>
-#include <exePath.hpp>
+#include <filesystem>
 
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
-
-int main()
-{
-	std::cerr << exePath() << '\n';
-
-	HelloTriangle app;
-
-	try
-	{
-		app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		exit(EXIT_FAILURE);
-	}
-
-	exit(EXIT_SUCCESS);
-}
+/// Returns the directory where the binary is located.
+std::filesystem::path exePath();

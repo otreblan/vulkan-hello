@@ -22,6 +22,7 @@ configure_file(config.cpp.in
 target_sources(${PROJECT_NAME}
 	PRIVATE
 		config.cpp
+		exePath.cpp
 		helloTriangle.cpp
 		main.cpp
 		stb_image.cpp

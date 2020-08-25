@@ -14,31 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdlib>
+#include <fstream>
 #include <iostream>
-#include <stdexcept>
+#include <libgen.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include <helloTriangle.hpp>
 #include <exePath.hpp>
 
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
+#define PID_MAX_LENGTH 7
 
-int main()
+std::filesystem::path exePath()
 {
-	std::cerr << exePath() << '\n';
+	using namespace std::filesystem;
 
-	HelloTriangle app;
+	//    6  7  4  1
+	// /proc/*/exe\0
+	char exeSymLink[6+7+4+1];
 
-	try
-	{
-		app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		exit(EXIT_FAILURE);
-	}
+	sprintf(exeSymLink, "/proc/%d/exe", getpid());
 
-	exit(EXIT_SUCCESS);
+	char* realExe = realpath(exeSymLink, nullptr);
+
+	path exe(dirname(realExe));
+
+	free(realExe);
+
+	return exe;
 }
