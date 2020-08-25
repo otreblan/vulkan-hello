@@ -108,6 +108,8 @@ private:
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
 
 	void initWindow();
 	void initVulkan();
@@ -153,10 +155,28 @@ private:
 		VkDeviceMemory& bufferMemory
 	);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	VkCommandBuffer beginSingleTimeCommands();
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 	void createIndexBuffer();
 	void createDescriptorSetLayout();
 	void createUniformBuffers();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createDescriptorPool();
 	void createDescriptorSets();
+	void createTextureImage();
+	void createImage(uint32_t width,
+		uint32_t height,
+		VkFormat format,
+		VkImageTiling tiling,
+		VkImageUsageFlags usage,
+		VkMemoryPropertyFlags properties,
+		VkImage& image,
+		VkDeviceMemory& imageMemory
+	);
+	void transitionImageLayout(VkImage image,
+		VkFormat format,
+		VkImageLayout oldLayout,
+		VkImageLayout newLayout
+	);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 };

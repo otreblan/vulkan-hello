@@ -14,15 +14,5 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <config.hpp>
-
-const std::filesystem::path dataDir =
-#ifdef DEBUG
-	"@CMAKE_BINARY_DIR@/share"
-#else
-	"@CMAKE_INSTALL_FULL_DATADIR@/@PROJECT_NAME@"
-#endif
-;
-
-const std::filesystem::path shadersDir = dataDir/"shaders";
-const std::filesystem::path texturesDir = dataDir/"textures";
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>

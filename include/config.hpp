@@ -18,4 +18,6 @@
 
 #include <filesystem>
 
+extern const std::filesystem::path dataDir;
 extern const std::filesystem::path shadersDir;
+extern const std::filesystem::path texturesDir;

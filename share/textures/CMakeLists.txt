@@ -14,5 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-add_subdirectory(shaders)
-add_subdirectory(textures)
+file(DOWNLOAD "https://vulkan-tutorial.com/images/texture.jpg"
+	${CMAKE_CURRENT_BINARY_DIR}/texture.jpg
+)
+
+install(FILES
+	${CMAKE_CURRENT_BINARY_DIR}/texture.jpg
+	DESTINATION "${CMAKE_INSTALL_DATADIR}/${PROJECT_NAME}/textures/"
+)

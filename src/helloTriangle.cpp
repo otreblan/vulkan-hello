@@ -27,6 +27,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stb/stb_image.h>
 
 #include <config.hpp>
 #include <helloTriangle.hpp>
@@ -70,6 +71,7 @@ void HelloTriangle::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
+	createTextureImage();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();
@@ -93,6 +95,9 @@ void HelloTriangle::mainLoop()
 void HelloTriangle::cleanup()
 {
 	cleanupSwapChain();
+
+	vkDestroyImage(device, textureImage, nullptr);
+	vkFreeMemory(device, textureImageMemory, nullptr);
 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
@@ -1209,6 +1214,22 @@ void HelloTriangle::createBuffer(VkDeviceSize size,
 
 void HelloTriangle::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
+	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+	VkBufferCopy copyRegion
+	{
+		.srcOffset = 0,
+		.dstOffset = 0,
+		.size      = size
+	};
+
+	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+	endSingleTimeCommands(commandBuffer);
+}
+
+VkCommandBuffer HelloTriangle::beginSingleTimeCommands()
+{
 	VkCommandBufferAllocateInfo allocInfo
 	{
 		.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
@@ -1228,14 +1249,11 @@ void HelloTriangle::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 
 	vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-	VkBufferCopy copyRegion
-	{
-		.srcOffset = 0,
-		.dstOffset = 0,
-		.size      = size
-	};
+	return commandBuffer;
+}
 
-	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+void HelloTriangle::endSingleTimeCommands(VkCommandBuffer commandBuffer)
+{
 	vkEndCommandBuffer(commandBuffer);
 
 	VkSubmitInfo submitInfo
@@ -1329,11 +1347,11 @@ void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
 	static auto startTime = high_resolution_clock::now();
 
 	auto currentTime = high_resolution_clock::now();
-	float time = duration<float, seconds::period>(currentTime - startTime).count();
+	float dTime = duration<float, seconds::period>(currentTime - startTime).count();
 
 	UniformBufferObject ubo
 	{
-		.model = rotate(mat4(1.0f), time * radians(90.0f), vec3(0.0f, 0.0f, 1.0f)),
+		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 0.0f, 1.0f)),
 		.view  = lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
 		.proj  = perspective(radians(45.0f), swapChainExtent.width / (float) swapChainExtent.height, 0.1f, 10.0f)
 	};
@@ -1407,4 +1425,200 @@ void HelloTriangle::createDescriptorSets()
 
 		vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 	}
+}
+
+void HelloTriangle::createTextureImage()
+{
+	path texture = texturesDir/"texture.jpg";
+
+	std::filesystem::file_size(texture);
+
+	int texWidth, texHeight, texChannels;
+	stbi_uc* pixels = stbi_load(texture.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+	if(!pixels)
+		throw std::runtime_error("failed to load texture image!");
+
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+
+	createBuffer(imageSize,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		stagingBuffer,
+		stagingBufferMemory
+	);
+
+	void* data;
+	vkMapMemory(device, stagingBufferMemory, 0, imageSize, 0, &data);
+	memcpy(data, pixels, static_cast<size_t>(imageSize));
+	vkUnmapMemory(device, stagingBufferMemory);
+	stbi_image_free(pixels);
+
+	createImage(texWidth,
+		texHeight,
+		VK_FORMAT_R8G8B8A8_SRGB,
+		VK_IMAGE_TILING_OPTIMAL,
+		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		textureImage,
+		textureImageMemory
+	);
+
+	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+	vkDestroyBuffer(device, stagingBuffer, nullptr);
+	vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void HelloTriangle::createImage(uint32_t width,
+	uint32_t height,
+	VkFormat format,
+	VkImageTiling tiling,
+	VkImageUsageFlags usage,
+	VkMemoryPropertyFlags properties,
+	VkImage& image,
+	VkDeviceMemory& imageMemory
+)
+{
+	VkImageCreateInfo imageInfo
+	{
+		.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+		.flags         = 0,
+		.imageType     = VK_IMAGE_TYPE_2D,
+		.format        = format,
+		.extent        =
+		{
+			.width  = width,
+			.height = height,
+			.depth  = 1,
+		},
+		.mipLevels     = 1,
+		.arrayLayers   = 1,
+		.samples       = VK_SAMPLE_COUNT_1_BIT,
+		.tiling        = tiling,
+		.usage         = usage,
+		.sharingMode   = VK_SHARING_MODE_EXCLUSIVE,
+		.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+	};
+
+	if(vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+		throw std::runtime_error("failed to create image!");
+
+	VkMemoryRequirements memRequirements;
+	vkGetImageMemoryRequirements(device, image, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo
+	{
+		.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+		.allocationSize  = memRequirements.size,
+		.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties)
+	};
+
+	if(vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
+		throw std::runtime_error("failed to allocate image memory!");
+
+	vkBindImageMemory(device, image, imageMemory, 0);
+}
+
+void HelloTriangle::transitionImageLayout(VkImage image,
+	VkFormat,
+	VkImageLayout oldLayout,
+	VkImageLayout newLayout
+)
+{
+	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+	VkImageMemoryBarrier barrier
+	{
+		.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+		.srcAccessMask       = 0, // TODO
+		.dstAccessMask       = 0, // TODO
+		.oldLayout           = oldLayout,
+		.newLayout           = newLayout,
+		.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+		.image               = image,
+		.subresourceRange    =
+		{
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+			.baseMipLevel   = 0,
+			.levelCount     = 1,
+			.baseArrayLayer = 0,
+			.layerCount     = 1,
+		}
+	};
+
+	VkPipelineStageFlags sourceStage;
+	VkPipelineStageFlags destinationStage;
+
+	if(oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+	{
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+	}
+	else if(oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+	{
+		barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+	}
+	else
+	{
+		throw std::invalid_argument("unsupported layout transition!");
+	}
+
+	vkCmdPipelineBarrier(commandBuffer,
+		sourceStage, destinationStage,
+		0,
+		0, nullptr,
+		0, nullptr,
+		1, &barrier
+	);
+
+	endSingleTimeCommands(commandBuffer);
+}
+
+void HelloTriangle::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+{
+	VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+	VkBufferImageCopy region
+	{
+		.bufferOffset      = 0,
+		.bufferRowLength   = 0,
+		.bufferImageHeight = 0,
+		.imageSubresource  =
+		{
+			.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+			.mipLevel       = 0,
+			.baseArrayLayer = 0,
+			.layerCount     = 1
+		},
+		.imageOffset = {.x = 0, .y = 0, .z = 0},
+		.imageExtent =
+		{
+			.width  = width,
+			.height = height,
+			.depth  = 1
+		}
+	};
+
+	vkCmdCopyBufferToImage(commandBuffer,
+		buffer,
+		image,
+		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+		1,
+		&region
+	);
+
+	endSingleTimeCommands(commandBuffer);
 }

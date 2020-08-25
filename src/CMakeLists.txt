@@ -24,5 +24,6 @@ target_sources(${PROJECT_NAME}
 		config.cpp
 		helloTriangle.cpp
 		main.cpp
+		stb_image.cpp
 		vertex.cpp
 )

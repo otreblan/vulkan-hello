@@ -47,6 +47,12 @@ jobs:
     - name: chown
       run: chown --recursive aur pkg/arch
 
+    - name: Aur dependencies
+      working-directory: ./pkg/arch
+      run: |
+          source PKGBUILD
+          sudo -u aur yay -Syu --noconfirm ${makedepends[@]} ${depends[@]}
+
     - name: makepkg
       working-directory: ./pkg/arch
       run: |
