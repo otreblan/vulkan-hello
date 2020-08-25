@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - name: Syu
-      run: sudo -u aur yay -Syu --noconfirm jq
+      run: |
+          source ./pkg/arch/PKGBUILD
+          sudo -u aur yay -Syu --noconfirm jq ${makedepends[@]} ${depends[@]}
 
     - name: Get last tag
       id: tag
@@ -46,13 +48,6 @@ jobs:
 
     - name: chown
       run: chown --recursive aur pkg/arch
-
-    - name: Aur dependencies
-      working-directory: ./pkg/arch
-      run: |
-          ls
-          source PKGBUILD
-          sudo -u aur yay -Syu --noconfirm ${makedepends[@]} ${depends[@]}
 
     - name: makepkg
       working-directory: ./pkg/arch
