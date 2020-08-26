@@ -110,6 +110,8 @@ private:
 	std::vector<VkDescriptorSet> descriptorSets;
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
 
 	void initWindow();
 	void initVulkan();
@@ -133,6 +135,7 @@ private:
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 	void createSwapChain();
+	VkImageView createImageView(VkImage image, VkFormat format);
 	void createImageViews();
 	void createGraphicsPipeline();
 	static std::vector<char> readFile(const path& filepath);
@@ -179,4 +182,6 @@ private:
 		VkImageLayout newLayout
 	);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void createTextureImageView();
+	void createTextureSampler();
 };
