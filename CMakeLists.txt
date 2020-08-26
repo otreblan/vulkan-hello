@@ -20,7 +20,6 @@ project(vulkan-hello
 	VERSION 0.0.0
 	DESCRIPTION "Vulkan"
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
-	LANGUAGES "CXX"
 )
 
 # Without this, paths are not relative in the sources list
