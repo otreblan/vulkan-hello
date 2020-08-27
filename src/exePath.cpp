@@ -29,19 +29,17 @@ std::filesystem::path exePath()
 {
 	using namespace std::filesystem;
 
-	// Read proc(5).
-	//
-	//    6  7  4  1
-	// /proc/*/exe\0
-	char exeSymLink[6+7+4+1];
+	char *exeSymLink;
 
-	sprintf(exeSymLink, "/proc/%d/exe", getpid());
+	if(asprintf(&exeSymLink, "/proc/%d/exe", getpid()) == -1)
+		exit(EXIT_FAILURE);
 
 	char* realExe = realpath(exeSymLink, nullptr);
 
 	path exe(dirname(realExe));
 
 	free(realExe);
+	free(exeSymLink);
 
 	return exe;
 }
