@@ -48,10 +48,11 @@ add_subdirectory(src) # Sources list
 add_subdirectory(share)
 
 # Shared libraries
-pkg_check_modules(shared
+pkg_check_modules(libraries
 	REQUIRED IMPORTED_TARGET
-		vulkan
 		glfw3
+		glm
+		vulkan
 )
 
 find_package(XdgUtils REQUIRED
@@ -60,21 +61,12 @@ find_package(XdgUtils REQUIRED
 		BaseDir
 )
 
-# Header only libraries
-pkg_check_modules(header_only
-	REQUIRED IMPORTED_TARGET
-		glm
-)
-
 # Linking
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
-		PkgConfig::shared
+		PkgConfig::libraries
 		XdgUtils::DesktopEntry
 		XdgUtils::BaseDir
-
-	INTERFACE
-		PkgConfig::header_only
 )
 
 # Defining some macros
