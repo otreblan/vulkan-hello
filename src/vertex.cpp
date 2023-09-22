@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <vertex.hpp>
+#include "vertex.hpp"
 
 const std::array<VkVertexInputAttributeDescription, 3> Vertex::attributeDescriptions
 {

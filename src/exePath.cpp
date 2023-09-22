@@ -23,7 +23,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <exePath.hpp>
+#include "exePath.hpp"
 
 std::filesystem::path exePath()
 {

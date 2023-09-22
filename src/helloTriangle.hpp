@@ -24,8 +24,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include <queueFamilyIndices.hpp>
-#include <swapChainSupportDetails.hpp>
+#include "queueFamilyIndices.hpp"
+#include "swapChainSupportDetails.hpp"
 
 class HelloTriangle
 {

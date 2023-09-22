@@ -29,10 +29,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb/stb_image.h>
 
-#include <config.hpp>
-#include <helloTriangle.hpp>
-#include <uniformBufferObject.hpp>
-#include <vertex.hpp>
+#include "config.hpp"
+#include "helloTriangle.hpp"
+#include "uniformBufferObject.hpp"
+#include "vertex.hpp"
 
 void HelloTriangle::run()
 {

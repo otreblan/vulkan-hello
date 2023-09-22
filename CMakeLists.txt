@@ -38,12 +38,6 @@ set_target_properties(${PROJECT_NAME}
 		CXX_STANDARD 20
 )
 
-# Headers
-target_include_directories(${PROJECT_NAME}
-	PRIVATE
-		${PROJECT_SOURCE_DIR}/include
-)
-
 add_subdirectory(src) # Sources list
 add_subdirectory(share)
 

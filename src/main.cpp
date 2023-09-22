@@ -18,11 +18,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <helloTriangle.hpp>
-#include <exePath.hpp>
-
-//#include <glm/vec4.hpp>
-//#include <glm/mat4x4.hpp>
+#include "helloTriangle.hpp"
+#include "exePath.hpp"
 
 int main()
 {
