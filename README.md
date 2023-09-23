@@ -1,17 +1,24 @@
-[![C/C++ CI](https://github.com/otreblan/hello/workflows/C/C++%20CI/badge.svg)](https://github.com/otreblan/hello/actions?query=workflow%3A%22C%2FC%2B%2B+CI%22)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/otreblan/hello?logo=github)
-![GitHub](https://img.shields.io/github/license/otreblan/hello?logo=gnu)
+[![C/C++ CI](https://github.com/otreblan/vulkan-hello/workflows/C/C++%20CI/badge.svg)](https://github.com/otreblan/vulkan-hello/actions?query=workflow%3A%22C%2FC%2B%2B+CI%22)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/otreblan/vulkan-hello?logo=github)
+![GitHub](https://img.shields.io/github/license/otreblan/vulkan-hello?logo=gnu)
 
-# A C++ template
+# Vulkan rasterizer
 
 ## Dependencies
 
-* `asciidoctor`
+* `build-essential`
 * `cmake`
+* `file`
+* `glslc`
+* `libglfw3-dev`
+* `libglm-dev`
+* `libstb-dev`
+* `libvulkan-dev`
+* `pkgconf`
+* `xdg-utils-cxx`
 
 ## Build
 ``` bash
-git clone https://github.com/otreblan/hello
-cd hello/pkg/arch
-makepkg -si
+cmake -B build
+cmake --build build
 ```
