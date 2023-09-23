@@ -7,60 +7,47 @@ on:
     branches: [ '*' ]
 
 jobs:
-  arch-linux:
+  ubuntu:
     runs-on: ubuntu-latest
-    container: oblique/archlinux-yay
+    container: ubuntu:rolling
 
     steps:
-    - name: Syu
-      run: sudo -u aur yay -Syu --noconfirm jq
+    - uses: actions/checkout@v3
+    - uses: ammaraskar/gcc-problem-matcher@master
 
-    - name: Get last tag
-      id: tag
-      env:
-        url: https://api.github.com/repos/${{ github.repository }}/tags
-      run: |
-          set -o pipefail
-          echo ::set-output name=tag::$(curl \
-              --silent \
-              --header 'authorization: Bearer ${{ github.token }}' \
-              --url $url | \
-              jq --raw-output '.[].name' | \
-              head --lines=1 \
-          )
+    - name: deps
+      run: apt-get -y update && apt-get -y install
+        build-essential
+        cmake
+        file
+        glslc
+        libglfw3-dev
+        libglm-dev
+        libstb-dev
+        libvulkan-dev
+        pkgconf
+        xdg-utils-cxx
 
-    - uses: actions/checkout@v2
-      with:
-        ref: ${{ steps.tag.outputs.tag }}
+    - name: configure
+      run: cmake
+        -DCMAKE_CXX_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
+        -DCMAKE_C_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_INSTALL_PREFIX=/usr
+        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+        -B build
 
-    - name: Checkout repo head
-      env:
-        REF: ${{ github.ref }}
-      run: |
-          git fetch origin ${REF#refs/heads/}
-          git checkout FETCH_HEAD
-          git log --decorate=on
-
-    - name: Zstd
-      run: sed -i 's/tar\.xz/tar.zst/' /etc/makepkg.conf
-
-    - name: chown
-      run: chown --recursive aur pkg/arch
-
-    - name: Aur dependencies
-      working-directory: ./pkg/arch
-      shell: bash
-      run: |
-          source PKGBUILD
-          sudo -u aur yay -Syu --noconfirm jq ${makedepends[@]} ${depends[@]}
-
-    - name: makepkg
-      working-directory: ./pkg/arch
+    - name: build
       run: |
           export MAKEFLAGS=-j$(nproc)
-          sudo -Eu aur makepkg -s --noconfirm
+          cmake --build build
 
-    - uses: actions/upload-artifact@v2
+    - name: deb
+      run: |
+          strip --strip-all $(find build -maxdepth 1 -executable -type f)
+          cmake --build build --target package
+
+    - uses: actions/upload-artifact@v3
       with:
-        name: arch_package
-        path: pkg/arch/*.pkg.tar.*
+        name: ubuntu_package
+        path: build/*.deb

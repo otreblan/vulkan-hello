@@ -38,8 +38,9 @@ set_target_properties(${PROJECT_NAME}
 		CXX_STANDARD 20
 )
 
-add_subdirectory(src) # Sources list
+add_subdirectory(pkg)
 add_subdirectory(share)
+add_subdirectory(src) # Sources list
 
 # Shared libraries
 pkg_check_modules(libraries
