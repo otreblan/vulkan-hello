@@ -29,13 +29,12 @@ jobs:
         xdg-utils-cxx
 
     - name: configure
-      run: cmake
+      run: cmake -B build
         -DCMAKE_CXX_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
         -DCMAKE_C_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
-        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_BUILD_TYPE=None
         -DCMAKE_INSTALL_PREFIX=/usr
         -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
-        -B build
 
     - name: build
       run: |

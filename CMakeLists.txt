@@ -22,8 +22,10 @@ project(vulkan-hello
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
 )
 
-# Without this, paths are not relative in the sources list
-cmake_policy(SET CMP0076 NEW)
+# Default build type
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Debug")
+endif()
 
 include(GNUInstallDirs)
 include(FindPkgConfig)
@@ -67,18 +69,15 @@ target_link_libraries(${PROJECT_NAME}
 # Defining some macros
 target_compile_definitions(${PROJECT_NAME}
 	PRIVATE
+		$<$<CONFIG:DEBUG>:VK_DEBUG>
 		GLFW_INCLUDE_VULKAN
-		GLM_FORCE_RADIANS
 		GLM_FORCE_DEPTH_ZERO_TO_ONE
+		GLM_FORCE_RADIANS
 )
 
 # Default flags and macros
 if(UNIX AND NOT (DEFINED ENV{CXXFLAGS} OR CMAKE_CXX_FLAGS))
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-missing-field-initializers -g")
-	target_compile_definitions(${PROJECT_NAME}
-		PRIVATE
-			DEBUG
-	)
 endif()
 
 # Install target

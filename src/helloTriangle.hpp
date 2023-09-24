@@ -45,7 +45,7 @@ private:
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	const bool enableValidationLayers = true;
 	VkDebugUtilsMessengerEXT debugMessenger;
 

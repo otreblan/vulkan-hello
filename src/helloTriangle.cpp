@@ -58,7 +58,7 @@ void HelloTriangle::initWindow()
 void HelloTriangle::initVulkan()
 {
 	createInstance();
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	setupDebugMessenger();
 #endif
 	createSurface();
@@ -120,7 +120,7 @@ void HelloTriangle::cleanup()
 	}
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroyDevice(device, nullptr);
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
 #endif
 	vkDestroySurfaceKHR(instance, surface, nullptr);
@@ -132,7 +132,7 @@ void HelloTriangle::cleanup()
 
 void HelloTriangle::createInstance()
 {
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	if (!checkValidationLayerSupport())
 	{
 		throw std::runtime_error("validation layers requested, but not available!");
@@ -151,21 +151,21 @@ void HelloTriangle::createInstance()
 
 	auto glfwExtensions = getRequiredExtensions();
 
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	auto debugCreateInfo = populateDebugMessengerCreateInfo();
 #endif
 
 	VkInstanceCreateInfo createInfo
 	{
 		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-#ifdef DEBUG
+#ifdef VK_DEBUG
 		.pNext = &debugCreateInfo,
 #else
 		.pNext = nullptr,
 #endif
 
 		.pApplicationInfo        = &appInfo,
-#ifdef DEBUG
+#ifdef VK_DEBUG
 		.enabledLayerCount       = static_cast<uint32_t>(validationLayers.size()),
 		.ppEnabledLayerNames     = validationLayers.data(),
 #else
@@ -203,14 +203,14 @@ std::vector<const char*> HelloTriangle::getRequiredExtensions()
 
 	std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
 	return extensions;
 }
 
-#ifdef DEBUG
+#ifdef VK_DEBUG
 
 bool HelloTriangle::checkValidationLayerSupport() {
 	uint32_t layerCount;
@@ -414,7 +414,7 @@ void HelloTriangle::createLogicalDevice()
 		.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
 		.queueCreateInfoCount    = static_cast<uint32_t>(queueCreateInfos.size()),
 		.pQueueCreateInfos       = queueCreateInfos.data(),
-#ifdef DEBUG
+#ifdef VK_DEBUG
 		.enabledLayerCount       = static_cast<uint32_t>(validationLayers.size()),
 		.ppEnabledLayerNames     = validationLayers.data(),
 #else

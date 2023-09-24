@@ -17,7 +17,7 @@
 #include "config.hpp"
 
 const std::filesystem::path dataDir =
-#ifdef DEBUG
+#ifdef VK_DEBUG
 	"@CMAKE_BINARY_DIR@/share"
 #else
 	"@CMAKE_INSTALL_FULL_DATADIR@/@PROJECT_NAME@"
