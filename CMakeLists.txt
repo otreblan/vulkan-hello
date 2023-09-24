@@ -75,10 +75,10 @@ target_compile_definitions(${PROJECT_NAME}
 		GLM_FORCE_RADIANS
 )
 
-# Default flags and macros
-if(UNIX AND NOT (DEFINED ENV{CXXFLAGS} OR CMAKE_CXX_FLAGS))
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-missing-field-initializers -g")
-endif()
+target_compile_options(${PROJECT_NAME}
+	PRIVATE
+		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-missing-field-initializers>
+)
 
 # Install target
 install(TARGETS ${PROJECT_NAME}
