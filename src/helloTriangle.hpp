@@ -82,10 +82,10 @@ private:
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
-	VkDevice device;
-	VkQueue graphicsQueue;
+	vk::raii::Device device = nullptr;
+	vk::raii::Queue graphicsQueue = nullptr;
+	vk::raii::Queue presentQueue = nullptr;
 	VkSurfaceKHR surface;
-	VkQueue presentQueue;
 	VkSwapchainKHR swapChain;
 	std::vector<VkImage> swapChainImages;
 	VkFormat swapChainImageFormat;
