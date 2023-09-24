@@ -81,7 +81,7 @@ private:
 
 	vk::raii::Context context;
 	vk::raii::Instance instance = nullptr;
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	vk::raii::PhysicalDevice physicalDevice = nullptr;
 	VkDevice device;
 	VkQueue graphicsQueue;
 	VkSurfaceKHR surface;
@@ -126,14 +126,14 @@ private:
 	std::vector<const char*> getRequiredExtensions();
 
 	void pickPhysicalDevice();
-	bool isDeviceSuitable(VkPhysicalDevice device);
-	QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+	bool isDeviceSuitable(vk::PhysicalDevice device);
+	QueueFamilyIndices findQueueFamilies(vk::PhysicalDevice device);
 
 	void createLogicalDevice();
 
 	void createSurface();
 
-	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);

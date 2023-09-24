@@ -280,25 +280,25 @@ void HelloTriangle::pickPhysicalDevice()
 {
 	for(const auto& device: instance.enumeratePhysicalDevices())
 	{
-		if (isDeviceSuitable(*device))
+		if(isDeviceSuitable(*device))
 		{
-			physicalDevice = *device;
+			physicalDevice = device;
 			break;
 		}
 	}
 
-	if (physicalDevice == VK_NULL_HANDLE)
+	if(!*physicalDevice)
 		throw std::runtime_error("failed to find a suitable GPU!");
 }
 
-bool HelloTriangle::isDeviceSuitable(VkPhysicalDevice device)
+bool HelloTriangle::isDeviceSuitable(vk::PhysicalDevice device)
 {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
 	bool extensionsSupported = checkDeviceExtensionSupport(device);
 
 	bool swapChainAdequate = false;
-	if (extensionsSupported)
+	if(extensionsSupported)
 	{
 		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
@@ -314,23 +314,16 @@ bool HelloTriangle::isDeviceSuitable(VkPhysicalDevice device)
 	;
 }
 
-QueueFamilyIndices HelloTriangle::findQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices HelloTriangle::findQueueFamilies(vk::PhysicalDevice device)
 {
 	QueueFamilyIndices indices;
 
-	uint32_t queueFamilyCount = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-	for(int i = 0; const auto& queueFamily : queueFamilies)
+	for(int i = 0; const auto& queueFamily: device.getQueueFamilyProperties())
 	{
-		if(queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		if(queueFamily.queueFlags & vk::QueueFlagBits::eGraphics)
 			indices.graphicsFamily = i;
 
-		VkBool32 presentSupport = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+		VkBool32 presentSupport = device.getSurfaceSupportKHR(i, surface);
 
 		if(presentSupport)
 			indices.presentFamily = i;
@@ -347,7 +340,7 @@ QueueFamilyIndices HelloTriangle::findQueueFamilies(VkPhysicalDevice device)
 
 void HelloTriangle::createLogicalDevice()
 {
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	QueueFamilyIndices indices = findQueueFamilies(*physicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -385,7 +378,7 @@ void HelloTriangle::createLogicalDevice()
 		.pEnabledFeatures        = &deviceFeatures
 	};
 
-	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
+	if (vkCreateDevice(*physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
 		throw std::runtime_error("failed to create logical device!");
 
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
@@ -398,17 +391,11 @@ void HelloTriangle::createSurface()
 		throw std::runtime_error("failed to create window surface!");
 }
 
-bool HelloTriangle::checkDeviceExtensionSupport([[maybe_unused]]VkPhysicalDevice device)
+bool HelloTriangle::checkDeviceExtensionSupport([[maybe_unused]]vk::PhysicalDevice device)
 {
-	uint32_t extensionCount;
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
-	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
 	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-	for(const auto& extension : availableExtensions)
+	for(const auto& extension: device.enumerateDeviceExtensionProperties())
 	{
 		requiredExtensions.erase(extension.extensionName);
 	}
@@ -487,7 +474,7 @@ VkExtent2D HelloTriangle::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capab
 
 void HelloTriangle::createSwapChain()
 {
-	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(*physicalDevice);
 
 	VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
 	VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -515,7 +502,7 @@ void HelloTriangle::createSwapChain()
 		.oldSwapchain     = VK_NULL_HANDLE
 	};
 
-	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
+	QueueFamilyIndices indices = findQueueFamilies(*physicalDevice);
 
 	uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
@@ -870,7 +857,7 @@ void HelloTriangle::createFramebuffers()
 
 void HelloTriangle::createCommandPool()
 {
-	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(physicalDevice);
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*physicalDevice);
 
 	VkCommandPoolCreateInfo poolInfo
 	{
@@ -1140,7 +1127,7 @@ void HelloTriangle::createVertexBuffer()
 uint32_t HelloTriangle::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+	vkGetPhysicalDeviceMemoryProperties(*physicalDevice, &memProperties);
 
 	for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 	{
