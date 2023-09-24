@@ -121,10 +121,9 @@ void HelloTriangle::cleanup()
 	vkDestroyCommandPool(device, commandPool, nullptr);
 	vkDestroyDevice(device, nullptr);
 #ifdef VK_DEBUG
-	DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+	DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
 #endif
-	vkDestroySurfaceKHR(instance, surface, nullptr);
-	vkDestroyInstance(instance, nullptr);
+	vkDestroySurfaceKHR(*instance, surface, nullptr);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -139,15 +138,13 @@ void HelloTriangle::createInstance()
 	}
 #endif
 
-	VkApplicationInfo appInfo
-	{
-		.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-		.pApplicationName   = "Hello triangle",
-		.applicationVersion = VK_MAKE_VERSION(0, 0, 0),
-		.pEngineName        = "No engine",
-		.engineVersion      = VK_MAKE_VERSION(0, 0, 0),
-		.apiVersion         = VK_API_VERSION_1_2
-	};
+	vk::ApplicationInfo appInfo(
+		"Hello triangle",
+		VK_MAKE_VERSION(0, 0, 0),
+		"No engine",
+		VK_MAKE_VERSION(0, 0, 0),
+		VK_API_VERSION_1_3
+	);
 
 	auto glfwExtensions = getRequiredExtensions();
 
@@ -155,41 +152,21 @@ void HelloTriangle::createInstance()
 	auto debugCreateInfo = populateDebugMessengerCreateInfo();
 #endif
 
-	VkInstanceCreateInfo createInfo
-	{
-		.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+	vk::InstanceCreateInfo createInfo(
+		{},
+		&appInfo,
+		validationLayers,
+		glfwExtensions,
 #ifdef VK_DEBUG
-		.pNext = &debugCreateInfo,
+		&debugCreateInfo
 #else
-		.pNext = nullptr,
+		nullptr
 #endif
+	);
 
-		.pApplicationInfo        = &appInfo,
-#ifdef VK_DEBUG
-		.enabledLayerCount       = static_cast<uint32_t>(validationLayers.size()),
-		.ppEnabledLayerNames     = validationLayers.data(),
-#else
-		.enabledLayerCount       = 0,
-		.ppEnabledLayerNames     = nullptr,
-#endif
+	instance = context.createInstance(createInfo);
 
-		.enabledExtensionCount   = static_cast<uint32_t>(glfwExtensions.size()),
-		.ppEnabledExtensionNames = glfwExtensions.data()
-	};
-
-	if(vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
-	{
-		throw std::runtime_error("Can't create instance");
-	}
-
-	uint32_t extensionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-	std::vector<VkExtensionProperties> extensions(extensionCount);
-
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
-
-	for(const auto& i: extensions)
+	for(const auto& i: vk::enumerateInstanceExtensionProperties())
 	{
 		std::cout << '\t' << i.extensionName << '\n';
 	}
@@ -213,17 +190,11 @@ std::vector<const char*> HelloTriangle::getRequiredExtensions()
 #ifdef VK_DEBUG
 
 bool HelloTriangle::checkValidationLayerSupport() {
-	uint32_t layerCount;
-	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-	std::vector<VkLayerProperties> availableLayers(layerCount);
-	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
 	for(const char* layerName : validationLayers)
 	{
 		bool layerFound = false;
 
-		for(const auto& layerProperties : availableLayers)
+		for(const auto& layerProperties : vk::enumerateInstanceLayerProperties())
 		{
 			if(strcmp(layerName, layerProperties.layerName) == 0)
 			{
@@ -258,7 +229,7 @@ void HelloTriangle::setupDebugMessenger()
 {
 	VkDebugUtilsMessengerCreateInfoEXT createInfo = populateDebugMessengerCreateInfo();
 
-	if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+	if (CreateDebugUtilsMessengerEXT(*instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
 		throw std::runtime_error("failed to set up debug messenger!");
 	}
 }
@@ -290,40 +261,28 @@ void HelloTriangle::DestroyDebugUtilsMessengerEXT(VkInstance instance,
 		func(instance, debugMessenger, pAllocator);
 	}
 }
-VkDebugUtilsMessengerCreateInfoEXT HelloTriangle::populateDebugMessengerCreateInfo()
+vk::DebugUtilsMessengerCreateInfoEXT HelloTriangle::populateDebugMessengerCreateInfo()
 {
-	return
-	{
-		.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-		.messageSeverity =
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-		.messageType     =
-			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-			VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-		.pfnUserCallback = debugCallback,
-		.pUserData       = this
+	using enum vk::DebugUtilsMessageSeverityFlagBitsEXT;
+	using enum vk::DebugUtilsMessageTypeFlagBitsEXT;
+
+	return {
+		{},
+		eVerbose | eWarning | eError,
+		eGeneral | eValidation | ePerformance,
+		debugCallback,
+		this
 	};
 }
 #endif
 
 void HelloTriangle::pickPhysicalDevice()
 {
-	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
-	if (deviceCount == 0)
-		throw std::runtime_error("failed to find GPUs with Vulkan support!");
-
-	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
-
-	for (const auto& device : devices)
+	for(const auto& device: instance.enumeratePhysicalDevices())
 	{
-		if (isDeviceSuitable(device))
+		if (isDeviceSuitable(*device))
 		{
-			physicalDevice = device;
+			physicalDevice = *device;
 			break;
 		}
 	}
@@ -435,7 +394,7 @@ void HelloTriangle::createLogicalDevice()
 
 void HelloTriangle::createSurface()
 {
-	if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(*instance, window, nullptr, &surface) != VK_SUCCESS)
 		throw std::runtime_error("failed to create window surface!");
 }
 

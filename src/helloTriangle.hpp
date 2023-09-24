@@ -23,6 +23,8 @@
 #include <filesystem>
 
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan_raii.hpp>
 
 #include "queueFamilyIndices.hpp"
 #include "swapChainSupportDetails.hpp"
@@ -71,12 +73,14 @@ private:
 		VkDebugUtilsMessengerEXT debugMessenger,
 		const VkAllocationCallbacks* pAllocator);
 
-	VkDebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo();
+	vk::DebugUtilsMessengerCreateInfoEXT populateDebugMessengerCreateInfo();
 #else
 	const bool enableValidationLayers = false;
+	const std::vector<const char*> validationLayers = {};
 #endif
 
-	VkInstance instance;
+	vk::raii::Context context;
+	vk::raii::Instance instance = nullptr;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 	VkDevice device;
 	VkQueue graphicsQueue;
