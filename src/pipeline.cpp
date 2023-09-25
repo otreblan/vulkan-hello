@@ -221,7 +221,7 @@ void Pipeline::createRenderPass()
 	);
 
 	vk::SubpassDependency dependency(
-		vk::SubpassExternal,
+		VK_SUBPASS_EXTERNAL,
 		0,
 		vk::PipelineStageFlagBits::eColorAttachmentOutput,
 		vk::PipelineStageFlagBits::eColorAttachmentOutput,
