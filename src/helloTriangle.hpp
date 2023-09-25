@@ -85,17 +85,17 @@ private:
 	vk::raii::Device device = nullptr;
 	vk::raii::Queue graphicsQueue = nullptr;
 	vk::raii::Queue presentQueue = nullptr;
-	VkSurfaceKHR surface;
-	VkSwapchainKHR swapChain;
-	std::vector<VkImage> swapChainImages;
-	VkFormat swapChainImageFormat;
-	VkExtent2D swapChainExtent;
-	std::vector<VkImageView> swapChainImageViews;
+	vk::raii::SurfaceKHR surface = nullptr;
+	vk::raii::SwapchainKHR swapChain = nullptr;
+	std::vector<vk::Image> swapChainImages;
+	vk::Format swapChainImageFormat;
+	vk::Extent2D swapChainExtent;
+	std::vector<vk::raii::ImageView> swapChainImageViews;
 	VkRenderPass renderPass;
 	VkDescriptorSetLayout descriptorSetLayout;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
-	std::vector<VkFramebuffer> swapChainFramebuffers;
+	std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 	mutable std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -114,7 +114,7 @@ private:
 	std::vector<VkDescriptorSet> descriptorSets;
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
-	VkImageView textureImageView;
+	vk::raii::ImageView textureImageView = nullptr;
 	VkSampler textureSampler;
 
 	void initWindow();
@@ -134,12 +134,12 @@ private:
 	void createSurface();
 
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
-	SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-	VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-	VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+	SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
+	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::span<vk::SurfaceFormatKHR> availableFormats);
+	vk::PresentModeKHR chooseSwapPresentMode(const std::span<vk::PresentModeKHR> availablePresentModes);
+	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
 	void createSwapChain();
-	VkImageView createImageView(VkImage image, VkFormat format);
+	vk::raii::ImageView createImageView(vk::Image image, vk::Format format);
 	void createImageViews();
 	void createGraphicsPipeline();
 	static std::vector<char> readFile(const path& filepath);
