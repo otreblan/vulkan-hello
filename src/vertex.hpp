@@ -17,7 +17,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.hpp>
 
 #include <array>
 #include <vector>
@@ -28,8 +28,8 @@ struct Vertex
 	glm::vec3 color;
 	glm::vec2 texCoord;
 
-	static const VkVertexInputBindingDescription bindingDescription;
-	static const std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
+	static const vk::VertexInputBindingDescription bindingDescription;
+	static const std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions;
 };
 
 extern const std::vector<Vertex> vertices;

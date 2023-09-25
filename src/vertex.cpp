@@ -16,37 +16,18 @@
 
 #include "vertex.hpp"
 
-const std::array<VkVertexInputAttributeDescription, 3> Vertex::attributeDescriptions
+const std::array<vk::VertexInputAttributeDescription, 3> Vertex::attributeDescriptions
 {
-	VkVertexInputAttributeDescription
-	{
-		.location = 0,
-		.binding  = 0,
-		.format   = VK_FORMAT_R32G32_SFLOAT,
-		.offset   = offsetof(Vertex, pos),
-	},
-	VkVertexInputAttributeDescription
-	{
-		.location = 1,
-		.binding  = 0,
-		.format   = VK_FORMAT_R32G32B32_SFLOAT,
-		.offset   = offsetof(Vertex, color),
-	},
-	VkVertexInputAttributeDescription
-	{
-		.location = 2,
-		.binding  = 0,
-		.format   = VK_FORMAT_R32G32_SFLOAT,
-		.offset   = offsetof(Vertex, texCoord),
-	}
+	vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, pos)),
+	vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, color)),
+	vk::VertexInputAttributeDescription(2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)),
 };
 
-const VkVertexInputBindingDescription Vertex::bindingDescription
-{
-	.binding   = 0,
-	.stride    = sizeof(Vertex),
-	.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
-};
+const vk::VertexInputBindingDescription Vertex::bindingDescription(
+	0,
+	sizeof(Vertex),
+	vk::VertexInputRate::eVertex
+);
 
 const std::vector<Vertex> vertices =
 {

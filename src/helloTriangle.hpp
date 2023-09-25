@@ -26,14 +26,16 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
-#include "swapChainSupportDetails.hpp"
 
 class HelloTriangle
 {
 	using path = std::filesystem::path;
 
 public:
+	HelloTriangle();
+
 	void run();
 
 private:
@@ -79,39 +81,33 @@ private:
 	const std::vector<const char*> validationLayers = {};
 #endif
 
-	vk::raii::Context context;
-	vk::raii::Instance instance = nullptr;
+	vk::raii::Context        context;
+	vk::raii::Instance       instance       = nullptr;
 	vk::raii::PhysicalDevice physicalDevice = nullptr;
-	vk::raii::Device device = nullptr;
-	vk::raii::Queue graphicsQueue = nullptr;
-	vk::raii::Queue presentQueue = nullptr;
-	vk::raii::SurfaceKHR surface = nullptr;
-	vk::raii::SwapchainKHR swapChain = nullptr;
-	std::vector<vk::Image> swapChainImages;
-	vk::Format swapChainImageFormat;
-	vk::Extent2D swapChainExtent;
-	std::vector<vk::raii::ImageView> swapChainImageViews;
-	VkRenderPass renderPass;
-	VkDescriptorSetLayout descriptorSetLayout;
-	VkPipelineLayout pipelineLayout;
-	VkPipeline graphicsPipeline;
-	std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
-	VkCommandPool commandPool;
-	std::vector<VkCommandBuffer> commandBuffers;
-	mutable std::vector<VkSemaphore> imageAvailableSemaphores;
-	mutable std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
-	std::vector<VkFence> imagesInFlight;
-	size_t currentFrame = 0;
+	vk::raii::Device         device         = nullptr;
+	vk::raii::Queue          graphicsQueue  = nullptr;
+	vk::raii::Queue          presentQueue   = nullptr;
+	vk::raii::SurfaceKHR     surface        = nullptr;
+
+	Pipeline pipeline;
+
+	vk::raii::CommandPool commandPool = nullptr;
+	mutable std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
+	mutable std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
+
+	std::vector<vk::raii::Fence> inFlightFences;
+	std::vector<vk::Fence> imagesInFlight;
+
+	size_t currentFrame     = 0;
 	bool framebufferResized = false;
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
+
+	vk::raii::Buffer       vertexBuffer       = nullptr;
+	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
+
 	VkBuffer indexBuffer;
 	VkDeviceMemory indexBufferMemory;
-	std::vector<VkBuffer> uniformBuffers;
-	std::vector<VkDeviceMemory> uniformBuffersMemory;
-	VkDescriptorPool descriptorPool;
-	std::vector<VkDescriptorSet> descriptorSets;
+
+	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
 	vk::raii::ImageView textureImageView = nullptr;
@@ -135,41 +131,31 @@ private:
 
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
-	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::span<vk::SurfaceFormatKHR> availableFormats);
-	vk::PresentModeKHR chooseSwapPresentMode(const std::span<vk::PresentModeKHR> availablePresentModes);
-	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
-	void createSwapChain();
 	vk::raii::ImageView createImageView(vk::Image image, vk::Format format);
-	void createImageViews();
-	void createGraphicsPipeline();
-	static std::vector<char> readFile(const path& filepath);
-	VkShaderModule createShaderModule(std::span<char> code);
-	void createRenderPass();
-	void createFramebuffers();
-	void createCommandPool();
-	void createCommandBuffers();
 	void drawFrame();
 	void createSyncObjects();
-	void recreateSwapChain();
-	void cleanupSwapChain();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void createVertexBuffer();
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	void createBuffer(VkDeviceSize size,
 		VkBufferUsageFlags usage,
 		VkMemoryPropertyFlags properties,
 		VkBuffer& buffer,
 		VkDeviceMemory& bufferMemory
 	);
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
+		vk::DeviceSize size,
+		vk::BufferUsageFlags usage,
+		vk::MemoryPropertyFlags properties
+	);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	VkCommandBuffer beginSingleTimeCommands();
 	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 	void createIndexBuffer();
 	void createDescriptorSetLayout();
-	void createUniformBuffers();
 	void updateUniformBuffer(uint32_t currentImage);
-	void createDescriptorPool();
-	void createDescriptorSets();
+	void createCommandPool();
 	void createTextureImage();
 	void createImage(uint32_t width,
 		uint32_t height,
@@ -188,4 +174,6 @@ private:
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 	void createTextureImageView();
 	void createTextureSampler();
+
+	friend struct Pipeline;
 };
