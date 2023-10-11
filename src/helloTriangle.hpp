@@ -104,8 +104,8 @@ private:
 	vk::raii::Buffer       vertexBuffer       = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
 
-	VkBuffer indexBuffer;
-	VkDeviceMemory indexBufferMemory;
+	vk::raii::Buffer       indexBuffer       = nullptr;
+	vk::raii::DeviceMemory indexBufferMemory = nullptr;
 
 	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
 	VkImage textureImage;
@@ -138,12 +138,6 @@ private:
 	void createVertexBuffer();
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	void createBuffer(VkDeviceSize size,
-		VkBufferUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkBuffer& buffer,
-		VkDeviceMemory& bufferMemory
-	);
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
 		vk::DeviceSize size,
 		vk::BufferUsageFlags usage,

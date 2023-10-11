@@ -97,8 +97,6 @@ void HelloTriangle::cleanup()
 	vkDestroyImage(*device, textureImage, nullptr);
 	vkFreeMemory(*device, textureImageMemory, nullptr);
 
-	vkDestroyBuffer(*device, indexBuffer, nullptr);
-	vkFreeMemory(*device, indexBufferMemory, nullptr);
 #ifdef VK_DEBUG
 	DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
 #endif
@@ -465,23 +463,25 @@ void HelloTriangle::framebufferResizeCallback(GLFWwindow* window, int, int)
 
 void HelloTriangle::createVertexBuffer()
 {
+	using enum vk::BufferUsageFlagBits;
+	using enum vk::MemoryPropertyFlagBits;
+
 	vk::DeviceSize bufferSize = sizeof(decltype(vertices)::value_type) * vertices.size();
 
 	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
 		bufferSize,
-		vk::BufferUsageFlagBits::eTransferSrc,
-		vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+		eTransferSrc,
+		eHostVisible | eHostCoherent
 	);
 
 	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
 	memcpy(data, vertices.data(), (size_t)bufferSize);
 	stagingBufferMemory.unmapMemory();
 
-
 	auto [_vertexBuffer, _vertexBufferMemory] = createBuffer(
 		bufferSize,
-		vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer,
-		vk::MemoryPropertyFlagBits::eDeviceLocal
+		eTransferDst | eVertexBuffer,
+		eDeviceLocal
 	);
 
 	vertexBuffer       = std::move(_vertexBuffer);
@@ -515,40 +515,6 @@ uint32_t HelloTriangle::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFl
 	}
 
 	throw std::runtime_error("failed to find suitable memory type!");
-}
-
-void HelloTriangle::createBuffer(VkDeviceSize size,
-	VkBufferUsageFlags usage,
-	VkMemoryPropertyFlags properties,
-	VkBuffer& buffer,
-	VkDeviceMemory& bufferMemory
-)
-{
-	VkBufferCreateInfo bufferInfo
-	{
-		.sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-		.size        = size,
-		.usage       = usage,
-		.sharingMode = VK_SHARING_MODE_EXCLUSIVE
-	};
-
-	if(vkCreateBuffer(*device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		throw std::runtime_error("failed to create vertex buffer!");
-
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(*device, buffer, &memRequirements);
-
-	VkMemoryAllocateInfo allocInfo
-	{
-		.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-		.allocationSize  = memRequirements.size,
-		.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties)
-	};
-
-	if(vkAllocateMemory(*device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		throw std::runtime_error("failed to allocate vertex buffer memory!");
-
-	vkBindBufferMemory(*device, buffer, bufferMemory, 0);
 }
 
 std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> HelloTriangle::createBuffer(
@@ -636,33 +602,31 @@ void HelloTriangle::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 
 void HelloTriangle::createIndexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(decltype(indices)::value_type) * indices.size();
+	using enum vk::BufferUsageFlagBits;
+	using enum vk::MemoryPropertyFlagBits;
 
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		stagingBuffer,
-		stagingBufferMemory
+	vk::DeviceSize bufferSize = sizeof(decltype(indices)::value_type) * indices.size();
+
+	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
+		bufferSize,
+		eTransferSrc,
+		eHostVisible | eHostCoherent
 	);
 
-	void* data;
-	vkMapMemory(*device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
 	memcpy(data, indices.data(), (size_t) bufferSize);
-	vkUnmapMemory(*device, stagingBufferMemory);
+	stagingBufferMemory.unmapMemory();
 
-	createBuffer(bufferSize,
-		VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		indexBuffer,
-		indexBufferMemory
+	auto [_indexBuffer, _indexBufferMemory] = createBuffer(
+		bufferSize,
+		eTransferDst | eIndexBuffer,
+		eDeviceLocal
 	);
 
-	copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+	copyBuffer(*stagingBuffer, *_indexBuffer, bufferSize);
 
-	vkDestroyBuffer(*device, stagingBuffer, nullptr);
-	vkFreeMemory(*device, stagingBufferMemory, nullptr);
+	indexBuffer = std::move(_indexBuffer);
+	indexBufferMemory = std::move(_indexBufferMemory);
 }
 
 void HelloTriangle::createDescriptorSetLayout()
@@ -731,31 +695,29 @@ void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
 
 void HelloTriangle::createTextureImage()
 {
+	using enum vk::BufferUsageFlagBits;
+	using enum vk::MemoryPropertyFlagBits;
+
 	path texture = texturesDir/"texture.jpg";
 
-	std::filesystem::file_size(texture);
+	//std::filesystem::file_size(texture);
 
 	int texWidth, texHeight, texChannels;
 	stbi_uc* pixels = stbi_load(texture.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-	VkDeviceSize imageSize = texWidth * texHeight * 4;
+	vk::DeviceSize imageSize = texWidth * texHeight * 4;
 
 	if(!pixels)
 		throw std::runtime_error("failed to load texture image!");
 
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-
-	createBuffer(imageSize,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		stagingBuffer,
-		stagingBufferMemory
+	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
+		imageSize,
+		eTransferSrc,
+		eHostVisible | eHostCoherent
 	);
 
-	void* data;
-	vkMapMemory(*device, stagingBufferMemory, 0, imageSize, 0, &data);
+	void* data = stagingBufferMemory.mapMemory(0, imageSize);
 	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	vkUnmapMemory(*device, stagingBufferMemory);
+	stagingBufferMemory.unmapMemory();
 	stbi_image_free(pixels);
 
 	createImage(texWidth,
@@ -769,11 +731,8 @@ void HelloTriangle::createTextureImage()
 	);
 
 	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-	copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	copyBufferToImage(*stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 	transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-	vkDestroyBuffer(*device, stagingBuffer, nullptr);
-	vkFreeMemory(*device, stagingBufferMemory, nullptr);
 }
 
 void HelloTriangle::createImage(uint32_t width,
