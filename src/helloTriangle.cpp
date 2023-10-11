@@ -269,21 +269,20 @@ void HelloTriangle::pickPhysicalDevice()
 		throw std::runtime_error("failed to find a suitable GPU!");
 }
 
-bool HelloTriangle::isDeviceSuitable(vk::PhysicalDevice device)
+bool HelloTriangle::isDeviceSuitable(vk::PhysicalDevice physicalDevice)
 {
-	QueueFamilyIndices indices = findQueueFamilies(device);
+	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
-	bool extensionsSupported = checkDeviceExtensionSupport(device);
+	bool extensionsSupported = checkDeviceExtensionSupport(physicalDevice);
 
 	bool swapChainAdequate = false;
 	if(extensionsSupported)
 	{
-		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device);
+		SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 		swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 	}
 
-	VkPhysicalDeviceFeatures supportedFeatures;
-	vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+	vk::PhysicalDeviceFeatures supportedFeatures = physicalDevice.getFeatures();
 
 	return indices.isComplete() &&
 		extensionsSupported &&
