@@ -26,6 +26,7 @@ target_sources(${PROJECT_NAME}
 		helloTriangle.cpp
 		main.cpp
 		pipeline.cpp
+		singleCommand.cpp
 		stb_image.cpp
 		swapChainSupportDetails.cpp
 		vertex.cpp

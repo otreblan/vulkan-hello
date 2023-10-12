@@ -28,6 +28,7 @@
 
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
+#include "singleCommand.hpp"
 
 class HelloTriangle
 {
@@ -108,8 +109,10 @@ private:
 	vk::raii::DeviceMemory indexBufferMemory = nullptr;
 
 	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
+
+	vk::raii::Image        textureImage       = nullptr;
+	vk::raii::DeviceMemory textureImageMemory = nullptr;
+
 	vk::raii::ImageView textureImageView = nullptr;
 	VkSampler textureSampler;
 
@@ -136,38 +139,38 @@ private:
 	void createSyncObjects();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void createVertexBuffer();
-	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
 		vk::DeviceSize size,
 		vk::BufferUsageFlags usage,
 		vk::MemoryPropertyFlags properties
 	);
-	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-	VkCommandBuffer beginSingleTimeCommands();
-	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
+
 	void createIndexBuffer();
 	void createDescriptorSetLayout();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createCommandPool();
+
 	void createTextureImage();
-	void createImage(uint32_t width,
+	std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(uint32_t width,
 		uint32_t height,
-		VkFormat format,
-		VkImageTiling tiling,
-		VkImageUsageFlags usage,
-		VkMemoryPropertyFlags properties,
-		VkImage& image,
-		VkDeviceMemory& imageMemory
+		vk::Format format,
+		vk::ImageTiling tiling,
+		vk::ImageUsageFlags usage,
+		vk::MemoryPropertyFlags properties
 	);
-	void transitionImageLayout(VkImage image,
-		VkFormat format,
-		VkImageLayout oldLayout,
-		VkImageLayout newLayout
+	void transitionImageLayout(vk::Image image,
+		vk::Format format,
+		vk::ImageLayout oldLayout,
+		vk::ImageLayout newLayout
 	);
-	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	void copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height);
 	void createTextureImageView();
 	void createTextureSampler();
 
 	friend struct Pipeline;
+
+protected:
+	SingleCommand makeSingleCommand();
 };
