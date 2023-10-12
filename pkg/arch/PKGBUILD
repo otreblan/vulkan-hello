@@ -1,7 +1,7 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
 pkgname=vulkan-hello-git
-pkgver=0.0.0.r60.g56753c7
+pkgver=0.0.0.r72.gf9c4bde
 pkgrel=1
 epoch=
 pkgdesc="Vulkan"
@@ -9,7 +9,7 @@ arch=('x86_64')
 url="https://github.com/otreblan/hello"
 license=('GPL3')
 groups=()
-depends=('vulkan-icd-loader' 'glfw')
+depends=('assimp' 'vulkan-icd-loader' 'glfw')
 makedepends=(
 	'cmake'
 	'git'

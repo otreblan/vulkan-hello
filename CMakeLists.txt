@@ -47,6 +47,7 @@ add_subdirectory(src) # Sources list
 # Shared libraries
 pkg_check_modules(libraries
 	REQUIRED IMPORTED_TARGET
+		assimp
 		glfw3
 		glm
 		vulkan

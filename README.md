@@ -10,6 +10,7 @@
 * `cmake`
 * `file`
 * `glslc`
+* `libassimp-dev`
 * `libglfw3-dev`
 * `libglm-dev`
 * `libstb-dev`
