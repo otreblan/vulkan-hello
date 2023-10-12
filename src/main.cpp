@@ -21,11 +21,17 @@
 #include "helloTriangle.hpp"
 #include "exePath.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
+	if(argc < 2)
+	{
+		std::cerr << "Usage: " << argv[0] << " SCENE\n";
+		return EXIT_FAILURE;
+	}
+
 	std::cerr << exePath() << '\n';
 
-	HelloTriangle app;
+	HelloTriangle app(argv[1]);
 
 	try
 	{

@@ -31,6 +31,3 @@ struct Vertex
 	static const vk::VertexInputBindingDescription bindingDescription;
 	static const std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions;
 };
-
-extern const std::vector<Vertex> vertices;
-extern const std::vector<uint16_t> indices;

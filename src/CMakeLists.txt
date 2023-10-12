@@ -26,6 +26,7 @@ target_sources(${PROJECT_NAME}
 		exePath.cpp
 		helloTriangle.cpp
 		main.cpp
+		mesh.cpp
 		pipeline.cpp
 		singleCommand.cpp
 		stb_image.cpp

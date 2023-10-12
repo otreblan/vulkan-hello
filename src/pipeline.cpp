@@ -537,9 +537,9 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 	vk::DeviceSize offsets[] = {0};
 
 	commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
-	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint16);
+	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint32);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
-	commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+	commandBuffer.drawIndexed(parent.mesh.getIndices().size(), 1, 0, 0, 0);
 	commandBuffer.endRenderPass();
 	commandBuffer.end();
 }

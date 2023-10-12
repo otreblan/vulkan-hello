@@ -31,11 +31,13 @@
 
 #include "config.hpp"
 #include "helloTriangle.hpp"
+#include "mesh.hpp"
 #include "uniformBufferObject.hpp"
 #include "vertex.hpp"
 
-HelloTriangle::HelloTriangle():
-	pipeline(*this)
+HelloTriangle::HelloTriangle(std::filesystem::path rootScene):
+	pipeline(*this),
+	mesh(rootScene)
 {}
 
 void HelloTriangle::run()
@@ -73,8 +75,10 @@ void HelloTriangle::initVulkan()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
-	createVertexBuffer();
-	createIndexBuffer();
+
+	mesh.load();
+	mesh.uploadToGpu(*this);
+
 	pipeline.create();
 	createSyncObjects();
 }
@@ -452,35 +456,6 @@ void HelloTriangle::framebufferResizeCallback(GLFWwindow* window, int, int)
 	app->framebufferResized = true;
 }
 
-void HelloTriangle::createVertexBuffer()
-{
-	using enum vk::BufferUsageFlagBits;
-	using enum vk::MemoryPropertyFlagBits;
-
-	vk::DeviceSize bufferSize = sizeof(decltype(vertices)::value_type) * vertices.size();
-
-	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
-		bufferSize,
-		eTransferSrc,
-		eHostVisible | eHostCoherent
-	);
-
-	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
-	stagingBufferMemory.unmapMemory();
-
-	auto [_vertexBuffer, _vertexBufferMemory] = createBuffer(
-		bufferSize,
-		eTransferDst | eVertexBuffer,
-		eDeviceLocal
-	);
-
-	vertexBuffer       = std::move(_vertexBuffer);
-	vertexBufferMemory = std::move(_vertexBufferMemory);
-
-	copyBuffer(*stagingBuffer, *vertexBuffer, bufferSize);
-}
-
 uint32_t HelloTriangle::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
 	vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
@@ -528,35 +503,6 @@ void HelloTriangle::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::D
 	vk::BufferCopy copyRegion(0, 0, size);
 
 	singleCommand.getBuffer().copyBuffer(srcBuffer, dstBuffer, copyRegion);
-}
-
-void HelloTriangle::createIndexBuffer()
-{
-	using enum vk::BufferUsageFlagBits;
-	using enum vk::MemoryPropertyFlagBits;
-
-	vk::DeviceSize bufferSize = sizeof(decltype(indices)::value_type) * indices.size();
-
-	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
-		bufferSize,
-		eTransferSrc,
-		eHostVisible | eHostCoherent
-	);
-
-	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
-	memcpy(data, indices.data(), (size_t) bufferSize);
-	stagingBufferMemory.unmapMemory();
-
-	auto [_indexBuffer, _indexBufferMemory] = createBuffer(
-		bufferSize,
-		eTransferDst | eIndexBuffer,
-		eDeviceLocal
-	);
-
-	copyBuffer(*stagingBuffer, *_indexBuffer, bufferSize);
-
-	indexBuffer = std::move(_indexBuffer);
-	indexBufferMemory = std::move(_indexBufferMemory);
 }
 
 void HelloTriangle::createDescriptorSetLayout()
@@ -612,8 +558,8 @@ void HelloTriangle::updateUniformBuffer(uint32_t currentImage)
 
 	UniformBufferObject ubo
 	{
-		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 0.0f, 1.0f)),
-		.view  = lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)),
+		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 1.0f, 0.0f)),
+		.view  = lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
 		.proj  = perspective(radians(45.0f), pipeline.swapChainExtent.width / (float) pipeline.swapChainExtent.height, 0.1f, 10.0f)
 	};
 

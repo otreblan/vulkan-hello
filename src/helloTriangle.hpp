@@ -26,6 +26,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "mesh.hpp"
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
@@ -35,7 +36,8 @@ class HelloTriangle
 	using path = std::filesystem::path;
 
 public:
-	HelloTriangle();
+	// TODO: Remove this constructor and load the scene from a child class
+	HelloTriangle(std::filesystem::path rootScene);
 
 	void run();
 
@@ -101,6 +103,8 @@ private:
 	size_t currentFrame     = 0;
 	bool framebufferResized = false;
 
+	Mesh mesh;
+
 	vk::raii::Buffer       vertexBuffer       = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
 
@@ -139,7 +143,6 @@ private:
 	void drawFrame();
 	void createSyncObjects();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-	void createVertexBuffer();
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
 		vk::DeviceSize size,
@@ -148,7 +151,6 @@ private:
 	);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
-	void createIndexBuffer();
 	void createDescriptorSetLayout();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createCommandPool();
@@ -172,6 +174,7 @@ private:
 
 	friend struct Pipeline;
 	friend class Depth;
+	friend class Mesh;
 
 protected:
 	SingleCommand makeSingleCommand();
