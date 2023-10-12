@@ -92,8 +92,6 @@ void HelloTriangle::mainLoop()
 
 void HelloTriangle::cleanup()
 {
-	vkDestroySampler(*device, textureSampler, nullptr);
-
 #ifdef VK_DEBUG
 	DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
 #endif
@@ -810,28 +808,26 @@ void HelloTriangle::createTextureImageView()
 
 void HelloTriangle::createTextureSampler()
 {
-	VkSamplerCreateInfo samplerInfo
-	{
-		.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-		.magFilter               = VK_FILTER_LINEAR,
-		.minFilter               = VK_FILTER_LINEAR,
-		.mipmapMode              = VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		.addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-		.mipLodBias              = 0.0f,
-		.anisotropyEnable        = VK_TRUE,
-		.maxAnisotropy           = 16.0f,
-		.compareEnable           = VK_FALSE,
-		.compareOp               = VK_COMPARE_OP_ALWAYS,
-		.minLod                  = 0.0f,
-		.maxLod                  = 0.0f,
-		.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
-		.unnormalizedCoordinates = VK_FALSE
-	};
+	vk::SamplerCreateInfo samplerInfo(
+		{},
+		vk::Filter::eLinear,
+		vk::Filter::eLinear,
+		vk::SamplerMipmapMode::eLinear,
+		vk::SamplerAddressMode::eRepeat,
+		vk::SamplerAddressMode::eRepeat,
+		vk::SamplerAddressMode::eRepeat,
+		0,
+		true,
+		16,
+		false,
+		vk::CompareOp::eAlways,
+		0,
+		0,
+		vk::BorderColor::eIntOpaqueBlack,
+		false
+	);
 
-	if (vkCreateSampler(*device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
-		throw std::runtime_error("failed to create texture sampler!");
+	textureSampler = device.createSampler(samplerInfo);
 }
 
 SingleCommand HelloTriangle::makeSingleCommand()

@@ -305,7 +305,7 @@ void Pipeline::createDescriptorSets()
 		vk::DescriptorBufferInfo bufferInfo(*uniformBuffers[i], 0, sizeof(UniformBufferObject));
 
 		vk::DescriptorImageInfo imageInfo(
-			parent.textureSampler,
+			*parent.textureSampler,
 			*parent.textureImageView,
 			vk::ImageLayout::eShaderReadOnlyOptimal
 		);

@@ -114,7 +114,7 @@ private:
 	vk::raii::DeviceMemory textureImageMemory = nullptr;
 
 	vk::raii::ImageView textureImageView = nullptr;
-	VkSampler textureSampler;
+	vk::raii::Sampler   textureSampler   = nullptr;
 
 	void initWindow();
 	void initVulkan();
