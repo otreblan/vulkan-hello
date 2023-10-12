@@ -23,7 +23,8 @@
 #include "vertex.hpp"
 
 Pipeline::Pipeline(HelloTriangle& parent):
-	parent(parent)
+	parent(parent),
+	depth(parent)
 {
 }
 
@@ -31,6 +32,7 @@ void Pipeline::create()
 {
 	createSwapChain(*parent.physicalDevice);
 	createImageViews();
+	depth.create();
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
@@ -53,9 +55,8 @@ void Pipeline::recreate()
 
 	parent.device.waitIdle();
 
+	depth.clear();
 	swapChainFramebuffers.clear();
-
-	commandBuffers.clear();
 
 	graphicsPipeline.clear();
 	pipelineLayout.clear();
@@ -211,25 +212,42 @@ void Pipeline::createRenderPass()
 		vk::ImageLayout::ePresentSrcKHR
 	);
 
+	vk::AttachmentDescription depthAttachment(
+		{},
+		depth.getFormat(),
+		vk::SampleCountFlagBits::e1,
+		vk::AttachmentLoadOp::eClear,
+		vk::AttachmentStoreOp::eDontCare,
+		vk::AttachmentLoadOp::eDontCare,
+		vk::AttachmentStoreOp::eDontCare,
+		vk::ImageLayout::eUndefined,
+		vk::ImageLayout::eDepthStencilAttachmentOptimal
+	);
+
 	vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+	vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
 	vk::SubpassDescription subpass(
 		{},
 		vk::PipelineBindPoint::eGraphics,
 		{},
-		colorAttachmentRef
+		colorAttachmentRef,
+		{},
+		&depthAttachmentRef
 	);
 
 	vk::SubpassDependency dependency(
 		VK_SUBPASS_EXTERNAL,
 		0,
-		vk::PipelineStageFlagBits::eColorAttachmentOutput,
-		vk::PipelineStageFlagBits::eColorAttachmentOutput,
-		vk::AccessFlagBits::eNone,
-		vk::AccessFlagBits::eColorAttachmentWrite
+		vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eLateFragmentTests,
+		vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eEarlyFragmentTests,
+		vk::AccessFlagBits::eDepthStencilAttachmentWrite,
+		vk::AccessFlagBits::eColorAttachmentWrite | vk::AccessFlagBits::eDepthStencilAttachmentWrite
 	);
 
-	vk::RenderPassCreateInfo renderPassInfo({}, colorAttachment, subpass, dependency);
+	vk::AttachmentDescription attachments[] = {colorAttachment, depthAttachment};
+
+	vk::RenderPassCreateInfo renderPassInfo({}, attachments, subpass, dependency);
 
 	renderPass = parent.device.createRenderPass(renderPassInfo);
 }
@@ -240,10 +258,12 @@ void Pipeline::createFramebuffers()
 
 	for(size_t i = 0; i < swapChainImageViews.size(); i++)
 	{
+		vk::ImageView attachments[] = {*swapChainImageViews[i], depth.getImageView()};
+
 		vk::FramebufferCreateInfo framebufferInfo(
 			{},
 			*renderPass,
-			*swapChainImageViews[i],
+			attachments,
 			swapChainExtent.width,
 			swapChainExtent.height,
 			1
@@ -417,6 +437,15 @@ void Pipeline::createGraphicsPipeline()
 		false
 	);
 
+	vk::PipelineDepthStencilStateCreateInfo depthStencil(
+		{},
+		true,
+		true,
+		vk::CompareOp::eLess,
+		false,
+		false
+	);
+
 	vk::PipelineColorBlendAttachmentState colorBlendAttachment(
 		false,
 		vk::BlendFactor::eOne,
@@ -460,7 +489,7 @@ void Pipeline::createGraphicsPipeline()
 		&viewportState,
 		&rasterizer,
 		&multisampling,
-		nullptr,
+		&depthStencil,
 		&colorBlending,
 		nullptr,
 		*pipelineLayout,
@@ -484,33 +513,33 @@ void Pipeline::createCommandBuffers()
 	);
 
 	commandBuffers = parent.device.allocateCommandBuffers(allocInfo);
+}
 
-	for(size_t i = 0; i < commandBuffers.size(); i++)
-	{
-		vk::CommandBufferBeginInfo beginInfo({}, nullptr);
+void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+{
+	vk::CommandBufferBeginInfo beginInfo({}, nullptr);
 
-		commandBuffers[i].begin(beginInfo);
+	commandBuffer.begin(beginInfo);
 
-		vk::ClearValue clearColor({0,0,0,1});
+	vk::ClearValue clearValues[] = {vk::ClearColorValue(0, 0, 0, 1), vk::ClearDepthStencilValue(1, 0)};
 
-		vk::RenderPassBeginInfo renderPassInfo(
-			*renderPass,
-			*swapChainFramebuffers[i],
-			vk::Rect2D({0, 0}, swapChainExtent),
-			clearColor
-		);
+	vk::RenderPassBeginInfo renderPassInfo(
+		*renderPass,
+		*swapChainFramebuffers[imageIndex],
+		vk::Rect2D({0, 0}, swapChainExtent),
+		clearValues
+	);
 
-		commandBuffers[i].beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
-		commandBuffers[i].bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
+	commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
 
-		vk::Buffer vertexBuffers[] = {*parent.vertexBuffer};
-		vk::DeviceSize offsets[] = {0};
+	vk::Buffer vertexBuffers[] = {*parent.vertexBuffer};
+	vk::DeviceSize offsets[] = {0};
 
-		commandBuffers[i].bindVertexBuffers(0, vertexBuffers, offsets);
-		commandBuffers[i].bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint16);
-		commandBuffers[i].bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[i], {});
-		commandBuffers[i].drawIndexed(indices.size(), 1, 0, 0, 0);
-		commandBuffers[i].endRenderPass();
-		commandBuffers[i].end();
-	}
+	commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
+	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint16);
+	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
+	commandBuffer.drawIndexed(indices.size(), 1, 0, 0, 0);
+	commandBuffer.endRenderPass();
+	commandBuffer.end();
 }

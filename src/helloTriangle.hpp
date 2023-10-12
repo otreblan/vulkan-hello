@@ -97,7 +97,6 @@ private:
 	mutable std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
 
 	std::vector<vk::raii::Fence> inFlightFences;
-	std::vector<vk::Fence> imagesInFlight;
 
 	size_t currentFrame     = 0;
 	bool framebufferResized = false;
@@ -134,7 +133,9 @@ private:
 
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
-	vk::raii::ImageView createImageView(vk::Image image, vk::Format format);
+
+	vk::raii::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
+
 	void drawFrame();
 	void createSyncObjects();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
@@ -170,6 +171,7 @@ private:
 	void createTextureSampler();
 
 	friend struct Pipeline;
+	friend class Depth;
 
 protected:
 	SingleCommand makeSingleCommand();

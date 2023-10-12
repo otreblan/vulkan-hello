@@ -367,6 +367,7 @@ SwapChainSupportDetails HelloTriangle::querySwapChainSupport(vk::PhysicalDevice 
 
 void HelloTriangle::drawFrame()
 {
+	[[maybe_unused]]
 	auto r = device.waitForFences(*inFlightFences[currentFrame], true, std::numeric_limits<uint64_t>::max());
 
 	auto [result, imageIndex] = pipeline.swapChain.acquireNextImage(
@@ -385,12 +386,10 @@ void HelloTriangle::drawFrame()
 
 	updateUniformBuffer(imageIndex);
 
-	// Check if a previous frame is using this image (i.e. there is its fence to wait on)
-	if(imagesInFlight[imageIndex])
-		r = device.waitForFences(imagesInFlight[imageIndex], true, std::numeric_limits<uint64_t>::max());
+	device.resetFences(*inFlightFences[currentFrame]);
 
-	// Mark the image as now being in use by this frame
-	imagesInFlight[imageIndex] = *inFlightFences[currentFrame];
+	pipeline.commandBuffers[currentFrame].reset();
+	pipeline.recordCommandBuffer(*pipeline.commandBuffers[currentFrame], imageIndex);
 
 	vk::Semaphore waitSemaphores[] = {*imageAvailableSemaphores[currentFrame]};
 	vk::Semaphore signalSemaphores[] = {*renderFinishedSemaphores[currentFrame]};
@@ -399,11 +398,9 @@ void HelloTriangle::drawFrame()
 	vk::SubmitInfo submitInfo(
 		waitSemaphores,
 		waitStages,
-		*pipeline.commandBuffers[imageIndex],
+		*pipeline.commandBuffers[currentFrame],
 		signalSemaphores
 	);
-
-	device.resetFences(*inFlightFences[currentFrame]);
 
 	graphicsQueue.submit(submitInfo, *inFlightFences[currentFrame]);
 
@@ -434,7 +431,6 @@ void HelloTriangle::createSyncObjects()
 	renderFinishedSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
 
 	inFlightFences.reserve(MAX_FRAMES_IN_FLIGHT);
-	imagesInFlight.resize(pipeline.swapChainImages.size(), VK_NULL_HANDLE);
 
 	vk::SemaphoreCreateInfo semaphoreInfo;
 
@@ -596,7 +592,10 @@ void HelloTriangle::createCommandPool()
 {
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*physicalDevice);
 
-	vk::CommandPoolCreateInfo poolInfo({}, queueFamilyIndices.graphicsFamily.value());
+	vk::CommandPoolCreateInfo poolInfo(
+		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+		queueFamilyIndices.graphicsFamily.value()
+	);
 
 	commandPool = device.createCommandPool(poolInfo);
 }
@@ -750,6 +749,14 @@ void HelloTriangle::transitionImageLayout(vk::Image image,
 		sourceStage      = vk::PipelineStageFlagBits::eTopOfPipe;
 		destinationStage = vk::PipelineStageFlagBits::eTransfer;
 	}
+	else if(oldLayout == vk::ImageLayout::eUndefined && newLayout == vk::ImageLayout::eDepthStencilAttachmentOptimal)
+	{
+		barrier.srcAccessMask = vk::AccessFlagBits::eNone;
+		barrier.dstAccessMask = vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+		sourceStage      = vk::PipelineStageFlagBits::eTopOfPipe;
+		destinationStage = vk::PipelineStageFlagBits::eEarlyFragmentTests;
+	}
 	else if(oldLayout == vk::ImageLayout::eTransferDstOptimal && newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)
 	{
 		barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
@@ -787,7 +794,7 @@ void HelloTriangle::copyBufferToImage(vk::Buffer buffer, vk::Image image, uint32
 	singleCommand.getBuffer().copyBufferToImage(buffer, image, vk::ImageLayout::eTransferDstOptimal, region);
 }
 
-vk::raii::ImageView HelloTriangle::createImageView(vk::Image image, vk::Format format)
+vk::raii::ImageView HelloTriangle::createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags)
 {
 	vk::ImageViewCreateInfo viewInfo(
 		{},
@@ -795,7 +802,7 @@ vk::raii::ImageView HelloTriangle::createImageView(vk::Image image, vk::Format f
 		vk::ImageViewType::e2D,
 		format,
 		{},
-		vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1)
+		vk::ImageSubresourceRange(aspectFlags, 0, 1, 0, 1)
 	);
 
 	return device.createImageView(viewInfo);

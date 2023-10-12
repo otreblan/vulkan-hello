@@ -22,6 +22,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "depth.hpp"
 #include "swapChainSupportDetails.hpp"
 
 class HelloTriangle;
@@ -39,6 +40,8 @@ public:
 	vk::Extent2D                     swapChainExtent;
 	std::vector<vk::raii::ImageView> swapChainImageViews;
 
+	Depth depth;
+
 	vk::raii::RenderPass                renderPass       = nullptr;
 	vk::raii::PipelineLayout            pipelineLayout   = nullptr;
 	vk::raii::Pipeline                  graphicsPipeline = nullptr;
@@ -54,6 +57,8 @@ public:
 	Pipeline(HelloTriangle& parent);
 	void create();
 	void recreate();
+
+	void recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
 private:
 	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::span<vk::SurfaceFormatKHR> availableFormats);
