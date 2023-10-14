@@ -8,6 +8,9 @@ layout(location = 1) in vec2 fragTexCoord;
 
 layout(location = 0) out vec4 outColor;
 
+// TODO: Make this uniform
+vec4 ambient = vec4(0.01, 0.01, 0.01, 1.0);
+
 void main() {
-	outColor = texture(texSampler, fragTexCoord);
+	outColor = ambient * texture(texSampler, fragTexCoord);
 }
