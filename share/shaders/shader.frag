@@ -12,21 +12,30 @@ layout(location = 0) out vec4 outColor;
 
 // TODO: Make this uniform
 vec4 ambient = vec4(0.01, 0.01, 0.01, 1.0);
+vec3 viewPos = vec3(2.0, 2.0, 2.0);
 
-void diffuseLightning(vec3 pos, vec3 normal, vec3 lightPos, vec3 lightColor, out vec4 diffuse)
+void lightning(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos, float strength, float shininess, vec3 lightColor, out vec4 diffuse, out vec4 specular)
 {
-	vec3 norm     = normalize(normal);
-	vec3 lightDir = normalize(lightPos - pos);
+	vec3 viewDir    = normalize(viewPos - pos);
+	vec3 norm       = normalize(normal);
+	vec3 lightDir   = normalize(lightPos - pos);
+	vec3 reflectDir = reflect(-lightDir, norm);
 
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 	float diff = max(dot(norm, lightDir), 0.0);
 
-	diffuse = vec4(diff * lightColor, 1.0);
+	diffuse  = vec4(diff * lightColor, 1.0);
+	specular = strength * spec * vec4(lightColor, 1.0);
 }
 
 void main()
 {
-	vec4 diffuse;
-	diffuseLightning(fragPos, fragNormal, vec3(0.0, 2.0, 2.0), vec3(1.0, 1.0, 1.0), diffuse);
+	vec3 lightColor = vec3(1.0, 1.0, 1.0);
+	vec3 lightPos   = vec3(0.0, 2.0, 2.0);
 
-	outColor = (ambient + diffuse) * texture(texSampler, fragTexCoord);
+	vec4 diffuse;
+	vec4 specular;
+	lightning(fragPos, fragNormal, lightPos, viewPos, 0.5, 32, lightColor, diffuse, specular);
+
+	outColor = (ambient + diffuse + specular) * texture(texSampler, fragTexCoord);
 }
