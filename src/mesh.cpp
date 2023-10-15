@@ -69,6 +69,7 @@ void Mesh::loadVertices(const aiMesh& mesh)
 	{
 		const auto& v = mesh.mVertices[i];
 		const auto& uv = mesh.mTextureCoords[0][i];
+		const auto& n = mesh.mNormals[i];
 
 		vertices[i].pos = {v.x, v.y, v.z};
 
@@ -79,6 +80,7 @@ void Mesh::loadVertices(const aiMesh& mesh)
 		}
 
 		vertices[i].texCoord = {uv.x, uv.y};
+		vertices[i].normal = {n.x, n.y, n.z};
 	}
 }
 

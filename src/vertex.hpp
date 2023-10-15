@@ -26,8 +26,9 @@ struct Vertex
 {
 	glm::vec3 pos;
 	glm::vec3 color;
+	glm::vec3 normal;
 	glm::vec2 texCoord;
 
 	static const vk::VertexInputBindingDescription bindingDescription;
-	static const std::array<vk::VertexInputAttributeDescription, 3> attributeDescriptions;
+	static const std::array<vk::VertexInputAttributeDescription, 4> attributeDescriptions;
 };

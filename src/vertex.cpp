@@ -16,11 +16,12 @@
 
 #include "vertex.hpp"
 
-const std::array<vk::VertexInputAttributeDescription, 3> Vertex::attributeDescriptions
+const std::array<vk::VertexInputAttributeDescription, 4> Vertex::attributeDescriptions
 {
 	vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, pos)),
 	vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, color)),
-	vk::VertexInputAttributeDescription(2, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)),
+	vk::VertexInputAttributeDescription(2, 0, vk::Format::eR32G32B32Sfloat, offsetof(Vertex, normal)),
+	vk::VertexInputAttributeDescription(3, 0, vk::Format::eR32G32Sfloat, offsetof(Vertex, texCoord)),
 };
 
 const vk::VertexInputBindingDescription Vertex::bindingDescription(
