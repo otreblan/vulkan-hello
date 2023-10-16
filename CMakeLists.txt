@@ -45,12 +45,17 @@ add_subdirectory(share)
 add_subdirectory(src) # Sources list
 
 # Shared libraries
-pkg_check_modules(libraries
-	REQUIRED IMPORTED_TARGET
+pkg_check_modules(libraries REQUIRED
+	IMPORTED_TARGET
 		assimp
 		glfw3
 		glm
 		vulkan
+)
+
+find_package(Boost REQUIRED
+	COMPONENTS
+		container
 )
 
 find_package(XdgUtils REQUIRED
@@ -62,9 +67,10 @@ find_package(XdgUtils REQUIRED
 # Linking
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
+		Boost::container
 		PkgConfig::libraries
-		XdgUtils::DesktopEntry
 		XdgUtils::BaseDir
+		XdgUtils::DesktopEntry
 )
 
 # Defining some macros

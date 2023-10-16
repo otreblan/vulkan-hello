@@ -11,6 +11,7 @@
 * `file`
 * `glslc`
 * `libassimp-dev`
+* `libboost-container-dev`
 * `libglfw3-dev`
 * `libglm-dev`
 * `libstb-dev`

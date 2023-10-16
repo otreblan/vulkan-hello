@@ -9,8 +9,9 @@ arch=('x86_64')
 url="https://github.com/otreblan/hello"
 license=('GPL3')
 groups=()
-depends=('assimp' 'vulkan-icd-loader' 'glfw')
+depends=('assimp' 'vulkan-icd-loader' 'glfw' 'boost-libs')
 makedepends=(
+	'boost'
 	'cmake'
 	'git'
 	'glm'
