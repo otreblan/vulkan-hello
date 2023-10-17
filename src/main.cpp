@@ -33,15 +33,7 @@ int main(int argc, char** argv)
 
 	HelloTriangle app(argv[1]);
 
-	try
-	{
-		app.run();
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-		exit(EXIT_FAILURE);
-	}
+	app.run();
 
 	exit(EXIT_SUCCESS);
 }
