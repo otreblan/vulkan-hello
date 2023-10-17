@@ -25,7 +25,7 @@ void lightning(vec3 pos, vec3 normal, vec3 lightPos, vec3 viewPos, float strengt
 	float diff = max(dot(norm, lightDir), 0.0);
 
 	diffuse  = vec4(diff * lightColor, 1.0);
-	specular = strength * spec * vec4(lightColor, 1.0);
+	specular = vec4(strength * spec * lightColor, 1.0);
 }
 
 void main()
