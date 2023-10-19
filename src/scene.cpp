@@ -21,6 +21,7 @@
 #include <assimp/scene.h>
 
 #include "scene.hpp"
+#include "component/transform.hpp"
 
 Scene::Scene(const std::filesystem::path& scenePath)
 {
