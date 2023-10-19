@@ -26,20 +26,21 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "../mesh.hpp"
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
+
+struct Scene;
 
 class Renderer
 {
 	using path = std::filesystem::path;
 
 public:
-	// TODO: Remove this constructor and load the scene from a child class
-	Renderer(std::filesystem::path rootScene);
+	Renderer();
 
 	void run();
+	void setActiveScene(Scene* scene);
 
 private:
 	static const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -103,7 +104,8 @@ private:
 	size_t currentFrame     = 0;
 	bool framebufferResized = false;
 
-	Mesh mesh;
+	// Non owning reference to the current scene.
+	Scene* activeScene = nullptr;
 
 	vk::raii::Buffer       vertexBuffer       = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;

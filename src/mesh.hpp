@@ -23,15 +23,13 @@
 
 #pragma once
 
-class aiMesh;
+struct aiMesh;
 class Renderer;
 
 // TODO: Make this data-oriented
 class Mesh
 {
 private:
-	std::filesystem::path data_path;
-
 	std::vector<Vertex>   vertices;
 	std::vector<uint32_t> indices;
 
@@ -43,7 +41,7 @@ private:
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(Renderer& root);
 
 public:
-	Mesh(std::filesystem::path data_path);
+	Mesh(const aiMesh& mesh);
 
 	bool load();
 	void clear();

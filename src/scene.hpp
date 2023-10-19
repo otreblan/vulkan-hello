@@ -17,12 +17,21 @@
 #pragma once
 
 #include <filesystem>
+#include <span>
 
 #include <entt/entt.hpp>
+
+#include "mesh.hpp"
+
+struct aiMesh;
 
 struct Scene
 {
 	Scene(const std::filesystem::path& scenePath);
 
-	entt::registry registry;
+	entt::registry    registry;
+	std::vector<Mesh> meshes;
+
+private:
+	void loadMeshes(const std::span<aiMesh*> newMeshes);
 };

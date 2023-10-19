@@ -17,10 +17,11 @@
 #include <fstream>
 
 #include "../config.hpp"
+#include "../scene.hpp"
+#include "../vertex.hpp"
 #include "pipeline.hpp"
 #include "renderer.hpp"
 #include "uniformBufferObject.hpp"
-#include "../vertex.hpp"
 
 Pipeline::Pipeline(Renderer& parent):
 	parent(parent),
@@ -539,7 +540,8 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 	commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
 	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint32);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
-	commandBuffer.drawIndexed(parent.mesh.getIndices().size(), 1, 0, 0, 0);
+	// TODO: Draw multiple meshes
+	commandBuffer.drawIndexed(parent.activeScene->meshes.front().getIndices().size(), 1, 0, 0, 0);
 	commandBuffer.endRenderPass();
 	commandBuffer.end();
 }

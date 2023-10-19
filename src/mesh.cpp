@@ -23,42 +23,10 @@
 #include "mesh.hpp"
 #include "vulkan/renderer.hpp"
 
-Mesh::Mesh(std::filesystem::path data_path):
-	data_path(data_path)
+Mesh::Mesh(const aiMesh& mesh)
 {
-}
-
-bool Mesh::load()
-{
-	// TODO: Load an scene from a file
-
-	Assimp::Importer importer;
-
-	const aiScene* scene = importer.ReadFile(
-		data_path,
-		aiProcess_ImproveCacheLocality |
-		aiProcess_JoinIdenticalVertices |
-		aiProcess_PreTransformVertices |
-		aiProcess_Triangulate
-	);
-
-	if(scene == nullptr)
-	{
-		std::cerr << importer.GetErrorString() << '\n';
-		return false;
-	}
-
-	if(!scene->HasMeshes())
-		return false;
-
-	const auto& mesh = *scene->mMeshes[0];
-
-	assert(mesh.HasTextureCoords(0));
-
 	loadVertices(mesh);
 	loadIndices(mesh);
-
-	return true;
 }
 
 void Mesh::loadVertices(const aiMesh& mesh)

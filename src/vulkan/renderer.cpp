@@ -30,14 +30,13 @@
 #include <stb/stb_image.h>
 
 #include "../config.hpp"
-#include "../mesh.hpp"
+#include "../scene.hpp"
+#include "../vertex.hpp"
 #include "renderer.hpp"
 #include "uniformBufferObject.hpp"
-#include "../vertex.hpp"
 
-Renderer::Renderer(std::filesystem::path rootScene):
-	pipeline(*this),
-	mesh(rootScene)
+Renderer::Renderer():
+	pipeline(*this)
 {}
 
 void Renderer::run()
@@ -46,6 +45,11 @@ void Renderer::run()
 	initVulkan();
 	mainLoop();
 	cleanup();
+}
+
+void Renderer::setActiveScene(Scene* scene)
+{
+	activeScene = scene;
 }
 
 void Renderer::initWindow()
@@ -76,8 +80,9 @@ void Renderer::initVulkan()
 	createTextureImageView();
 	createTextureSampler();
 
-	mesh.load();
-	mesh.uploadToGpu(*this);
+	// TODO: Upload multiple meshes
+	if(activeScene)
+		activeScene->meshes.front().uploadToGpu(*this);
 
 	pipeline.create();
 	createSyncObjects();

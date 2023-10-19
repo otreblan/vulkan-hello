@@ -17,12 +17,12 @@
 #include "engine.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
-	mainScene(mainScene),
-	renderer(mainScene)
+	mainScene(mainScene)
 {};
 
 int Engine::run()
 {
+	renderer.setActiveScene(&mainScene);
 	renderer.run();
 
 	return EXIT_SUCCESS;

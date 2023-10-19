@@ -37,6 +37,21 @@ Scene::Scene(const std::filesystem::path& scenePath)
 	if(scene == nullptr)
 		throw importer.GetErrorString();
 
+	loadMeshes({scene->mMeshes, scene->mNumMeshes});
+
 	auto* root = scene->mRootNode;
 	// TODO: Load scene
+}
+
+void Scene::loadMeshes(const std::span<aiMesh*> newMeshes)
+{
+	meshes.reserve(newMeshes.size());
+
+	for(const auto* mesh: newMeshes)
+	{
+		if(mesh)
+		{
+			meshes.emplace_back(*mesh);
+		}
+	}
 }
