@@ -26,7 +26,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
-#include "mesh.hpp"
+#include "../mesh.hpp"
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"

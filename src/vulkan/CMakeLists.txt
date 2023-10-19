@@ -14,19 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-configure_file(config.cpp.in
-	${CMAKE_CURRENT_SOURCE_DIR}/config.cpp
-	@ONLY
-)
-
 target_sources(${PROJECT_NAME}
 	PRIVATE
-		config.cpp
-		exePath.cpp
-		main.cpp
-		mesh.cpp
-		stb_image.cpp
-		vertex.cpp
+		depth.cpp
+		pipeline.cpp
+		renderer.cpp
+		singleCommand.cpp
+		swapChainSupportDetails.cpp
 )
-
-add_subdirectory(vulkan)

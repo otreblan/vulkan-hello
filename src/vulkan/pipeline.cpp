@@ -16,11 +16,11 @@
 
 #include <fstream>
 
-#include "config.hpp"
+#include "../config.hpp"
 #include "pipeline.hpp"
 #include "renderer.hpp"
 #include "uniformBufferObject.hpp"
-#include "vertex.hpp"
+#include "../vertex.hpp"
 
 Pipeline::Pipeline(Renderer& parent):
 	parent(parent),

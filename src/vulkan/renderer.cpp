@@ -29,11 +29,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb/stb_image.h>
 
-#include "config.hpp"
-#include "mesh.hpp"
+#include "../config.hpp"
+#include "../mesh.hpp"
 #include "renderer.hpp"
 #include "uniformBufferObject.hpp"
-#include "vertex.hpp"
+#include "../vertex.hpp"
 
 Renderer::Renderer(std::filesystem::path rootScene):
 	pipeline(*this),

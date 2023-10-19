@@ -21,7 +21,7 @@
 #include <iostream>
 
 #include "mesh.hpp"
-#include "renderer.hpp"
+#include "vulkan/renderer.hpp"
 
 Mesh::Mesh(std::filesystem::path data_path):
 	data_path(data_path)
