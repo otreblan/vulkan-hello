@@ -20,12 +20,12 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
-class HelloTriangle;
+class Renderer;
 
 class Depth
 {
 private:
-	HelloTriangle& root;
+	Renderer& root;
 
 	vk::raii::Image        image       = nullptr;
 	vk::raii::DeviceMemory imageMemory = nullptr;
@@ -36,7 +36,7 @@ private:
 	bool hasStencilComponent(vk::Format format);
 
 public:
-	Depth(HelloTriangle& root);
+	Depth(Renderer& root);
 
 	void create();
 	void clear();

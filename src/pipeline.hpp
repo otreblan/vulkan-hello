@@ -25,14 +25,14 @@
 #include "depth.hpp"
 #include "swapChainSupportDetails.hpp"
 
-class HelloTriangle;
+class Renderer;
 
 struct Pipeline
 {
 public:
 	using path = std::filesystem::path;
 
-	HelloTriangle& parent;
+	Renderer& parent;
 
 	vk::raii::SwapchainKHR           swapChain = nullptr;
 	std::vector<vk::Image>           swapChainImages;
@@ -54,7 +54,7 @@ public:
 	vk::raii::DescriptorPool       descriptorPool = nullptr;
 	std::vector<vk::DescriptorSet> descriptorSets;
 
-	Pipeline(HelloTriangle& parent);
+	Pipeline(Renderer& parent);
 	void create();
 	void recreate();
 

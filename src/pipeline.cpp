@@ -17,12 +17,12 @@
 #include <fstream>
 
 #include "config.hpp"
-#include "helloTriangle.hpp"
 #include "pipeline.hpp"
+#include "renderer.hpp"
 #include "uniformBufferObject.hpp"
 #include "vertex.hpp"
 
-Pipeline::Pipeline(HelloTriangle& parent):
+Pipeline::Pipeline(Renderer& parent):
 	parent(parent),
 	depth(parent)
 {

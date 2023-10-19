@@ -18,8 +18,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "helloTriangle.hpp"
 #include "exePath.hpp"
+#include "renderer.hpp"
 
 int main(int argc, char** argv)
 {
@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 	std::cerr << exePath() << '\n';
 
-	HelloTriangle app(argv[1]);
+	Renderer app(argv[1]);
 
 	app.run();
 

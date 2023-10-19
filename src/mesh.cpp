@@ -20,8 +20,8 @@
 
 #include <iostream>
 
-#include "helloTriangle.hpp"
 #include "mesh.hpp"
+#include "renderer.hpp"
 
 Mesh::Mesh(std::filesystem::path data_path):
 	data_path(data_path)
@@ -104,7 +104,7 @@ void Mesh::clear()
 	indices.clear();
 }
 
-bool Mesh::uploadToGpu(HelloTriangle& root)
+bool Mesh::uploadToGpu(Renderer& root)
 {
 	auto [_vertexBuffer, _vertexBufferMemory] = uploadVertices(root);
 
@@ -119,7 +119,7 @@ bool Mesh::uploadToGpu(HelloTriangle& root)
 	return false;
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(HelloTriangle& root)
+std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Renderer& root)
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;
@@ -147,7 +147,7 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(HelloTr
 	return {std::move(vertexBuffer), std::move(vertexBufferMemory)};
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(HelloTriangle& root)
+std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer& root)
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;

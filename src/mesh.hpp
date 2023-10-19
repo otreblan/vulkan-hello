@@ -24,7 +24,7 @@
 #pragma once
 
 class aiMesh;
-class HelloTriangle;
+class Renderer;
 
 // TODO: Make this data-oriented
 class Mesh
@@ -39,8 +39,8 @@ private:
 	void loadIndices(const aiMesh& mesh);
 
 	// TODO: Use vulkan memory allocator
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadVertices(HelloTriangle& root);
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(HelloTriangle& root);
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadVertices(Renderer& root);
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(Renderer& root);
 
 public:
 	Mesh(std::filesystem::path data_path);
@@ -48,7 +48,7 @@ public:
 	bool load();
 	void clear();
 
-	bool uploadToGpu(HelloTriangle& root);
+	bool uploadToGpu(Renderer& root);
 
 	std::span<Vertex>       getVertices();
 	std::span<const Vertex> getVertices() const;

@@ -31,13 +31,13 @@
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
 
-class HelloTriangle
+class Renderer
 {
 	using path = std::filesystem::path;
 
 public:
 	// TODO: Remove this constructor and load the scene from a child class
-	HelloTriangle(std::filesystem::path rootScene);
+	Renderer(std::filesystem::path rootScene);
 
 	void run();
 

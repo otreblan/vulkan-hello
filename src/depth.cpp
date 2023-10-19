@@ -15,7 +15,7 @@
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "depth.hpp"
-#include "helloTriangle.hpp"
+#include "renderer.hpp"
 
 vk::Format Depth::findSupportedFormat(const std::span<const vk::Format> candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features)
 {
@@ -56,7 +56,7 @@ bool Depth::hasStencilComponent(vk::Format format)
 	}
 }
 
-Depth::Depth(HelloTriangle& root):
+Depth::Depth(Renderer& root):
 	root(root)
 {
 }

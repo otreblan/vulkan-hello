@@ -24,10 +24,10 @@ target_sources(${PROJECT_NAME}
 		config.cpp
 		depth.cpp
 		exePath.cpp
-		helloTriangle.cpp
 		main.cpp
 		mesh.cpp
 		pipeline.cpp
+		renderer.cpp
 		singleCommand.cpp
 		stb_image.cpp
 		swapChainSupportDetails.cpp
