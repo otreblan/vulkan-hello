@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <boost/container/small_vector.hpp>
+#include <entt/entt.hpp>
 #include <glm/mat4x4.hpp>
 
 namespace component
@@ -23,6 +25,16 @@ namespace component
 
 struct Transform
 {
+	struct Parent
+	{
+		entt::entity parent;
+	};
+
+	struct Children
+	{
+		boost::container::small_vector<entt::entity, 16> children;
+	};
+
 	glm::mat4x4 matrix;
 };
 

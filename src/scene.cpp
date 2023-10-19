@@ -20,8 +20,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include "scene.hpp"
 #include "component/transform.hpp"
+#include "scene.hpp"
+#include "utils.hpp"
 
 Scene::Scene(const std::filesystem::path& scenePath)
 {
@@ -38,10 +39,10 @@ Scene::Scene(const std::filesystem::path& scenePath)
 	if(scene == nullptr)
 		throw importer.GetErrorString();
 
-	loadMeshes({scene->mMeshes, scene->mNumMeshes});
+	name = scene->mName.C_Str();
 
-	auto* root = scene->mRootNode;
-	// TODO: Load scene
+	loadMeshes({scene->mMeshes, scene->mNumMeshes});
+	loadHierarchy(scene->mRootNode, entt::null);
 }
 
 void Scene::loadMeshes(const std::span<aiMesh*> newMeshes)
@@ -55,4 +56,27 @@ void Scene::loadMeshes(const std::span<aiMesh*> newMeshes)
 			meshes.emplace_back(*mesh);
 		}
 	}
+}
+
+entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
+{
+	if(node == nullptr)
+		return entt::null;
+
+	auto entity = registry.create();
+
+	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
+	registry.emplace<component::Transform::Parent>(entity, parent);
+	// TODO: Assign meshes
+
+	for(size_t i = 0; i < node->mNumChildren; i++)
+	{
+		auto& children = registry.emplace<component::Transform::Children>(entity);
+		if(auto child = loadHierarchy(node->mChildren[i], entity); child != entt::null)
+		{
+			children.children.emplace_back(child);
+		}
+	}
+
+	return entity;
 }

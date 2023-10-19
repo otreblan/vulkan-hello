@@ -21,17 +21,22 @@
 
 #include <entt/entt.hpp>
 
+#include "component/transform.hpp"
 #include "mesh.hpp"
 
 struct aiMesh;
+struct aiNode;
 
 struct Scene
 {
 	Scene(const std::filesystem::path& scenePath);
+
+	std::string name;
 
 	entt::registry    registry;
 	std::vector<Mesh> meshes;
 
 private:
 	void loadMeshes(const std::span<aiMesh*> newMeshes);
+	entt::entity loadHierarchy(aiNode* node, entt::entity parent);
 };
