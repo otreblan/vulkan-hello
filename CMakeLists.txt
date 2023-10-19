@@ -22,14 +22,17 @@ project(vulkan-hello
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
 )
 
+option(USE_SYSTEM_DEPS "Use system entt" OFF)
+
 # Default build type
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-include(GNUInstallDirs)
-include(FindPkgConfig)
+Include(FetchContent)
 include(CPack)
+include(FindPkgConfig)
+include(GNUInstallDirs)
 
 # The program itself
 add_executable(${PROJECT_NAME})
@@ -53,6 +56,19 @@ pkg_check_modules(libraries REQUIRED
 		vulkan
 )
 
+if(NOT USE_SYSTEM_DEPS)
+	FetchContent_Declare(
+		EnTT
+		GIT_REPOSITORY https://github.com/skypjack/entt
+		GIT_TAG        v3.12.2
+		OVERRIDE_FIND_PACKAGE
+	)
+
+	FetchContent_MakeAvailable(EnTT)
+endif()
+
+find_package(EnTT REQUIRED)
+
 find_package(Boost REQUIRED
 	COMPONENTS
 		container
@@ -68,6 +84,7 @@ find_package(XdgUtils REQUIRED
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		Boost::container
+		EnTT::EnTT
 		PkgConfig::libraries
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
