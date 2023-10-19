@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "engine.hpp"
+#pragma once
 
-Engine::Engine(const std::filesystem::path& mainScene):
-	mainScene(mainScene),
-	renderer(mainScene)
-{};
+#include <filesystem>
 
-int Engine::run()
+#include <entt/entt.hpp>
+
+struct Scene
 {
-	renderer.run();
+	Scene(const std::filesystem::path& scenePath);
 
-	return EXIT_SUCCESS;
-}
+	entt::registry registry;
+};

@@ -18,16 +18,18 @@
 
 #include <filesystem>
 
+#include "scene.hpp"
 #include "vulkan/renderer.hpp"
 
 class Engine
 {
 public:
-	Engine(const std::filesystem::path& rootScene);
+	Engine(const std::filesystem::path& mainScene);
 
 	// Starts the engine and returns an exit code.
 	int run();
 
 private:
+	Scene    mainScene;
 	Renderer renderer;
 };

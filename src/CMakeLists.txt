@@ -26,6 +26,7 @@ target_sources(${PROJECT_NAME}
 		exePath.cpp
 		main.cpp
 		mesh.cpp
+		scene.cpp
 		stb_image.cpp
 		vertex.cpp
 )

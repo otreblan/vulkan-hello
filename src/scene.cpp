@@ -14,16 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "engine.hpp"
+#include <iostream>
 
-Engine::Engine(const std::filesystem::path& mainScene):
-	mainScene(mainScene),
-	renderer(mainScene)
-{};
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
-int Engine::run()
+#include "scene.hpp"
+
+Scene::Scene(const std::filesystem::path& scenePath)
 {
-	renderer.run();
+	Assimp::Importer importer;
 
-	return EXIT_SUCCESS;
+	const aiScene* scene = importer.ReadFile(
+		scenePath,
+		aiProcess_ImproveCacheLocality |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_RemoveRedundantMaterials |
+		aiProcess_Triangulate
+	);
+
+	if(scene == nullptr)
+		throw importer.GetErrorString();
+
+	auto* root = scene->mRootNode;
+	// TODO: Load scene
 }
