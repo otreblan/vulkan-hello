@@ -14,25 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#pragma once
 
-#include "engine.hpp"
-#include "exePath.hpp"
+#include <filesystem>
 
-int main(int argc, char** argv)
+#include "vulkan/renderer.hpp"
+
+class Engine
 {
-	if(argc < 2)
-	{
-		std::cerr << "Usage: " << argv[0] << " SCENE\n";
-		return EXIT_FAILURE;
-	}
+public:
+	Engine(const std::filesystem::path& rootScene);
 
-	std::cerr << exePath() << '\n';
+	// Starts the engine and returns an exit code.
+	int run();
 
-
-	Engine app(argv[1]);
-
-	return app.run();
-}
+private:
+	Renderer renderer;
+};

@@ -92,11 +92,11 @@ private:
 	vk::raii::Queue          presentQueue   = nullptr;
 	vk::raii::SurfaceKHR     surface        = nullptr;
 
-	Pipeline pipeline;
-
 	vk::raii::CommandPool commandPool = nullptr;
 	mutable std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
 	mutable std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
+
+	Pipeline pipeline;
 
 	std::vector<vk::raii::Fence> inFlightFences;
 
