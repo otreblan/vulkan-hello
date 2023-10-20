@@ -37,8 +37,8 @@ private:
 	void loadIndices(const aiMesh& mesh);
 
 	// TODO: Use vulkan memory allocator
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadVertices(Renderer& root);
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(Renderer& root);
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadVertices(Renderer& root) const;
+	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(Renderer& root) const;
 
 public:
 	Mesh(const aiMesh& mesh);
@@ -46,7 +46,7 @@ public:
 	bool load();
 	void clear();
 
-	bool uploadToGpu(Renderer& root);
+	bool uploadToGpu(Renderer& root) const;
 
 	std::span<Vertex>       getVertices();
 	std::span<const Vertex> getVertices() const;

@@ -27,6 +27,13 @@
 struct aiMesh;
 struct aiNode;
 
+struct Renderable
+{
+	const glm::mat4 transform;
+	const Mesh&     mesh;
+	// Material& material;
+};
+
 struct Scene
 {
 	Scene(const std::filesystem::path& scenePath);
@@ -36,6 +43,8 @@ struct Scene
 
 	entt::registry    registry;
 	std::vector<Mesh> meshes;
+
+	std::vector<Renderable> getRenderables();
 
 private:
 	void loadMeshes(const std::span<aiMesh*> newMeshes);

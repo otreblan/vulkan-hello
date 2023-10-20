@@ -105,3 +105,30 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 
 	return entity;
 }
+
+std::vector<Renderable> Scene::getRenderables()
+{
+	using namespace component;
+
+	std::vector<Renderable> v;
+
+	auto tGroup = registry.group<Transform, Transform::Relationship>();
+	auto mGroup = registry.group<MeshInstance>(entt::get<Transform>);
+
+	for(auto&& [entity, meshIndices, transform]: mGroup.each())
+	{
+		glm::mat4 matrix(1);
+
+		for(auto e = entity; e != entt::null; e = tGroup.get<Transform::Relationship>(e).parent)
+		{
+			matrix = tGroup.get<Transform>(e).matrix * matrix;
+		}
+
+		for(auto i: meshIndices.meshes)
+		{
+			v.emplace_back(matrix, meshes[i]);
+		}
+	}
+
+	return v;
+}

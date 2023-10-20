@@ -72,7 +72,7 @@ void Mesh::clear()
 	indices.clear();
 }
 
-bool Mesh::uploadToGpu(Renderer& root)
+bool Mesh::uploadToGpu(Renderer& root) const
 {
 	auto [_vertexBuffer, _vertexBufferMemory] = uploadVertices(root);
 
@@ -87,7 +87,7 @@ bool Mesh::uploadToGpu(Renderer& root)
 	return false;
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Renderer& root)
+std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Renderer& root) const
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;
@@ -115,7 +115,7 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Rendere
 	return {std::move(vertexBuffer), std::move(vertexBufferMemory)};
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer& root)
+std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer& root) const
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;

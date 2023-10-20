@@ -82,7 +82,7 @@ void Renderer::initVulkan()
 
 	// TODO: Upload multiple meshes
 	if(activeScene)
-		activeScene->meshes.front().uploadToGpu(*this);
+		activeScene->getRenderables().front().mesh.uploadToGpu(*this);
 
 	pipeline.create();
 	createSyncObjects();
