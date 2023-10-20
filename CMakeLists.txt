@@ -22,7 +22,7 @@ project(vulkan-hello
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
 )
 
-option(USE_SYSTEM_DEPS "Use system entt" OFF)
+option(USE_SYSTEM_DEPS "Use system dependencies" OFF)
 
 # Default build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -68,6 +68,7 @@ if(NOT USE_SYSTEM_DEPS)
 endif()
 
 find_package(EnTT REQUIRED)
+find_package(VulkanMemoryAllocator REQUIRED)
 
 find_package(Boost REQUIRED
 	COMPONENTS
@@ -85,6 +86,7 @@ target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		Boost::container
 		EnTT::EnTT
+		GPUOpen::VulkanMemoryAllocator
 		PkgConfig::libraries
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry

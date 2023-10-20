@@ -16,6 +16,7 @@
 * `libglm-dev`
 * `libstb-dev`
 * `libvulkan-dev`
+* `libvulkan-memory-allocator-dev`
 * `pkgconf`
 * `xdg-utils-cxx`
 
