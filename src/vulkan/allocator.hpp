@@ -19,24 +19,24 @@
 #include <vk_mem_alloc.h>
 #include <vulkan/vulkan_raii.hpp>
 
+class Renderer;
+
 class Allocator
 {
 public:
-	Allocator();
+	Allocator(Renderer& root);
 	~Allocator();
 
-	void create(vk::PhysicalDevice physicalDevice, vk::Device device, vk::Instance instance);
+	void create();
 
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
-		vk::raii::Device& device,
 		vk::DeviceSize size,
 		vk::BufferUsageFlags usage,
 		vk::MemoryPropertyFlags properties
 	);
 
 private:
-	VmaAllocator       allocator;
-	vk::PhysicalDevice physicalDevice;
-	vk::Device         device;
+	VmaAllocator allocator;
+	Renderer&    root;
 };

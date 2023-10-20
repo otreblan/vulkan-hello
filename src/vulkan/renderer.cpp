@@ -36,6 +36,7 @@
 #include "uniformBufferObject.hpp"
 
 Renderer::Renderer():
+	allocator(*this),
 	pipeline(*this)
 {}
 
@@ -74,7 +75,7 @@ void Renderer::initVulkan()
 	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
-	allocator.create(*physicalDevice, *device, *instance);
+	allocator.create();
 	createDescriptorSetLayout();
 	createCommandPool();
 	createTextureImage();
@@ -557,7 +558,6 @@ void Renderer::createTextureImage()
 		throw std::runtime_error("failed to load texture image!");
 
 	auto [stagingBuffer, stagingBufferMemory] = allocator.createBuffer(
-		device,
 		imageSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent

@@ -15,8 +15,10 @@
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "allocator.hpp"
+#include "renderer.hpp"
 
-Allocator::Allocator()
+Allocator::Allocator(Renderer& root):
+	root(root)
 {
 }
 
@@ -25,11 +27,8 @@ Allocator::~Allocator()
 	vmaDestroyAllocator(allocator);
 }
 
-void Allocator::create(vk::PhysicalDevice physicalDevice, vk::Device device, vk::Instance instance)
+void Allocator::create()
 {
-	this->physicalDevice = physicalDevice;
-	this->device         = device;
-
 	VmaVulkanFunctions vulkanFunctions
 	{
 		.vkGetInstanceProcAddr = &vkGetInstanceProcAddr,
@@ -39,17 +38,16 @@ void Allocator::create(vk::PhysicalDevice physicalDevice, vk::Device device, vk:
 	VmaAllocatorCreateInfo allocatorCreateInfo
 	{
 		.flags            = {},
-		.physicalDevice   = physicalDevice,
-		.device           = device,
+		.physicalDevice   = *root.physicalDevice,
+		.device           = *root.device,
 		.pVulkanFunctions = &vulkanFunctions,
-		.instance         = instance,
+		.instance         = *root.instance,
 	};
 
 	vmaCreateAllocator(&allocatorCreateInfo, &allocator);
 }
 
 std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Allocator::createBuffer(
-	vk::raii::Device& device,
 	vk::DeviceSize size,
 	vk::BufferUsageFlags usage,
 	vk::MemoryPropertyFlags properties
@@ -60,7 +58,7 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Allocator::createBuffer(
 
 	vk::BufferCreateInfo bufferInfo({}, size, usage, vk::SharingMode::eExclusive);
 
-	buffer = device.createBuffer(bufferInfo);
+	buffer = root.device.createBuffer(bufferInfo);
 
 	vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
 
@@ -69,7 +67,7 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Allocator::createBuffer(
 		findMemoryType(memRequirements.memoryTypeBits, properties)
 	);
 
-	bufferMemory = device.allocateMemory(allocInfo);
+	bufferMemory = root.device.allocateMemory(allocInfo);
 
 	buffer.bindMemory(*bufferMemory, 0);
 
@@ -78,7 +76,7 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Allocator::createBuffer(
 
 uint32_t Allocator::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
 {
-	vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
+	vk::PhysicalDeviceMemoryProperties memProperties = root.physicalDevice.getMemoryProperties();
 
 	for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 	{

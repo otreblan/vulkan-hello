@@ -171,9 +171,10 @@ private:
 	void createTextureImageView();
 	void createTextureSampler();
 
-	friend struct Pipeline;
+	friend class Allocator;
 	friend class Depth;
 	friend class Mesh;
+	friend struct Pipeline;
 
 protected:
 	SingleCommand makeSingleCommand();

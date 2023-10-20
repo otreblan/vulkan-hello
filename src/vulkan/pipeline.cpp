@@ -284,7 +284,6 @@ void Pipeline::createUniformBuffers()
 	for(size_t i = 0; i < swapChainImages.size(); i++)
 	{
 		auto [buffer, bufferMemory] = parent.allocator.createBuffer(
-			parent.device,
 			bufferSize,
 			vk::BufferUsageFlagBits::eUniformBuffer,
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
