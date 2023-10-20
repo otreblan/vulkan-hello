@@ -21,6 +21,7 @@
 #include <assimp/scene.h>
 
 #include "component/meshInstance.hpp"
+#include "component/properties.hpp"
 #include "component/transform.hpp"
 #include "scene.hpp"
 #include "utils.hpp"
@@ -67,6 +68,7 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 	auto entity = registry.create();
 
 	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
+	registry.emplace<component::Properties>(entity, node->mName.C_Str());
 
 	component::MeshInstance instance;
 
