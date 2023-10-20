@@ -7,67 +7,26 @@ on:
     branches: [ '*' ]
 
 jobs:
-  ubuntu:
-    runs-on: ubuntu-latest
-    container: ubuntu:rolling
-
-    steps:
-    - uses: actions/checkout@v3
-    - uses: ammaraskar/gcc-problem-matcher@master
-
-    - name: deps
-      run: apt-get -y update && apt-get -y install
-        build-essential
-        cmake
-        file
-        git
-        glslc
-        libassimp-dev
-        libboost-container-dev
-        libglfw3-dev
-        libglm-dev
-        libstb-dev
-        libvulkan-dev
-        libvulkan-memory-allocator-dev
-        pkgconf
-        xdg-utils-cxx
-
-    - name: configure
-      run: cmake -B build
-        -DCMAKE_CXX_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
-        -DCMAKE_C_FLAGS="-O2 -pipe -fno-plt -Wall -Wextra -Wno-missing-field-initializers"
-        -DCMAKE_BUILD_TYPE=None
-        -DCMAKE_INSTALL_PREFIX=/usr
-        -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
-
-    - name: build
-      run: |
-          export MAKEFLAGS=-j$(nproc)
-          cmake --build build
-
-    - name: deb
-      run: |
-          strip --strip-all $(find build -maxdepth 1 -executable -type f)
-          cmake --build build --target package
-
-    - uses: actions/upload-artifact@v3
-      with:
-        name: ubuntu_package
-        path: build/*.deb
-
   arch-linux:
     runs-on: ubuntu-latest
-    container: archlinux:base-devel
+    container: greyltc/archlinux-aur:yay
 
     steps:
     - uses: ammaraskar/gcc-problem-matcher@master
+
     - name: Build user
       run: |
           USER=ab
-          useradd "$USER"
           echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/pacman" >> "/etc/sudoers.d/$USER-no-password"
 
-    - run: pacman -Syu --noconfirm git
+    - run: sudo -Eu ab
+        yay -Syu
+        --needed
+        --noconfirm
+        --noprogressbar
+        --removemake
+        git
+        vulkan-memory-allocator
 
     - uses: actions/checkout@v4
       with:
