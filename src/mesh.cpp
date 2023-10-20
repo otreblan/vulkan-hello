@@ -36,7 +36,6 @@ void Mesh::loadVertices(const aiMesh& mesh)
 	for(size_t i = 0; i < mesh.mNumVertices; i++)
 	{
 		const auto& v = mesh.mVertices[i];
-		const auto& uv = mesh.mTextureCoords[0][i];
 		const auto& n = mesh.mNormals[i];
 
 		vertices[i].pos = {v.x, v.y, v.z};
@@ -47,7 +46,11 @@ void Mesh::loadVertices(const aiMesh& mesh)
 			vertices[i].color = {c.r, c.g, c.b};
 		}
 
-		vertices[i].texCoord = {uv.x, uv.y};
+		if(mesh.HasTextureCoords(0))
+		{
+			const auto& uv = mesh.mTextureCoords[0][i];
+			vertices[i].texCoord = {uv.x, uv.y};
+		}
 		vertices[i].normal = {n.x, n.y, n.z};
 	}
 }
