@@ -97,7 +97,8 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Rendere
 
 	vk::DeviceSize bufferSize = sizeof(decltype(vertices)::value_type) * vertices.size();
 
-	auto [stagingBuffer, stagingBufferMemory] = root.createBuffer(
+	auto [stagingBuffer, stagingBufferMemory] = root.allocator.createBuffer(
+		root.device,
 		bufferSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
@@ -107,7 +108,8 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Rendere
 	memcpy(data, vertices.data(), (size_t)bufferSize);
 	stagingBufferMemory.unmapMemory();
 
-	auto [vertexBuffer, vertexBufferMemory] = root.createBuffer(
+	auto [vertexBuffer, vertexBufferMemory] = root.allocator.createBuffer(
+		root.device,
 		bufferSize,
 		eTransferDst | eVertexBuffer,
 		eDeviceLocal
@@ -125,7 +127,8 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer
 
 	vk::DeviceSize bufferSize = sizeof(decltype(indices)::value_type) * indices.size();
 
-	auto [stagingBuffer, stagingBufferMemory] = root.createBuffer(
+	auto [stagingBuffer, stagingBufferMemory] = root.allocator.createBuffer(
+		root.device,
 		bufferSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
@@ -135,7 +138,8 @@ std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer
 	memcpy(data, indices.data(), (size_t) bufferSize);
 	stagingBufferMemory.unmapMemory();
 
-	auto [indexBuffer, indexBufferMemory] = root.createBuffer(
+	auto [indexBuffer, indexBufferMemory] = root.allocator.createBuffer(
+		root.device,
 		bufferSize,
 		eTransferDst | eIndexBuffer,
 		eDeviceLocal

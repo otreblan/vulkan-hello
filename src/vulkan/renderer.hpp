@@ -26,10 +26,11 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "../scene.hpp"
+#include "allocator.hpp"
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
-#include "../scene.hpp"
 
 class Renderer
 {
@@ -92,6 +93,8 @@ private:
 	vk::raii::Queue          presentQueue   = nullptr;
 	vk::raii::SurfaceKHR     surface        = nullptr;
 
+	Allocator allocator;
+
 	vk::raii::CommandPool commandPool = nullptr;
 	mutable std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
 	mutable std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
@@ -145,12 +148,6 @@ private:
 	void drawFrame();
 	void createSyncObjects();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
-		vk::DeviceSize size,
-		vk::BufferUsageFlags usage,
-		vk::MemoryPropertyFlags properties
-	);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
 	void createDescriptorSetLayout();

@@ -74,6 +74,7 @@ void Renderer::initVulkan()
 	createSurface();
 	pickPhysicalDevice();
 	createLogicalDevice();
+	allocator.create(*physicalDevice, *device, *instance);
 	createDescriptorSetLayout();
 	createCommandPool();
 	createTextureImage();
@@ -463,46 +464,6 @@ void Renderer::framebufferResizeCallback(GLFWwindow* window, int, int)
 	app->framebufferResized = true;
 }
 
-uint32_t Renderer::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)
-{
-	vk::PhysicalDeviceMemoryProperties memProperties = physicalDevice.getMemoryProperties();
-
-	for(uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-	{
-		if((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-			return i;
-	}
-
-	throw std::runtime_error("failed to find suitable memory type!");
-}
-
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Renderer::createBuffer(
-	vk::DeviceSize size,
-	vk::BufferUsageFlags usage,
-	vk::MemoryPropertyFlags properties
-)
-{
-	vk::raii::Buffer buffer = nullptr;
-	vk::raii::DeviceMemory bufferMemory = nullptr;
-
-	vk::BufferCreateInfo bufferInfo({}, size, usage, vk::SharingMode::eExclusive);
-
-	buffer = device.createBuffer(bufferInfo);
-
-	vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
-
-	vk::MemoryAllocateInfo allocInfo(
-		memRequirements.size,
-		findMemoryType(memRequirements.memoryTypeBits, properties)
-	);
-
-	bufferMemory = device.allocateMemory(allocInfo);
-
-	buffer.bindMemory(*bufferMemory, 0);
-
-	return {std::move(buffer), std::move(bufferMemory)};
-}
-
 void Renderer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)
 {
 	auto singleCommand = makeSingleCommand();
@@ -566,7 +527,7 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
 	UniformBufferObject ubo
 	{
 		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 1.0f, 0.0f)),
-		.view  = lookAt(vec3(2.0f, 2.0f, 2.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
+		.view  = lookAt(vec3(3.0f, 4.0f, 3.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
 		.proj  = perspective(radians(45.0f), pipeline.swapChainExtent.width / (float) pipeline.swapChainExtent.height, 0.1f, 10.0f)
 	};
 
@@ -595,7 +556,8 @@ void Renderer::createTextureImage()
 	if(!pixels)
 		throw std::runtime_error("failed to load texture image!");
 
-	auto [stagingBuffer, stagingBufferMemory] = createBuffer(
+	auto [stagingBuffer, stagingBufferMemory] = allocator.createBuffer(
+		device,
 		imageSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
@@ -656,7 +618,7 @@ std::pair<vk::raii::Image, vk::raii::DeviceMemory> Renderer::createImage(
 
 	vk::MemoryAllocateInfo allocInfo(
 		memRequirements.size,
-		findMemoryType(memRequirements.memoryTypeBits, properties)
+		allocator.findMemoryType(memRequirements.memoryTypeBits, properties)
 	);
 
 	imageMemory = device.allocateMemory(allocInfo);

@@ -16,6 +16,7 @@
 
 target_sources(${PROJECT_NAME}
 	PRIVATE
+		allocator.cpp
 		depth.cpp
 		pipeline.cpp
 		renderer.cpp
