@@ -20,6 +20,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "component/meshInstance.hpp"
 #include "component/transform.hpp"
 #include "scene.hpp"
 #include "utils.hpp"
@@ -67,7 +68,14 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 
 	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
 
-	// TODO: Assign meshes
+	component::MeshInstance instance;
+
+	for(size_t i = 0; i < node->mNumMeshes; i++)
+	{
+		instance.meshes.emplace_back(node->mMeshes[i]);
+	}
+
+	registry.emplace<component::MeshInstance>(entity, std::move(instance));
 
 	component::Transform::Relationship relationship
 	{
