@@ -80,9 +80,11 @@ void Renderer::initVulkan()
 	createTextureImageView();
 	createTextureSampler();
 
-	// TODO: Upload multiple meshes
 	if(activeScene)
-		activeScene->getRenderables().front().mesh.uploadToGpu(*this);
+		renderables = activeScene->getRenderables();
+
+	// TODO: Upload multiple meshes
+	renderables.front().mesh.uploadToGpu(*this);
 
 	pipeline.create();
 	createSyncObjects();

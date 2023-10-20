@@ -541,7 +541,7 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint32);
 	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
 	// TODO: Draw multiple meshes
-	commandBuffer.drawIndexed(parent.activeScene->meshes.front().getIndices().size(), 1, 0, 0, 0);
+	commandBuffer.drawIndexed(parent.renderables.front().mesh.getIndices().size(), 1, 0, 0, 0);
 	commandBuffer.endRenderPass();
 	commandBuffer.end();
 }

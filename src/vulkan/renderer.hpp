@@ -29,8 +29,7 @@
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
-
-struct Scene;
+#include "../scene.hpp"
 
 class Renderer
 {
@@ -105,7 +104,8 @@ private:
 	bool framebufferResized = false;
 
 	// Non owning reference to the current scene.
-	Scene* activeScene = nullptr;
+	Scene*                  activeScene = nullptr;
+	std::vector<Renderable> renderables;
 
 	vk::raii::Buffer       vertexBuffer       = nullptr;
 	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
