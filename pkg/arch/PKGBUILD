@@ -13,6 +13,7 @@ depends=('assimp' 'vulkan-icd-loader' 'glfw' 'boost-libs')
 makedepends=(
 	'boost'
 	'cmake'
+	'entt'
 	'git'
 	'glm'
 	'shaderc'

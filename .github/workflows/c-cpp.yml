@@ -25,6 +25,7 @@ jobs:
         --noconfirm
         --noprogressbar
         --removemake
+        entt
         git
         vulkan-memory-allocator
 

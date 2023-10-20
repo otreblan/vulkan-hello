@@ -22,14 +22,11 @@ project(vulkan-hello
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
 )
 
-option(USE_SYSTEM_DEPS "Use system dependencies" OFF)
-
 # Default build type
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-Include(FetchContent)
 include(CPack)
 include(FindPkgConfig)
 include(GNUInstallDirs)
@@ -51,23 +48,12 @@ add_subdirectory(src) # Sources list
 pkg_check_modules(libraries REQUIRED
 	IMPORTED_TARGET
 		assimp
+		entt
 		glfw3
 		glm
 		vulkan
 )
 
-if(NOT USE_SYSTEM_DEPS)
-	FetchContent_Declare(
-		EnTT
-		GIT_REPOSITORY https://github.com/skypjack/entt
-		GIT_TAG        v3.12.2
-		OVERRIDE_FIND_PACKAGE
-	)
-
-	FetchContent_MakeAvailable(EnTT)
-endif()
-
-find_package(EnTT REQUIRED)
 find_package(VulkanMemoryAllocator REQUIRED)
 
 find_package(Boost REQUIRED
@@ -85,7 +71,6 @@ find_package(XdgUtils REQUIRED
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE
 		Boost::container
-		EnTT::EnTT
 		GPUOpen::VulkanMemoryAllocator
 		PkgConfig::libraries
 		XdgUtils::BaseDir

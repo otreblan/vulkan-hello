@@ -8,6 +8,7 @@
 
 * `build-essential`
 * `cmake`
+* `entt`
 * `file`
 * `glslc`
 * `libassimp-dev`
