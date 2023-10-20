@@ -67,17 +67,23 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 
 	auto entity = registry.create();
 
+	if(parent == entt::null)
+		root = entity;
+
 	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
 	registry.emplace<component::Properties>(entity, node->mName.C_Str());
 
-	component::MeshInstance instance;
-
-	for(size_t i = 0; i < node->mNumMeshes; i++)
+	if(node->mNumMeshes > 0)
 	{
-		instance.meshes.emplace_back(node->mMeshes[i]);
-	}
+		component::MeshInstance instance;
 
-	registry.emplace<component::MeshInstance>(entity, std::move(instance));
+		for(size_t i = 0; i < node->mNumMeshes; i++)
+		{
+			instance.meshes.emplace_back(node->mMeshes[i]);
+		}
+
+		registry.emplace<component::MeshInstance>(entity, std::move(instance));
+	}
 
 	component::Transform::Relationship relationship
 	{

@@ -32,6 +32,7 @@ struct Scene
 	Scene(const std::filesystem::path& scenePath);
 
 	std::string name;
+	entt::entity root = entt::null;
 
 	entt::registry    registry;
 	std::vector<Mesh> meshes;

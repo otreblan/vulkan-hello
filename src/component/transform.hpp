@@ -31,7 +31,7 @@ struct Transform
 		entt::entity                                    parent;
 	};
 
-	glm::mat4x4 matrix;
+	glm::mat4 matrix;
 };
 
 }
