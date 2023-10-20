@@ -66,17 +66,26 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 	auto entity = registry.create();
 
 	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
-	registry.emplace<component::Transform::Parent>(entity, parent);
+
 	// TODO: Assign meshes
+
+	component::Transform::Relationship relationship
+	{
+		.children = {},
+		.parent   = parent
+	};
+
+	relationship.children.reserve(node->mNumChildren);
 
 	for(size_t i = 0; i < node->mNumChildren; i++)
 	{
-		auto& children = registry.emplace<component::Transform::Children>(entity);
 		if(auto child = loadHierarchy(node->mChildren[i], entity); child != entt::null)
 		{
-			children.children.emplace_back(child);
+			relationship.children.emplace_back(child);
 		}
 	}
+
+	registry.emplace<component::Transform::Relationship>(entity, std::move(relationship));
 
 	return entity;
 }

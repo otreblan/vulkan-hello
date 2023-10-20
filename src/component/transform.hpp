@@ -25,14 +25,10 @@ namespace component
 
 struct Transform
 {
-	struct Parent
+	struct alignas(64) Relationship
 	{
-		entt::entity parent;
-	};
-
-	struct Children
-	{
-		boost::container::small_vector<entt::entity, 16> children;
+		boost::container::small_vector<entt::entity, 8> children;
+		entt::entity                                    parent;
 	};
 
 	glm::mat4x4 matrix;
