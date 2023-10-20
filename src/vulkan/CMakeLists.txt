@@ -21,4 +21,5 @@ target_sources(${PROJECT_NAME}
 		renderer.cpp
 		singleCommand.cpp
 		swapChainSupportDetails.cpp
+		vma.cpp
 )
