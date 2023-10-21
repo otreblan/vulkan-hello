@@ -110,12 +110,6 @@ private:
 	Scene*                  activeScene = nullptr;
 	std::vector<Renderable> renderables;
 
-	vk::raii::Buffer       vertexBuffer       = nullptr;
-	vk::raii::DeviceMemory vertexBufferMemory = nullptr;
-
-	vk::raii::Buffer       indexBuffer       = nullptr;
-	vk::raii::DeviceMemory indexBufferMemory = nullptr;
-
 	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
 
 	vk::raii::Image        textureImage       = nullptr;

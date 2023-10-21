@@ -75,75 +75,66 @@ void Mesh::clear()
 	indices.clear();
 }
 
-bool Mesh::uploadToGpu(Renderer& root) const
+bool Mesh::uploadToGpu(Renderer& root)
 {
-	auto [_vertexBuffer, _vertexBufferMemory] = uploadVertices(root);
+	vertexBuffer = uploadVertices(root);
+	indexBuffer  = uploadIndices(root);
 
-	root.vertexBuffer       = std::move(_vertexBuffer);
-	root.vertexBufferMemory = std::move(_vertexBufferMemory);
-
-	auto [_indexBuffer, _indexBufferMemory] = uploadIndices(root);
-
-	root.indexBuffer       = std::move(_indexBuffer);
-	root.indexBufferMemory = std::move(_indexBufferMemory);
-
-	return false;
+	return true;
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadVertices(Renderer& root) const
+Buffer Mesh::uploadVertices(Renderer& root) const
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;
 
 	vk::DeviceSize bufferSize = sizeof(decltype(vertices)::value_type) * vertices.size();
 
-	auto [stagingBuffer, stagingBufferMemory] = root.allocator.createBuffer(
+	Buffer stagingBuffer = root.allocator.createBuffer(
 		bufferSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
 	);
 
-	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
-	memcpy(data, vertices.data(), (size_t)bufferSize);
-	stagingBufferMemory.unmapMemory();
+	memcpy(stagingBuffer.allocationInfo.pMappedData, vertices.data(), (size_t)bufferSize);
+	stagingBuffer.flush();
 
-	auto [vertexBuffer, vertexBufferMemory] = root.allocator.createBuffer(
+	Buffer vertexBuffer = root.allocator.createBuffer(
 		bufferSize,
 		eTransferDst | eVertexBuffer,
 		eDeviceLocal
 	);
 
-	root.copyBuffer(*stagingBuffer, *vertexBuffer, bufferSize);
+	root.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-	return {std::move(vertexBuffer), std::move(vertexBufferMemory)};
+	return vertexBuffer;
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Mesh::uploadIndices(Renderer& root) const
+Buffer Mesh::uploadIndices(Renderer& root) const
 {
 	using enum vk::BufferUsageFlagBits;
 	using enum vk::MemoryPropertyFlagBits;
 
 	vk::DeviceSize bufferSize = sizeof(decltype(indices)::value_type) * indices.size();
 
-	auto [stagingBuffer, stagingBufferMemory] = root.allocator.createBuffer(
+	Buffer stagingBuffer = root.allocator.createBuffer(
 		bufferSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
 	);
 
-	void* data = stagingBufferMemory.mapMemory(0, bufferSize);
-	memcpy(data, indices.data(), (size_t) bufferSize);
-	stagingBufferMemory.unmapMemory();
+	memcpy(stagingBuffer.allocationInfo.pMappedData, indices.data(), (size_t) bufferSize);
+	stagingBuffer.flush();
 
-	auto [indexBuffer, indexBufferMemory] = root.allocator.createBuffer(
+	Buffer indexBuffer = root.allocator.createBuffer(
 		bufferSize,
 		eTransferDst | eIndexBuffer,
 		eDeviceLocal
 	);
 
-	root.copyBuffer(*stagingBuffer, *indexBuffer, bufferSize);
+	root.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-	return {std::move(indexBuffer), std::move(indexBufferMemory)};
+	return indexBuffer;
 }
 
 std::span<Vertex> Mesh::getVertices()
@@ -164,4 +155,14 @@ std::span<uint32_t> Mesh::getIndices()
 std::span<const uint32_t> Mesh::getIndices() const
 {
 	return indices;
+}
+
+const vk::Buffer Mesh::getVertexBuffer() const
+{
+	return vertexBuffer.buffer;
+}
+
+const vk::Buffer Mesh::getIndexBuffer() const
+{
+	return indexBuffer.buffer;
 }

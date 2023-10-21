@@ -14,8 +14,48 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <utility>
+
 #include "allocator.hpp"
 #include "renderer.hpp"
+
+Buffer::Buffer(Buffer&& other):
+	buffer(std::exchange(other.buffer,                 {})),
+	allocation(std::exchange(other.allocation,         {})),
+	allocationInfo(std::exchange(other.allocationInfo, {})),
+	allocatorRef(std::exchange(other.allocatorRef,     {}))
+{}
+
+Buffer& Buffer::operator=(Buffer && other )
+{
+	std::swap(buffer,         other.buffer);
+	std::swap(allocation,     other.allocation);
+	std::swap(allocationInfo, other.allocationInfo);
+	std::swap(allocatorRef,  other.allocatorRef);
+
+	return *this;
+}
+
+Buffer::~Buffer()
+{
+	if(buffer)
+	{
+		vmaDestroyBuffer(allocatorRef, buffer, allocation);
+	}
+	buffer        = nullptr;
+	allocation    = nullptr;
+	allocatorRef = nullptr;
+}
+
+Buffer::operator vk::Buffer&()
+{
+	return buffer;
+}
+
+void Buffer::flush()
+{
+	vmaFlushAllocation(allocatorRef, allocation, 0, VK_WHOLE_SIZE);
+}
 
 Allocator::Allocator(Renderer& root):
 	root(root)
@@ -47,31 +87,31 @@ void Allocator::create()
 	vmaCreateAllocator(&allocatorCreateInfo, &allocator);
 }
 
-std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> Allocator::createBuffer(
+Buffer Allocator::createBuffer(
 	vk::DeviceSize size,
 	vk::BufferUsageFlags usage,
 	vk::MemoryPropertyFlags properties
 )
 {
-	vk::raii::Buffer buffer = nullptr;
-	vk::raii::DeviceMemory bufferMemory = nullptr;
+	Buffer buffer;
+
+	buffer.allocatorRef = allocator;
 
 	vk::BufferCreateInfo bufferInfo({}, size, usage, vk::SharingMode::eExclusive);
 
-	buffer = root.device.createBuffer(bufferInfo);
+	VkBufferCreateInfo _bufferInfo = bufferInfo;
+	VkBuffer _buffer;
 
-	vk::MemoryRequirements memRequirements = buffer.getMemoryRequirements();
+	VmaAllocationCreateInfo allocCreateInfo = {};
+	allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+	allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT |
+		VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-	vk::MemoryAllocateInfo allocInfo(
-		memRequirements.size,
-		findMemoryType(memRequirements.memoryTypeBits, properties)
-	);
+	vmaCreateBuffer(allocator, &_bufferInfo, &allocCreateInfo, &_buffer, &buffer.allocation, &buffer.allocationInfo);
 
-	bufferMemory = root.device.allocateMemory(allocInfo);
+	buffer.buffer = _buffer;
 
-	buffer.bindMemory(*bufferMemory, 0);
-
-	return {std::move(buffer), std::move(bufferMemory)};
+	return buffer;
 }
 
 uint32_t Allocator::findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties)

@@ -22,6 +22,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vulkan/vulkan_raii.hpp>
 
+#include "allocator.hpp"
 #include "depth.hpp"
 #include "swapChainSupportDetails.hpp"
 
@@ -42,12 +43,11 @@ public:
 
 	Depth depth;
 
-	vk::raii::RenderPass                renderPass       = nullptr;
-	vk::raii::PipelineLayout            pipelineLayout   = nullptr;
-	vk::raii::Pipeline                  graphicsPipeline = nullptr;
-	std::vector<vk::raii::Framebuffer>  swapChainFramebuffers;
-	std::vector<vk::raii::Buffer>       uniformBuffers;
-	std::vector<vk::raii::DeviceMemory> uniformBuffersMemory;
+	vk::raii::RenderPass               renderPass       = nullptr;
+	vk::raii::PipelineLayout           pipelineLayout   = nullptr;
+	vk::raii::Pipeline                 graphicsPipeline = nullptr;
+	std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
+	std::vector<Buffer>                uniformBuffers;
 
 	std::vector<vk::raii::CommandBuffer> commandBuffers;
 

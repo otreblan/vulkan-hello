@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <filesystem>
 #include <span>
 #include <vector>
+
 #include <vulkan/vulkan_raii.hpp>
 
 #include "vertex.hpp"
+#include "vulkan/allocator.hpp"
 
 #pragma once
 
@@ -33,12 +34,14 @@ private:
 	std::vector<Vertex>   vertices;
 	std::vector<uint32_t> indices;
 
+	Buffer vertexBuffer;
+	Buffer indexBuffer;
+
 	void loadVertices(const aiMesh& mesh);
 	void loadIndices(const aiMesh& mesh);
 
-	// TODO: Use vulkan memory allocator
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadVertices(Renderer& root) const;
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> uploadIndices(Renderer& root) const;
+	Buffer uploadVertices(Renderer& root) const;
+	Buffer uploadIndices(Renderer& root) const;
 
 public:
 	Mesh(const aiMesh& mesh);
@@ -46,11 +49,14 @@ public:
 	bool load();
 	void clear();
 
-	bool uploadToGpu(Renderer& root) const;
+	bool uploadToGpu(Renderer& root);
 
 	std::span<Vertex>       getVertices();
 	std::span<const Vertex> getVertices() const;
 
 	std::span<uint32_t>       getIndices();
 	std::span<const uint32_t> getIndices() const;
+
+	const vk::Buffer getVertexBuffer() const;
+	const vk::Buffer getIndexBuffer() const;
 };

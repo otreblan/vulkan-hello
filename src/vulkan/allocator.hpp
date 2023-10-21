@@ -21,6 +21,27 @@
 
 class Renderer;
 
+struct Buffer
+{
+	vk::Buffer        buffer;
+	VmaAllocation     allocation;
+	VmaAllocationInfo allocationInfo;
+	VmaAllocator      allocatorRef;
+
+	Buffer()         = default;
+
+	Buffer(Buffer&)  = delete;
+	Buffer(Buffer&& other);
+
+	Buffer& operator=(Buffer &)  = delete;
+	Buffer& operator=(Buffer && other);
+
+	~Buffer();
+
+	operator vk::Buffer&();
+	void flush();
+};
+
 class Allocator
 {
 public:
@@ -30,11 +51,7 @@ public:
 	void create();
 
 	uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-	std::pair<vk::raii::Buffer, vk::raii::DeviceMemory> createBuffer(
-		vk::DeviceSize size,
-		vk::BufferUsageFlags usage,
-		vk::MemoryPropertyFlags properties
-	);
+	Buffer createBuffer(vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags properties);
 
 private:
 	VmaAllocator allocator;

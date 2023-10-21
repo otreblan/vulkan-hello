@@ -29,8 +29,8 @@ struct aiNode;
 
 struct Renderable
 {
-	const glm::mat4 transform;
-	const Mesh&     mesh;
+	glm::mat4 transform;
+	Mesh&     mesh;
 	// Material& material;
 };
 

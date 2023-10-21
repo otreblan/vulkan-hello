@@ -65,7 +65,6 @@ void Pipeline::recreate()
 	swapChainImageViews.clear();
 	swapChain.clear();
 	uniformBuffers.clear();
-	uniformBuffersMemory.clear();
 	descriptorPool.clear();
 
 	create();
@@ -279,18 +278,14 @@ void Pipeline::createUniformBuffers()
 	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
 
 	uniformBuffers.reserve(swapChainImages.size());
-	uniformBuffersMemory.reserve(swapChainImages.size());
 
 	for(size_t i = 0; i < swapChainImages.size(); i++)
 	{
-		auto [buffer, bufferMemory] = parent.allocator.createBuffer(
+		uniformBuffers.emplace_back(parent.allocator.createBuffer(
 			bufferSize,
 			vk::BufferUsageFlagBits::eUniformBuffer,
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		);
-
-		uniformBuffers.emplace_back(std::move(buffer));
-		uniformBuffersMemory.emplace_back(std::move(bufferMemory));
+		));
 	}
 }
 
@@ -323,7 +318,7 @@ void Pipeline::createDescriptorSets()
 
 	for(size_t i = 0; i < swapChainImages.size(); i++)
 	{
-		vk::DescriptorBufferInfo bufferInfo(*uniformBuffers[i], 0, sizeof(UniformBufferObject));
+		vk::DescriptorBufferInfo bufferInfo(uniformBuffers[i].buffer, 0, sizeof(UniformBufferObject));
 
 		vk::DescriptorImageInfo imageInfo(
 			*parent.textureSampler,
@@ -534,14 +529,16 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 	commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
 
-	vk::Buffer vertexBuffers[] = {*parent.vertexBuffer};
-	vk::DeviceSize offsets[] = {0};
+	for(const auto& r: parent.renderables)
+	{
+		vk::Buffer vertexBuffers[] = {r.mesh.getVertexBuffer()};
+		vk::DeviceSize offsets[] = {0};
 
-	commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
-	commandBuffer.bindIndexBuffer(*parent.indexBuffer, 0, vk::IndexType::eUint32);
-	commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
-	// TODO: Draw multiple meshes
-	commandBuffer.drawIndexed(parent.renderables.front().mesh.getIndices().size(), 1, 0, 0, 0);
+		commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
+		commandBuffer.bindIndexBuffer(r.mesh.getIndexBuffer(), 0, vk::IndexType::eUint32);
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
+		commandBuffer.drawIndexed(r.mesh.getIndices().size(), 1, 0, 0, 0);
+	}
 	commandBuffer.endRenderPass();
 	commandBuffer.end();
 }

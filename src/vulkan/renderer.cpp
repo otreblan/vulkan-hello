@@ -85,8 +85,10 @@ void Renderer::initVulkan()
 	if(activeScene)
 		renderables = activeScene->getRenderables();
 
-	// TODO: Upload multiple meshes
-	renderables.front().mesh.uploadToGpu(*this);
+	for(auto& r: renderables)
+	{
+		r.mesh.uploadToGpu(*this);
+	}
 
 	pipeline.create();
 	createSyncObjects();
@@ -535,10 +537,10 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
 	// OpenGL -> Vulkan
 	ubo.proj[1][1] *= -1;
 
-	void* data;
-	vkMapMemory(*device, *pipeline.uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
-	memcpy(data, &ubo, sizeof(ubo));
-	vkUnmapMemory(*device, *pipeline.uniformBuffersMemory[currentImage]);
+	Buffer& uboBuffer = pipeline.uniformBuffers[currentImage];
+
+	memcpy(uboBuffer.allocationInfo.pMappedData, &ubo, sizeof(ubo));
+	uboBuffer.flush();
 }
 
 void Renderer::createTextureImage()
@@ -557,15 +559,15 @@ void Renderer::createTextureImage()
 	if(!pixels)
 		throw std::runtime_error("failed to load texture image!");
 
-	auto [stagingBuffer, stagingBufferMemory] = allocator.createBuffer(
+	Buffer stagingBuffer = allocator.createBuffer(
 		imageSize,
 		eTransferSrc,
 		eHostVisible | eHostCoherent
 	);
 
-	void* data = stagingBufferMemory.mapMemory(0, imageSize);
-	memcpy(data, pixels, static_cast<size_t>(imageSize));
-	stagingBufferMemory.unmapMemory();
+	memcpy(stagingBuffer.allocationInfo.pMappedData, pixels, static_cast<size_t>(imageSize));
+	stagingBuffer.flush();
+
 	stbi_image_free(pixels);
 
 	auto [_textureImage, _textureImageMemory] = createImage(
@@ -581,7 +583,7 @@ void Renderer::createTextureImage()
 	textureImageMemory = std::move(_textureImageMemory);
 
 	transitionImageLayout(*textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal);
-	copyBufferToImage(*stagingBuffer, *textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	copyBufferToImage(stagingBuffer, *textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 	transitionImageLayout(*textureImage, vk::Format::eR8G8B8A8Srgb, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eShaderReadOnlyOptimal);
 }
 
