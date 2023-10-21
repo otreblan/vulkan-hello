@@ -85,23 +85,20 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 		registry.emplace<component::MeshInstance>(entity, std::move(instance));
 	}
 
-	component::Transform::Relationship relationship
-	{
-		.children = {},
-		.parent   = parent
-	};
+	component::Transform::Children children;
 
-	relationship.children.reserve(node->mNumChildren);
+	children.entities.reserve(node->mNumChildren);
 
 	for(size_t i = 0; i < node->mNumChildren; i++)
 	{
 		if(auto child = loadHierarchy(node->mChildren[i], entity); child != entt::null)
 		{
-			relationship.children.emplace_back(child);
+			children.entities.emplace_back(child);
 		}
 	}
 
-	registry.emplace<component::Transform::Relationship>(entity, std::move(relationship));
+	registry.emplace<component::Transform::Children>(entity, std::move(children));
+	registry.emplace<component::Transform::Parent>(entity, parent);
 
 	return entity;
 }
@@ -112,16 +109,15 @@ std::vector<Renderable> Scene::getRenderables()
 
 	std::vector<Renderable> v;
 
-	auto tGroup = registry.group<Transform, Transform::Relationship>();
-	auto mGroup = registry.group<MeshInstance>(entt::get<Transform>);
+	auto pGroup = registry.group<Transform, Transform::Parent>();
 
-	for(auto&& [entity, meshIndices, transform]: mGroup.each())
+	for(auto&& [entity, meshIndices]: registry.view<MeshInstance>().each())
 	{
 		glm::mat4 matrix(1);
 
-		for(auto e = entity; e != entt::null; e = tGroup.get<Transform::Relationship>(e).parent)
+		for(auto e = entity; e != entt::null; e = pGroup.get<Transform::Parent>(e).entity)
 		{
-			matrix = tGroup.get<Transform>(e).matrix * matrix;
+			matrix = pGroup.get<Transform>(e).matrix * matrix;
 		}
 
 		for(auto i: meshIndices.meshes)
