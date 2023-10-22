@@ -93,6 +93,19 @@ target_compile_options(${PROJECT_NAME}
 		$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wno-missing-field-initializers>
 )
 
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+	target_precompile_headers(${PROJECT_NAME}
+		PRIVATE
+			<boost/container/small_vector.hpp>
+			<entt/entt.hpp>
+			<glm/glm.hpp>
+			<glm/gtc/matrix_transform.hpp>
+			<stb/stb_image.h>
+			<vk_mem_alloc.h>
+			<vulkan/vulkan_raii.hpp>
+	)
+endif()
+
 # Install target
 install(TARGETS ${PROJECT_NAME}
 	DESTINATION ${CMAKE_INSTALL_BINDIR}
