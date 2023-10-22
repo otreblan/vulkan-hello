@@ -24,13 +24,16 @@
 #include "component/transform.hpp"
 #include "mesh.hpp"
 
+class Renderer;
 struct aiMesh;
 struct aiNode;
 
 struct Renderable
 {
-	glm::mat4 transform;
-	Mesh&     mesh;
+	glm::mat4  transform;
+	vk::Buffer vertexBuffer;
+	vk::Buffer indexBuffer;
+	uint32_t   indexCount;
 	// Material& material;
 };
 
@@ -45,6 +48,7 @@ struct Scene
 	std::vector<Mesh> meshes;
 
 	std::vector<Renderable> getRenderables();
+	void uploadToGpu(Renderer& renderer);
 
 private:
 	void loadMeshes(const std::span<aiMesh*> newMeshes);

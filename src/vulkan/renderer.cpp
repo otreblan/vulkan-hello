@@ -44,7 +44,13 @@ void Renderer::run()
 {
 	initWindow();
 	initVulkan();
-	mainLoop();
+
+	if(activeScene)
+	{
+		activeScene->uploadToGpu(*this);
+		mainLoop();
+	}
+
 	cleanup();
 }
 
@@ -81,15 +87,6 @@ void Renderer::initVulkan()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
-
-	if(activeScene)
-		renderables = activeScene->getRenderables();
-
-	for(auto& r: renderables)
-	{
-		r.mesh.uploadToGpu(*this);
-	}
-
 	pipeline.create();
 	createSyncObjects();
 }
@@ -99,6 +96,7 @@ void Renderer::mainLoop()
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		renderables = activeScene->getRenderables();
 		drawFrame();
 	}
 

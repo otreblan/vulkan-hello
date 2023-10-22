@@ -531,13 +531,13 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 
 	for(const auto& r: parent.renderables)
 	{
-		vk::Buffer vertexBuffers[] = {r.mesh.getVertexBuffer()};
+		vk::Buffer vertexBuffers[] = {r.vertexBuffer};
 		vk::DeviceSize offsets[] = {0};
 
 		commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
-		commandBuffer.bindIndexBuffer(r.mesh.getIndexBuffer(), 0, vk::IndexType::eUint32);
+		commandBuffer.bindIndexBuffer(r.indexBuffer, 0, vk::IndexType::eUint32);
 		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
-		commandBuffer.drawIndexed(r.mesh.getIndices().size(), 1, 0, 0, 0);
+		commandBuffer.drawIndexed(r.indexCount, 1, 0, 0, 0);
 	}
 	commandBuffer.endRenderPass();
 	commandBuffer.end();

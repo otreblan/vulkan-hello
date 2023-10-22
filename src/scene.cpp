@@ -122,9 +122,22 @@ std::vector<Renderable> Scene::getRenderables()
 
 		for(auto i: meshIndices.meshes)
 		{
-			v.emplace_back(matrix, meshes[i]);
+			v.emplace_back(
+				matrix,
+				meshes[i].getVertexBuffer(),
+				meshes[i].getIndexBuffer(),
+				meshes[i].getIndices().size()
+			);
 		}
 	}
 
 	return v;
+}
+
+void Scene::uploadToGpu(Renderer& renderer)
+{
+	for(auto& mesh: meshes)
+	{
+		mesh.uploadToGpu(renderer);
+	}
 }
