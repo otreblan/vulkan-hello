@@ -529,11 +529,14 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
 	{
 		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 1.0f, 0.0f)),
 		.view  = lookAt(vec3(3.0f, 4.0f, 3.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
-		.proj  = perspective(radians(45.0f), pipeline.swapChainExtent.width / (float) pipeline.swapChainExtent.height, 0.1f, 10.0f)
+		.proj  = perspective(radians(45.0f), pipeline.swapChainExtent.width / (float) pipeline.swapChainExtent.height, 0.1f, 10.0f),
+		.projView = {}
 	};
 
 	// OpenGL -> Vulkan
 	ubo.proj[1][1] *= -1;
+
+	ubo.projView = ubo.proj * ubo.view;
 
 	Buffer& uboBuffer = pipeline.uniformBuffers[currentImage];
 

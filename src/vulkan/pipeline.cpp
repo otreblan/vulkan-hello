@@ -90,7 +90,7 @@ vk::PresentModeKHR Pipeline::chooseSwapPresentMode(const std::span<vk::PresentMo
 
 	for(const auto& availablePresentMode: availablePresentModes)
 	{
-		if(availablePresentMode == eFifoRelaxed)
+		if(availablePresentMode == eMailbox)
 			return availablePresentMode;
 	}
 
