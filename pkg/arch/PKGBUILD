@@ -1,7 +1,7 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
 pkgname=vulkan-hello-git
-pkgver=0.0.0.r101.g0d206ff
+pkgver=0.0.0.r107.g94d5f1a
 pkgrel=1
 epoch=
 pkgdesc="Vulkan"
@@ -43,7 +43,8 @@ build() {
 	cmake -B build -S "$pkgname" \
 		-DCMAKE_BUILD_TYPE='None' \
 		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+		-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON \
+		-DCMAKE_UNITY_BUILD=ON
 
 	cmake --build build
 }
