@@ -93,7 +93,7 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 	{
 		if(auto child = loadHierarchy(node->mChildren[i], entity); child != entt::null)
 		{
-			children.entities.emplace_back(child);
+			children.entities.insert(child);
 		}
 	}
 

@@ -31,6 +31,7 @@
 
 #include "../config.hpp"
 #include "../scene.hpp"
+#include "../utils.hpp"
 #include "../vertex.hpp"
 #include "renderer.hpp"
 #include "uniformBufferObject.hpp"
@@ -326,7 +327,7 @@ void Renderer::createLogicalDevice()
 	QueueFamilyIndices indices = findQueueFamilies(*physicalDevice);
 
 	std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
-	std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+	small_flat_set<uint32_t, 2> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
 	float queuePriority[] = {1.0f};
 

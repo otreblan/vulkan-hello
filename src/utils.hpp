@@ -15,6 +15,11 @@
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assimp/matrix4x4.h>
+#include <boost/container/flat_set.hpp>
+#include <boost/container/small_vector.hpp>
 #include <glm/mat4x4.hpp>
+
+template <typename T, std::size_t N>
+using small_flat_set = boost::container::flat_set<T, std::less<T>, boost::container::small_vector<T, N>>;
 
 glm::mat4x4 toGlm(const aiMatrix4x4& m);

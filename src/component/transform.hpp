@@ -16,9 +16,10 @@
 
 #pragma once
 
-#include <boost/container/small_vector.hpp>
 #include <entt/entt.hpp>
 #include <glm/mat4x4.hpp>
+
+#include "../utils.hpp"
 
 namespace component
 {
@@ -32,7 +33,7 @@ struct Transform
 
 	struct Children
 	{
-		boost::container::small_vector<entt::entity, 8> entities;
+		small_flat_set<entt::entity, 8> entities;
 	};
 
 	glm::mat4 matrix;
