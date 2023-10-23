@@ -60,8 +60,10 @@ void Scene::loadMeshes(const std::span<aiMesh*> newMeshes)
 	}
 }
 
-entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
+entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 {
+	using namespace component;
+
 	if(node == nullptr)
 		return entt::null;
 
@@ -70,35 +72,21 @@ entt::entity Scene::loadHierarchy(aiNode* node, entt::entity parent)
 	if(parent == entt::null)
 		root = entity;
 
-	registry.emplace<component::Transform>(entity, toGlm(node->mTransformation));
-	registry.emplace<component::Properties>(entity, node->mName.C_Str());
+	registry.emplace<Transform>(entity, toGlm(node->mTransformation));
+	registry.emplace<Properties>(entity, node->mName.C_Str());
+	registry.emplace<Transform::Parent>(entity, parent);
 
 	if(node->mNumMeshes > 0)
-	{
-		component::MeshInstance instance;
+		registry.emplace<MeshInstance>(entity, MeshInstance({node->mMeshes, node->mMeshes+node->mNumMeshes}));
 
-		for(size_t i = 0; i < node->mNumMeshes; i++)
-		{
-			instance.meshes.emplace_back(node->mMeshes[i]);
-		}
-
-		registry.emplace<component::MeshInstance>(entity, std::move(instance));
-	}
-
-	component::Transform::Children children;
-
-	children.entities.reserve(node->mNumChildren);
+	entt::entity children[node->mNumChildren];
 
 	for(size_t i = 0; i < node->mNumChildren; i++)
 	{
-		if(auto child = loadHierarchy(node->mChildren[i], entity); child != entt::null)
-		{
-			children.entities.insert(child);
-		}
+		children[i] = loadHierarchy(node->mChildren[i], entity);
 	}
 
-	registry.emplace<component::Transform::Children>(entity, std::move(children));
-	registry.emplace<component::Transform::Parent>(entity, parent);
+	registry.emplace<Transform::Children>(entity, Transform::Children({children, children+node->mNumChildren}));
 
 	return entity;
 }

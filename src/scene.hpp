@@ -52,5 +52,5 @@ struct Scene
 
 private:
 	void loadMeshes(const std::span<aiMesh*> newMeshes);
-	entt::entity loadHierarchy(aiNode* node, entt::entity parent);
+	entt::entity loadHierarchy(const aiNode* node, entt::entity parent);
 };
