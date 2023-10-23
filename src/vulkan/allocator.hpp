@@ -31,10 +31,10 @@ struct Buffer
 	Buffer()         = default;
 
 	Buffer(Buffer&)  = delete;
-	Buffer(Buffer&& other);
+	Buffer(Buffer&& other) noexcept;
 
 	Buffer& operator=(Buffer &)  = delete;
-	Buffer& operator=(Buffer && other);
+	Buffer& operator=(Buffer && other) noexcept;
 
 	~Buffer();
 

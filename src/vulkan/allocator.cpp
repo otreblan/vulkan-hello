@@ -19,19 +19,22 @@
 #include "allocator.hpp"
 #include "renderer.hpp"
 
-Buffer::Buffer(Buffer&& other):
+Buffer::Buffer(Buffer&& other) noexcept:
 	buffer(std::exchange(other.buffer,                 {})),
 	allocation(std::exchange(other.allocation,         {})),
 	allocationInfo(std::exchange(other.allocationInfo, {})),
 	allocatorRef(std::exchange(other.allocatorRef,     {}))
 {}
 
-Buffer& Buffer::operator=(Buffer && other )
+Buffer& Buffer::operator=(Buffer&& other) noexcept
 {
-	std::swap(buffer,         other.buffer);
-	std::swap(allocation,     other.allocation);
-	std::swap(allocationInfo, other.allocationInfo);
-	std::swap(allocatorRef,  other.allocatorRef);
+	if(this != &other)
+	{
+		std::swap(buffer,         other.buffer);
+		std::swap(allocation,     other.allocation);
+		std::swap(allocationInfo, other.allocationInfo);
+		std::swap(allocatorRef,   other.allocatorRef);
+	}
 
 	return *this;
 }
