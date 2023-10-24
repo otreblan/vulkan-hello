@@ -172,4 +172,5 @@ private:
 
 protected:
 	SingleCommand makeSingleCommand();
+	vk::Extent2D getWindowSize() const;
 };

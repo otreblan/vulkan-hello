@@ -70,48 +70,6 @@ void Pipeline::recreate()
 	create();
 };
 
-vk::SurfaceFormatKHR Pipeline::chooseSwapSurfaceFormat(const std::span<vk::SurfaceFormatKHR> availableFormats)
-{
-	using enum vk::Format;
-	using enum vk::ColorSpaceKHR;
-
-	for(const auto& availableFormat: availableFormats)
-	{
-		if(availableFormat.format == eB8G8R8A8Srgb && availableFormat.colorSpace == eSrgbNonlinear)
-			return availableFormat;
-	}
-
-	return availableFormats[0];
-}
-
-vk::PresentModeKHR Pipeline::chooseSwapPresentMode(const std::span<vk::PresentModeKHR> availablePresentModes)
-{
-	using enum vk::PresentModeKHR;
-
-	for(const auto& availablePresentMode: availablePresentModes)
-	{
-		if(availablePresentMode == eMailbox)
-			return availablePresentMode;
-	}
-
-	return eFifo;
-}
-
-vk::Extent2D Pipeline::chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities)
-{
-	if(capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-	{
-		return capabilities.currentExtent;
-	}
-	else
-	{
-		int width, height;
-		glfwGetWindowSize(parent.window, &width, &height);
-
-		return vk::Extent2D(width, height);
-	}
-}
-
 void Pipeline::createImageViews()
 {
 	swapChainImageViews.reserve(swapChainImages.size());
@@ -125,9 +83,9 @@ void Pipeline::createSwapChain(vk::PhysicalDevice physicalDevice)
 {
 	SwapChainSupportDetails swapChainSupport = parent.querySwapChainSupport(physicalDevice);
 
-	vk::SurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-	vk::PresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-	vk::Extent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+	vk::SurfaceFormatKHR surfaceFormat = swapChainSupport.getSurfaceFormat();
+	vk::PresentModeKHR   presentMode   = swapChainSupport.getPresentMode();
+	vk::Extent2D         extent        = swapChainSupport.getExtent(parent.getWindowSize());
 
 	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 

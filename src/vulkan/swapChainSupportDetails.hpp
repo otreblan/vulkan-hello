@@ -27,4 +27,8 @@ struct SwapChainSupportDetails
 	std::vector<vk::PresentModeKHR> presentModes;
 
 	SwapChainSupportDetails(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
+
+	vk::Extent2D getExtent(vk::Extent2D windowExtent) const;
+	vk::SurfaceFormatKHR getSurfaceFormat() const;
+	vk::PresentModeKHR getPresentMode() const;
 };

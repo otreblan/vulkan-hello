@@ -760,3 +760,11 @@ SingleCommand Renderer::makeSingleCommand()
 {
 	return {device, *commandPool, *graphicsQueue};
 }
+
+vk::Extent2D Renderer::getWindowSize() const
+{
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	return vk::Extent2D(width, height);
+}

@@ -21,3 +21,42 @@ SwapChainSupportDetails::SwapChainSupportDetails(vk::PhysicalDevice physicalDevi
 	formats(physicalDevice.getSurfaceFormatsKHR(surface)),
 	presentModes(physicalDevice.getSurfacePresentModesKHR(surface))
 {}
+
+vk::Extent2D SwapChainSupportDetails::getExtent(vk::Extent2D windowExtent) const
+{
+	if(capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+	{
+		return capabilities.currentExtent;
+	}
+	else
+	{
+		return windowExtent;
+	}
+}
+
+vk::SurfaceFormatKHR SwapChainSupportDetails::getSurfaceFormat() const
+{
+	using enum vk::Format;
+	using enum vk::ColorSpaceKHR;
+
+	for(const auto& availableFormat: formats)
+	{
+		if(availableFormat.format == eB8G8R8A8Srgb && availableFormat.colorSpace == eSrgbNonlinear)
+			return availableFormat;
+	}
+
+	return formats[0];
+}
+
+vk::PresentModeKHR SwapChainSupportDetails::getPresentMode() const
+{
+	using enum vk::PresentModeKHR;
+
+	for(const auto& availablePresentMode: presentModes)
+	{
+		if(availablePresentMode == eMailbox)
+			return availablePresentMode;
+	}
+
+	return eFifo;
+}

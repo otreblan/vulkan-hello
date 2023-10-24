@@ -61,9 +61,6 @@ public:
 	void recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
 private:
-	vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::span<vk::SurfaceFormatKHR> availableFormats);
-	vk::PresentModeKHR chooseSwapPresentMode(const std::span<vk::PresentModeKHR> availablePresentModes);
-	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& capabilities);
 	void createImageViews();
 	void createSwapChain(vk::PhysicalDevice physicalDevice);
 
