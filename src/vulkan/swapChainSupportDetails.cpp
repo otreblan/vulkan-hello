@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <limits>
+
 #include "swapChainSupportDetails.hpp"
 
 SwapChainSupportDetails::SwapChainSupportDetails(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface):

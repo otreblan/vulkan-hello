@@ -55,9 +55,9 @@ Buffer::operator vk::Buffer&()
 	return buffer;
 }
 
-void Buffer::flush()
+vk::Result Buffer::flush()
 {
-	vmaFlushAllocation(allocatorRef, allocation, 0, VK_WHOLE_SIZE);
+	return (vk::Result)vmaFlushAllocation(allocatorRef, allocation, 0, VK_WHOLE_SIZE);
 }
 
 Allocator::Allocator(Renderer& root):
