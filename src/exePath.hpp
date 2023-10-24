@@ -19,4 +19,4 @@
 #include <filesystem>
 
 /// Returns the directory where the binary is located.
-std::filesystem::path exePath();
+std::filesystem::path exePath() noexcept;

@@ -25,7 +25,7 @@
 
 #include "exePath.hpp"
 
-std::filesystem::path exePath()
+std::filesystem::path exePath() noexcept
 {
 	using namespace std::filesystem;
 
