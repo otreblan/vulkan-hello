@@ -18,11 +18,13 @@
 
 #include <filesystem>
 #include <span>
+#include <type_traits>
 
 #include <entt/entt.hpp>
 
 #include "component/transform.hpp"
 #include "mesh.hpp"
+#include "utils.hpp"
 
 class Renderer;
 struct aiMesh;
@@ -39,6 +41,9 @@ struct Renderable
 
 struct Scene
 {
+	using Transform = component::Transform;
+	using pgroup_t  = group_t<const Transform, const Transform::Parent>;
+
 	Scene(const std::filesystem::path& scenePath);
 
 	std::string name;
@@ -47,7 +52,9 @@ struct Scene
 	entt::registry    registry;
 	std::vector<Mesh> meshes;
 
-	std::vector<Renderable> getRenderables();
+	const pgroup_t pGroup = registry.group<const Transform, const Transform::Parent>();
+
+	std::vector<Renderable> getRenderables() const;
 	void uploadToGpu(Renderer& renderer);
 
 private:

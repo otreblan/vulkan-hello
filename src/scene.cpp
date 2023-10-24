@@ -91,15 +91,14 @@ entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 	return entity;
 }
 
-std::vector<Renderable> Scene::getRenderables()
+std::vector<Renderable> Scene::getRenderables() const
 {
 	using namespace component;
 
-	std::vector<Renderable> v;
+	std::vector<Renderable> renderables;
+	auto view = registry.view<MeshInstance>();
 
-	auto pGroup = registry.group<Transform, Transform::Parent>();
-
-	for(auto&& [entity, meshIndices]: registry.view<MeshInstance>().each())
+	for(entt::entity entity: view)
 	{
 		glm::mat4 matrix(1);
 
@@ -108,9 +107,9 @@ std::vector<Renderable> Scene::getRenderables()
 			matrix = pGroup.get<Transform>(e).matrix * matrix;
 		}
 
-		for(auto i: meshIndices.meshes)
+		for(auto i: view.get<MeshInstance>(entity).meshes)
 		{
-			v.emplace_back(
+			renderables.emplace_back(
 				matrix,
 				meshes[i].getVertexBuffer(),
 				meshes[i].getIndexBuffer(),
@@ -119,7 +118,7 @@ std::vector<Renderable> Scene::getRenderables()
 		}
 	}
 
-	return v;
+	return renderables;
 }
 
 void Scene::uploadToGpu(Renderer& renderer)

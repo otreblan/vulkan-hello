@@ -22,4 +22,10 @@
 template <typename T, std::size_t N>
 using small_flat_set = boost::container::flat_set<T, std::less<T>, boost::container::small_vector<T, N>>;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+template <typename... T>
+using group_t = decltype(((entt::registry*)nullptr)->group<T...>());
+#pragma GCC diagnostic pop
+
 glm::mat4x4 toGlm(const aiMatrix4x4& m);
