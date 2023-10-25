@@ -29,7 +29,9 @@ class FrameData
 {
 private:
 	// TODO: Make this a SOA
+	// TODO: Dynamic object buffer
 	static const int MAX_FRAMES_IN_FLIGHT = 2;
+	static const int MAX_OBJECTS          = 100000;
 
 	struct Data
 	{
@@ -40,6 +42,7 @@ private:
 		vk::raii::CommandBuffer commandBuffer = nullptr;
 
 		Buffer uniformBuffer;
+		Buffer storageBuffer;
 
 		vk::DescriptorSet descriptorSet;
 	};
@@ -57,6 +60,7 @@ private:
 	void createDescriptorPool();
 	void createDescriptorSets();
 	void createUniformBuffers();
+	void createStorageBuffers();
 
 public:
 	FrameData(Renderer& root);
@@ -72,6 +76,7 @@ public:
 	vk::CommandBuffer  getCommandBuffer(size_t imageIndex);
 	vk::DescriptorSet  getDescriptorSet(size_t imageIndex);
 	Buffer&            getUniformBuffer(size_t imageIndex);
+	Buffer&            getStorageBuffer(size_t imageIndex);
 
 	vk::Semaphore      getImageAvailable();
 	vk::Semaphore      getRenderFinished();
@@ -80,6 +85,7 @@ public:
 	vk::DescriptorPool getDescriptorPool();
 	vk::DescriptorSet  getDescriptorSet();
 	Buffer&            getUniformBuffer();
+	Buffer&            getStorageBuffer();
 
 	friend class Renderer;
 };

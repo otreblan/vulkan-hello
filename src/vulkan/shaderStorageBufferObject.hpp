@@ -18,9 +18,7 @@
 
 #include <glm/glm.hpp>
 
-struct UniformBufferObject
+struct ShaderStorageBufferObject
 {
-	alignas(16) glm::mat4 view;
-	alignas(16) glm::mat4 proj;
-	alignas(16) glm::mat4 projView;
+	alignas(16) glm::mat4 model;
 };

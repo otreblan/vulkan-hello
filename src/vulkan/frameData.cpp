@@ -16,6 +16,7 @@
 
 #include "frameData.hpp"
 #include "renderer.hpp"
+#include "shaderStorageBufferObject.hpp"
 
 FrameData::FrameData(Renderer& root):
 	root(root)
@@ -27,6 +28,7 @@ void FrameData::create()
 	createCommandBuffers();
 	createDescriptorPool();
 	createUniformBuffers();
+	createStorageBuffers();
 	createDescriptorSets();
 }
 
@@ -70,6 +72,11 @@ Buffer& FrameData::getUniformBuffer(size_t imageIndex)
 	return data[imageIndex].uniformBuffer;
 }
 
+Buffer& FrameData::getStorageBuffer(size_t imageIndex)
+{
+	return data[imageIndex].storageBuffer;
+}
+
 vk::Semaphore FrameData::getImageAvailable()
 {
 	return getImageAvailable(getCurrentFrame());
@@ -105,6 +112,11 @@ Buffer& FrameData::getUniformBuffer()
 	return getUniformBuffer(getCurrentFrame());
 }
 
+Buffer& FrameData::getStorageBuffer()
+{
+	return getStorageBuffer(getCurrentFrame());
+}
+
 void FrameData::createSyncObjects()
 {
 	vk::SemaphoreCreateInfo semaphoreInfo;
@@ -137,10 +149,14 @@ void FrameData::createCommandBuffers()
 
 void FrameData::createDescriptorPool()
 {
-	std::array<vk::DescriptorPoolSize, 2> poolSizes
+	vk::DescriptorPoolSize poolSizes[] =
 	{
 		vk::DescriptorPoolSize(
 			vk::DescriptorType::eUniformBuffer,
+			MAX_FRAMES_IN_FLIGHT
+		),
+		vk::DescriptorPoolSize(
+			vk::DescriptorType::eStorageBuffer,
 			MAX_FRAMES_IN_FLIGHT
 		),
 		vk::DescriptorPoolSize(
@@ -169,7 +185,17 @@ void FrameData::createDescriptorSets()
 
 	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 	{
-		vk::DescriptorBufferInfo bufferInfo(data[i].uniformBuffer, 0, sizeof(UniformBufferObject));
+		vk::DescriptorBufferInfo bufferInfo(
+			data[i].uniformBuffer,
+			0,
+			sizeof(UniformBufferObject)
+		);
+
+		vk::DescriptorBufferInfo storageBufferInfo(
+			data[i].storageBuffer,
+			0,
+			sizeof(ShaderStorageBufferObject)*MAX_OBJECTS
+		);
 
 		vk::DescriptorImageInfo imageInfo(
 			*root.textureSampler,
@@ -177,7 +203,7 @@ void FrameData::createDescriptorSets()
 			vk::ImageLayout::eShaderReadOnlyOptimal
 		);
 
-		std::array<vk::WriteDescriptorSet, 2> descriptorWrites
+		vk::WriteDescriptorSet descriptorWrites[] =
 		{
 			vk::WriteDescriptorSet(
 				data[i].descriptorSet,
@@ -191,6 +217,15 @@ void FrameData::createDescriptorSets()
 			vk::WriteDescriptorSet(
 				data[i].descriptorSet,
 				1,
+				0,
+				vk::DescriptorType::eStorageBuffer,
+				nullptr,
+				storageBufferInfo,
+				nullptr
+			),
+			vk::WriteDescriptorSet(
+				data[i].descriptorSet,
+				2,
 				0,
 				vk::DescriptorType::eCombinedImageSampler,
 				imageInfo,
@@ -212,6 +247,20 @@ void FrameData::createUniformBuffers()
 		data[i].uniformBuffer = root.allocator.createBuffer(
 			bufferSize,
 			vk::BufferUsageFlagBits::eUniformBuffer,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+		);
+	}
+}
+
+void FrameData::createStorageBuffers()
+{
+	vk::DeviceSize bufferSize = sizeof(ShaderStorageBufferObject)*MAX_OBJECTS;
+
+	for(size_t i = 0; i < data.size(); i++)
+	{
+		data[i].storageBuffer = root.allocator.createBuffer(
+			bufferSize,
+			vk::BufferUsageFlagBits::eStorageBuffer,
 			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
 		);
 	}

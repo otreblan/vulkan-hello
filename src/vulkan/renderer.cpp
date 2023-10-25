@@ -473,17 +473,26 @@ void Renderer::createDescriptorSetLayout()
 		nullptr
 	);
 
-	vk::DescriptorSetLayoutBinding samplerLayoutBinding(
+	vk::DescriptorSetLayoutBinding ssboLayoutBinding(
 		1,
+		vk::DescriptorType::eStorageBuffer,
+		1,
+		vk::ShaderStageFlagBits::eVertex,
+		nullptr
+	);
+
+	vk::DescriptorSetLayoutBinding samplerLayoutBinding(
+		2,
 		vk::DescriptorType::eCombinedImageSampler,
 		1,
 		vk::ShaderStageFlagBits::eFragment,
 		nullptr
 	);
 
-	std::array<vk::DescriptorSetLayoutBinding, 2> bindings
+	vk::DescriptorSetLayoutBinding bindings[] =
 	{
 		uboLayoutBinding,
+		ssboLayoutBinding,
 		samplerLayoutBinding
 	};
 
@@ -504,7 +513,6 @@ void Renderer::updateUniformBuffer()
 
 	UniformBufferObject ubo
 	{
-		.model = rotate(mat4(1.0f), dTime * radians(90.0f), vec3(0.0f, 1.0f, 0.0f)),
 		.view  = lookAt(vec3(3.0f, 4.0f, 3.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
 		.proj  = perspective(radians(45.0f), pipeline.swapChainExtent.width / (float) pipeline.swapChainExtent.height, 0.1f, 10.0f),
 		.projView = {}
