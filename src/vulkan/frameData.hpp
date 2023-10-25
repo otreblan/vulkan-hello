@@ -20,7 +20,11 @@
 
 struct FrameData
 {
+	// TODO: Make this a SOA
+
 	mutable vk::raii::Semaphore imageAvailable = nullptr;
 	mutable vk::raii::Semaphore renderFinished = nullptr;
 	mutable vk::raii::Fence     inFlight       = nullptr;
+
+	vk::raii::CommandBuffer commandBuffer = nullptr;
 };

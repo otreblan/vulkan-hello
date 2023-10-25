@@ -139,11 +139,12 @@ private:
 	vk::raii::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
 
 	void drawFrame();
-	void createSyncObjects();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
 	void createFrameData();
+	void createSyncObjects();
+	void createCommandBuffers();
 	void createDescriptorSetLayout();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createCommandPool();

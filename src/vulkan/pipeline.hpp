@@ -49,8 +49,6 @@ public:
 	std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
 	std::vector<Buffer>                uniformBuffers;
 
-	std::vector<vk::raii::CommandBuffer> commandBuffers;
-
 	vk::raii::DescriptorPool       descriptorPool = nullptr;
 	std::vector<vk::DescriptorSet> descriptorSets;
 
@@ -72,5 +70,4 @@ private:
 	void createDescriptorPool();
 	void createDescriptorSets();
 	void createGraphicsPipeline();
-	void createCommandBuffers();
 };

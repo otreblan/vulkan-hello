@@ -83,9 +83,9 @@ void Renderer::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	allocator.create();
+	createCommandPool();
 	createFrameData();
 	createDescriptorSetLayout();
-	createCommandPool();
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
@@ -402,17 +402,17 @@ void Renderer::drawFrame()
 
 	device.resetFences(*getCurrentFrame().inFlight);
 
-	pipeline.commandBuffers[currentFrame].reset();
-	pipeline.recordCommandBuffer(*pipeline.commandBuffers[currentFrame], imageIndex);
+	getCurrentFrame().commandBuffer.reset();
+	pipeline.recordCommandBuffer(*getCurrentFrame().commandBuffer, imageIndex);
 
-	vk::Semaphore waitSemaphores[] = {*getCurrentFrame().imageAvailable};
-	vk::Semaphore signalSemaphores[] = {*getCurrentFrame().renderFinished};
-	vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+	vk::Semaphore          waitSemaphores[]   = {*getCurrentFrame().imageAvailable};
+	vk::Semaphore          signalSemaphores[] = {*getCurrentFrame().renderFinished};
+	vk::PipelineStageFlags waitStages[]       = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
 	vk::SubmitInfo submitInfo(
 		waitSemaphores,
 		waitStages,
-		*pipeline.commandBuffers[currentFrame],
+		*getCurrentFrame().commandBuffer,
 		signalSemaphores
 	);
 
@@ -439,23 +439,6 @@ void Renderer::drawFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void Renderer::createSyncObjects()
-{
-	vk::SemaphoreCreateInfo semaphoreInfo;
-
-	// Start signaled to avoid a deadlock in the first frame.
-	vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
-
-	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
-
-	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		frames[i].imageAvailable = device.createSemaphore(semaphoreInfo);
-		frames[i].renderFinished = device.createSemaphore(semaphoreInfo);
-		frames[i].inFlight       = device.createFence(fenceInfo);
-	}
-}
-
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int, int)
 {
 	auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
@@ -474,6 +457,42 @@ void Renderer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::Device
 void Renderer::createFrameData()
 {
 	createSyncObjects();
+	createCommandBuffers();
+}
+
+void Renderer::createSyncObjects()
+{
+	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
+
+	vk::SemaphoreCreateInfo semaphoreInfo;
+
+	// Start signaled to avoid a deadlock in the first frame.
+	vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
+
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		frames[i].imageAvailable = device.createSemaphore(semaphoreInfo);
+		frames[i].renderFinished = device.createSemaphore(semaphoreInfo);
+		frames[i].inFlight       = device.createFence(fenceInfo);
+	}
+}
+
+void Renderer::createCommandBuffers()
+{
+	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
+
+	vk::CommandBufferAllocateInfo allocInfo(
+		*commandPool,
+		vk::CommandBufferLevel::ePrimary,
+		MAX_FRAMES_IN_FLIGHT
+	);
+
+	auto buffers = device.allocateCommandBuffers(allocInfo);
+
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		frames[i].commandBuffer = std::move(buffers[i]);
+	}
 }
 
 void Renderer::createDescriptorSetLayout()

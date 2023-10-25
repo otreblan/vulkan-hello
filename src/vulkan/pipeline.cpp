@@ -40,7 +40,6 @@ void Pipeline::create()
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
-	createCommandBuffers();
 }
 
 void Pipeline::recreate()
@@ -454,19 +453,6 @@ void Pipeline::createGraphicsPipeline()
 	);
 
 	graphicsPipeline = parent.device.createGraphicsPipeline(nullptr, pipelineInfo);
-}
-
-void Pipeline::createCommandBuffers()
-{
-	commandBuffers.reserve(swapChainFramebuffers.size());
-
-	vk::CommandBufferAllocateInfo allocInfo(
-		*parent.commandPool,
-		vk::CommandBufferLevel::ePrimary,
-		swapChainFramebuffers.size()
-	);
-
-	commandBuffers = parent.device.allocateCommandBuffers(allocInfo);
 }
 
 void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
