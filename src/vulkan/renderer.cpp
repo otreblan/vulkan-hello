@@ -38,6 +38,7 @@
 
 Renderer::Renderer():
 	allocator(*this),
+	frameData(*this),
 	pipeline(*this)
 {}
 
@@ -83,8 +84,7 @@ void Renderer::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	allocator.create();
-	createCommandPool();
-	createFrameData();
+	frameData.create();
 	createDescriptorSetLayout();
 	createTextureImage();
 	createTextureImageView();
@@ -382,11 +382,11 @@ SwapChainSupportDetails Renderer::querySwapChainSupport(vk::PhysicalDevice devic
 void Renderer::drawFrame()
 {
 	[[maybe_unused]]
-	auto r = device.waitForFences(*getCurrentFrame().inFlight, true, std::numeric_limits<uint64_t>::max());
+	auto r = device.waitForFences(frameData.getInFlight(), true, std::numeric_limits<uint64_t>::max());
 
 	auto [result, imageIndex] = pipeline.swapChain.acquireNextImage(
 		std::numeric_limits<uint64_t>::max(),
-		*getCurrentFrame().imageAvailable,
+		frameData.getImageAvailable(),
 		nullptr
 	);
 
@@ -400,23 +400,19 @@ void Renderer::drawFrame()
 
 	updateUniformBuffer(imageIndex);
 
-	device.resetFences(*getCurrentFrame().inFlight);
+	device.resetFences(frameData.getInFlight());
 
-	getCurrentFrame().commandBuffer.reset();
-	pipeline.recordCommandBuffer(*getCurrentFrame().commandBuffer, imageIndex);
+	frameData.getCommandBuffer().reset();
+	pipeline.recordCommandBuffer(frameData.getCommandBuffer(), imageIndex);
 
-	vk::Semaphore          waitSemaphores[]   = {*getCurrentFrame().imageAvailable};
-	vk::Semaphore          signalSemaphores[] = {*getCurrentFrame().renderFinished};
+	vk::Semaphore          waitSemaphores[]   = {frameData.getImageAvailable()};
 	vk::PipelineStageFlags waitStages[]       = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+	vk::CommandBuffer      commandBuffers[]   = {frameData.getCommandBuffer()};
+	vk::Semaphore          signalSemaphores[] = {frameData.getRenderFinished()};
 
-	vk::SubmitInfo submitInfo(
-		waitSemaphores,
-		waitStages,
-		*getCurrentFrame().commandBuffer,
-		signalSemaphores
-	);
+	vk::SubmitInfo submitInfo(waitSemaphores, waitStages, commandBuffers, signalSemaphores);
 
-	graphicsQueue.submit(submitInfo, *getCurrentFrame().inFlight);
+	graphicsQueue.submit(submitInfo, frameData.getInFlight());
 
 	vk::SwapchainKHR swapChains[] = {*pipeline.swapChain};
 
@@ -436,7 +432,7 @@ void Renderer::drawFrame()
 	else if (result != vk::Result::eSuccess)
 		throw std::runtime_error("failed to present swap chain image!");
 
-	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	frameData.incrementFrame();
 }
 
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int, int)
@@ -452,47 +448,6 @@ void Renderer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::Device
 	vk::BufferCopy copyRegion(0, 0, size);
 
 	singleCommand.getBuffer().copyBuffer(srcBuffer, dstBuffer, copyRegion);
-}
-
-void Renderer::createFrameData()
-{
-	createSyncObjects();
-	createCommandBuffers();
-}
-
-void Renderer::createSyncObjects()
-{
-	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
-
-	vk::SemaphoreCreateInfo semaphoreInfo;
-
-	// Start signaled to avoid a deadlock in the first frame.
-	vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
-
-	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		frames[i].imageAvailable = device.createSemaphore(semaphoreInfo);
-		frames[i].renderFinished = device.createSemaphore(semaphoreInfo);
-		frames[i].inFlight       = device.createFence(fenceInfo);
-	}
-}
-
-void Renderer::createCommandBuffers()
-{
-	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
-
-	vk::CommandBufferAllocateInfo allocInfo(
-		*commandPool,
-		vk::CommandBufferLevel::ePrimary,
-		MAX_FRAMES_IN_FLIGHT
-	);
-
-	auto buffers = device.allocateCommandBuffers(allocInfo);
-
-	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		frames[i].commandBuffer = std::move(buffers[i]);
-	}
 }
 
 void Renderer::createDescriptorSetLayout()
@@ -522,18 +477,6 @@ void Renderer::createDescriptorSetLayout()
 	vk::DescriptorSetLayoutCreateInfo layoutInfo({}, bindings);
 
 	descriptorSetLayout = device.createDescriptorSetLayout(layoutInfo);
-}
-
-void Renderer::createCommandPool()
-{
-	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*physicalDevice);
-
-	vk::CommandPoolCreateInfo poolInfo(
-		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-		queueFamilyIndices.graphicsFamily.value()
-	);
-
-	commandPool = device.createCommandPool(poolInfo);
 }
 
 void Renderer::updateUniformBuffer(uint32_t currentImage)
@@ -778,7 +721,7 @@ void Renderer::createTextureSampler()
 
 SingleCommand Renderer::makeSingleCommand()
 {
-	return {device, *commandPool, *graphicsQueue};
+	return {device, frameData.getCommandPool(), *graphicsQueue};
 }
 
 vk::Extent2D Renderer::getWindowSize() const
@@ -787,9 +730,4 @@ vk::Extent2D Renderer::getWindowSize() const
 	glfwGetWindowSize(window, &width, &height);
 
 	return vk::Extent2D(width, height);
-}
-
-FrameData& Renderer::getCurrentFrame()
-{
-	return frames[currentFrame];
 }

@@ -16,15 +16,52 @@
 
 #pragma once
 
+#include <array>
+
 #include <vulkan/vulkan_raii.hpp>
 
-struct FrameData
+class Renderer;
+
+class FrameData
 {
+private:
 	// TODO: Make this a SOA
+	static const int MAX_FRAMES_IN_FLIGHT = 2;
 
-	mutable vk::raii::Semaphore imageAvailable = nullptr;
-	mutable vk::raii::Semaphore renderFinished = nullptr;
-	mutable vk::raii::Fence     inFlight       = nullptr;
+	struct Data
+	{
+		mutable vk::raii::Semaphore imageAvailable = nullptr;
+		mutable vk::raii::Semaphore renderFinished = nullptr;
+		mutable vk::raii::Fence     inFlight       = nullptr;
 
-	vk::raii::CommandBuffer commandBuffer = nullptr;
+		vk::raii::CommandBuffer commandBuffer = nullptr;
+	};
+
+	Renderer& root;
+
+	vk::raii::CommandPool commandPool = nullptr;
+
+	std::array<Data, MAX_FRAMES_IN_FLIGHT> data;
+
+	int currentFrame = 0;
+
+	void createCommandPool();
+	void createSyncObjects();
+	void createCommandBuffers();
+
+public:
+	FrameData(Renderer& root);
+
+	void create();
+
+	int incrementFrame();
+	int getCurrentFrame() const;
+
+	vk::CommandPool   getCommandPool();
+	vk::Semaphore     getImageAvailable();
+	vk::Semaphore     getRenderFinished();
+	vk::Fence         getInFlight();
+	vk::CommandBuffer getCommandBuffer();
+
+	friend class Renderer;
 };

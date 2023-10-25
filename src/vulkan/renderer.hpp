@@ -44,7 +44,7 @@ public:
 	void setActiveScene(Scene* scene);
 
 private:
-	static const int MAX_FRAMES_IN_FLIGHT = 2;
+	static const int MAX_FRAMES_IN_FLIGHT = FrameData::MAX_FRAMES_IN_FLIGHT;
 	GLFWwindow* window;
 
 	const int width = 800;
@@ -95,14 +95,9 @@ private:
 	vk::raii::SurfaceKHR     surface        = nullptr;
 
 	Allocator allocator;
+	FrameData frameData;
+	Pipeline  pipeline;
 
-	vk::raii::CommandPool commandPool = nullptr;
-
-	std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
-
-	Pipeline pipeline;
-
-	size_t currentFrame     = 0;
 	bool framebufferResized = false;
 
 	// Non owning reference to the current scene.
@@ -142,12 +137,8 @@ private:
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
-	void createFrameData();
-	void createSyncObjects();
-	void createCommandBuffers();
 	void createDescriptorSetLayout();
 	void updateUniformBuffer(uint32_t currentImage);
-	void createCommandPool();
 
 	void createTextureImage();
 	std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(uint32_t width,
@@ -168,11 +159,11 @@ private:
 
 	friend class Allocator;
 	friend class Depth;
+	friend class FrameData;
 	friend class Mesh;
 	friend struct Pipeline;
 
 protected:
 	SingleCommand makeSingleCommand();
 	vk::Extent2D getWindowSize() const;
-	FrameData& getCurrentFrame();
 };

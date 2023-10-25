@@ -18,6 +18,7 @@ target_sources(${PROJECT_NAME}
 	PRIVATE
 		allocator.cpp
 		depth.cpp
+		frameData.cpp
 		pipeline.cpp
 		renderer.cpp
 		singleCommand.cpp
