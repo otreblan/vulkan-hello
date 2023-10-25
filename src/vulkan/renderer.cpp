@@ -549,7 +549,8 @@ void Renderer::updateStorageBuffer()
 
 	for(size_t i = 0; i < renderables.size(); i++)
 	{
-		ssbo[i].model = renderables[i].transform;
+		ssbo[i].model        = renderables[i].transform;
+		ssbo[i].normalMatrix = glm::transpose(glm::inverse(renderables[i].transform));
 	}
 
 	ssboBuffer.flush();

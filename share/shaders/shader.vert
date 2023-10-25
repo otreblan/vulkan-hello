@@ -4,6 +4,7 @@
 struct ObjectData
 {
 	mat4 model;
+	mat4 normalMatrix;
 };
 
 layout(binding = 0) uniform UniformBufferObject
@@ -30,13 +31,14 @@ layout(location = 3) out vec2 fragTexCoord;
 
 void main()
 {
-	const mat4 model    = objectBuffer.objects[gl_BaseInstance].model;
+	const mat4 model        = objectBuffer.objects[gl_BaseInstance].model;
+	const mat4 normalMatrix = objectBuffer.objects[gl_BaseInstance].normalMatrix;
 
 	const vec4 worldPos = model * vec4(inPosition, 1.0);
 	gl_Position         = ubo.projView * worldPos;
 
 	fragPos      = worldPos.xyz;
 	fragColor    = inColor;
-	fragNormal   = mat3(transpose(inverse(model))) * inNormal; // TODO: Calculate this in the CPU.
+	fragNormal   = (normalMatrix * vec4(inNormal, 0.0)).xyz;
 	fragTexCoord = inTexCoord;
 }
