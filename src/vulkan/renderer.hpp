@@ -31,6 +31,7 @@
 #include "pipeline.hpp"
 #include "queueFamilyIndices.hpp"
 #include "singleCommand.hpp"
+#include "frameData.hpp"
 
 class Renderer
 {
@@ -96,12 +97,10 @@ private:
 	Allocator allocator;
 
 	vk::raii::CommandPool commandPool = nullptr;
-	mutable std::vector<vk::raii::Semaphore> imageAvailableSemaphores;
-	mutable std::vector<vk::raii::Semaphore> renderFinishedSemaphores;
+
+	std::array<FrameData, MAX_FRAMES_IN_FLIGHT> frames;
 
 	Pipeline pipeline;
-
-	std::vector<vk::raii::Fence> inFlightFences;
 
 	size_t currentFrame     = 0;
 	bool framebufferResized = false;
@@ -144,6 +143,7 @@ private:
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
+	void createFrameData();
 	void createDescriptorSetLayout();
 	void updateUniformBuffer(uint32_t currentImage);
 	void createCommandPool();
@@ -173,4 +173,5 @@ private:
 protected:
 	SingleCommand makeSingleCommand();
 	vk::Extent2D getWindowSize() const;
+	FrameData& getCurrentFrame();
 };

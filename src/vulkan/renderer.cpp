@@ -83,13 +83,13 @@ void Renderer::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	allocator.create();
+	createFrameData();
 	createDescriptorSetLayout();
 	createCommandPool();
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
 	pipeline.create();
-	createSyncObjects();
 }
 
 void Renderer::mainLoop()
@@ -382,11 +382,11 @@ SwapChainSupportDetails Renderer::querySwapChainSupport(vk::PhysicalDevice devic
 void Renderer::drawFrame()
 {
 	[[maybe_unused]]
-	auto r = device.waitForFences(*inFlightFences[currentFrame], true, std::numeric_limits<uint64_t>::max());
+	auto r = device.waitForFences(*getCurrentFrame().inFlight, true, std::numeric_limits<uint64_t>::max());
 
 	auto [result, imageIndex] = pipeline.swapChain.acquireNextImage(
 		std::numeric_limits<uint64_t>::max(),
-		*imageAvailableSemaphores[currentFrame],
+		*getCurrentFrame().imageAvailable,
 		nullptr
 	);
 
@@ -400,13 +400,13 @@ void Renderer::drawFrame()
 
 	updateUniformBuffer(imageIndex);
 
-	device.resetFences(*inFlightFences[currentFrame]);
+	device.resetFences(*getCurrentFrame().inFlight);
 
 	pipeline.commandBuffers[currentFrame].reset();
 	pipeline.recordCommandBuffer(*pipeline.commandBuffers[currentFrame], imageIndex);
 
-	vk::Semaphore waitSemaphores[] = {*imageAvailableSemaphores[currentFrame]};
-	vk::Semaphore signalSemaphores[] = {*renderFinishedSemaphores[currentFrame]};
+	vk::Semaphore waitSemaphores[] = {*getCurrentFrame().imageAvailable};
+	vk::Semaphore signalSemaphores[] = {*getCurrentFrame().renderFinished};
 	vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
 	vk::SubmitInfo submitInfo(
@@ -416,7 +416,7 @@ void Renderer::drawFrame()
 		signalSemaphores
 	);
 
-	graphicsQueue.submit(submitInfo, *inFlightFences[currentFrame]);
+	graphicsQueue.submit(submitInfo, *getCurrentFrame().inFlight);
 
 	vk::SwapchainKHR swapChains[] = {*pipeline.swapChain};
 
@@ -441,22 +441,18 @@ void Renderer::drawFrame()
 
 void Renderer::createSyncObjects()
 {
-	imageAvailableSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
-	renderFinishedSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
-
-	inFlightFences.reserve(MAX_FRAMES_IN_FLIGHT);
-
 	vk::SemaphoreCreateInfo semaphoreInfo;
 
 	// Start signaled to avoid a deadlock in the first frame.
 	vk::FenceCreateInfo fenceInfo(vk::FenceCreateFlagBits::eSignaled);
 
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		imageAvailableSemaphores.emplace_back(device.createSemaphore(semaphoreInfo));
-		renderFinishedSemaphores.emplace_back(device.createSemaphore(semaphoreInfo));
+	assert(frames.size() == MAX_FRAMES_IN_FLIGHT);
 
-		inFlightFences.emplace_back(device.createFence(fenceInfo));
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		frames[i].imageAvailable = device.createSemaphore(semaphoreInfo);
+		frames[i].renderFinished = device.createSemaphore(semaphoreInfo);
+		frames[i].inFlight       = device.createFence(fenceInfo);
 	}
 }
 
@@ -473,6 +469,11 @@ void Renderer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::Device
 	vk::BufferCopy copyRegion(0, 0, size);
 
 	singleCommand.getBuffer().copyBuffer(srcBuffer, dstBuffer, copyRegion);
+}
+
+void Renderer::createFrameData()
+{
+	createSyncObjects();
 }
 
 void Renderer::createDescriptorSetLayout()
@@ -767,4 +768,9 @@ vk::Extent2D Renderer::getWindowSize() const
 	glfwGetWindowSize(window, &width, &height);
 
 	return vk::Extent2D(width, height);
+}
+
+FrameData& Renderer::getCurrentFrame()
+{
+	return frames[currentFrame];
 }
