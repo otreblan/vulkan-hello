@@ -1,5 +1,10 @@
-#version 450
+#version 460
 #extension GL_ARB_separate_shader_objects : enable
+
+struct ObjectData
+{
+	mat4 model;
+};
 
 layout(binding = 0) uniform UniformBufferObject
 {
@@ -7,6 +12,11 @@ layout(binding = 0) uniform UniformBufferObject
 	mat4 proj;
 	mat4 projView;
 } ubo;
+
+layout(std140, binding = 1) readonly buffer ObjectBuffer
+{
+	ObjectData objects[];
+} objectBuffer;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
@@ -20,13 +30,13 @@ layout(location = 3) out vec2 fragTexCoord;
 
 void main()
 {
-	//vec4 worldPos = ubo.model * vec4(inPosition, 1.0);
-	const vec4 worldPos = vec4(inPosition, 1.0);
-	gl_Position   = ubo.projView * worldPos;
+	const mat4 model    = objectBuffer.objects[gl_BaseInstance].model;
+
+	const vec4 worldPos = model * vec4(inPosition, 1.0);
+	gl_Position         = ubo.projView * worldPos;
 
 	fragPos      = worldPos.xyz;
 	fragColor    = inColor;
-	//fragNormal   = mat3(transpose(inverse(ubo.model))) * inNormal; // TODO: Calculate this in the CPU.
-	fragNormal   = inNormal;
+	fragNormal   = mat3(transpose(inverse(model))) * inNormal; // TODO: Calculate this in the CPU.
 	fragTexCoord = inTexCoord;
 }

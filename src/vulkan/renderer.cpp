@@ -34,6 +34,7 @@
 #include "../utils.hpp"
 #include "../vertex.hpp"
 #include "renderer.hpp"
+#include "shaderStorageBufferObject.hpp"
 #include "uniformBufferObject.hpp"
 
 Renderer::Renderer():
@@ -340,12 +341,16 @@ void Renderer::createLogicalDevice()
 	vk::PhysicalDeviceFeatures deviceFeatures;
 	deviceFeatures.samplerAnisotropy = true;
 
+	// For storage buffers
+	vk::PhysicalDeviceShaderDrawParametersFeatures drawFeatures(true);
+
 	vk::DeviceCreateInfo createInfo(
 		{},
 		queueCreateInfos,
 		validationLayers,
 		deviceExtensions,
-		&deviceFeatures
+		&deviceFeatures,
+		&drawFeatures
 	);
 
 	device = physicalDevice.createDevice(createInfo);
@@ -412,6 +417,7 @@ void Renderer::drawFrame()
 		throw std::runtime_error("failed to acquire swap chain image!");
 
 	updateUniformBuffer();
+	updateStorageBuffer();
 
 	device.resetFences(frameData.getInFlight());
 
@@ -527,6 +533,22 @@ void Renderer::updateUniformBuffer()
 
 	memcpy(uboBuffer.allocationInfo.pMappedData, &ubo, sizeof(ubo));
 	uboBuffer.flush();
+}
+
+void Renderer::updateStorageBuffer()
+{
+	Buffer& ssboBuffer = frameData.getStorageBuffer();
+
+	auto* ssbo = (ShaderStorageBufferObject*)ssboBuffer.allocationInfo.pMappedData;
+
+	assert(renderables.size() < FrameData::MAX_OBJECTS);
+
+	for(size_t i = 0; i < renderables.size(); i++)
+	{
+		ssbo[i].model = renderables[i].transform;
+	}
+
+	ssboBuffer.flush();
 }
 
 void Renderer::createTextureImage()

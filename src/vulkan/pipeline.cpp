@@ -387,15 +387,16 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 	commandBuffer.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
 	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, *graphicsPipeline);
 
-	for(const auto& r: parent.renderables)
+	//for(const auto& r: parent.renderables)
+	for(size_t i = 0; i < parent.renderables.size(); i++)
 	{
-		vk::Buffer vertexBuffers[] = {r.vertexBuffer};
-		vk::DeviceSize offsets[] = {0};
+		vk::Buffer     vertexBuffers[] = {parent.renderables[i].vertexBuffer};
+		vk::DeviceSize offsets[]       = {0};
 
 		commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
-		commandBuffer.bindIndexBuffer(r.indexBuffer, 0, vk::IndexType::eUint32);
+		commandBuffer.bindIndexBuffer(parent.renderables[i].indexBuffer, 0, vk::IndexType::eUint32);
 		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, parent.frameData.getDescriptorSet(), {});
-		commandBuffer.drawIndexed(r.indexCount, 1, 0, 0, 0);
+		commandBuffer.drawIndexed(parent.renderables[i].indexCount, 1, 0, 0, i);
 	}
 	commandBuffer.endRenderPass();
 	commandBuffer.end();

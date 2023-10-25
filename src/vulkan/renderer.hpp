@@ -143,6 +143,7 @@ private:
 
 	void createDescriptorSetLayout();
 	void updateUniformBuffer();
+	void updateStorageBuffer();
 
 	void createTextureImage();
 	std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(uint32_t width,
