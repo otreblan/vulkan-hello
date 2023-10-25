@@ -23,10 +23,10 @@ class Renderer;
 
 struct Buffer
 {
-	vk::Buffer        buffer;
-	VmaAllocation     allocation;
-	VmaAllocationInfo allocationInfo;
-	VmaAllocator      allocatorRef;
+	vk::Buffer        buffer         = {};
+	VmaAllocation     allocation     = {};
+	VmaAllocationInfo allocationInfo = {};
+	VmaAllocator      allocatorRef   = {};
 
 	Buffer()         = default;
 

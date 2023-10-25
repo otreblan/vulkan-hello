@@ -45,8 +45,8 @@ Buffer::~Buffer()
 	{
 		vmaDestroyBuffer(allocatorRef, buffer, allocation);
 	}
-	buffer        = nullptr;
-	allocation    = nullptr;
+	buffer       = nullptr;
+	allocation   = nullptr;
 	allocatorRef = nullptr;
 }
 

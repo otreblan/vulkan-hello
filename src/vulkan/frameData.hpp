@@ -20,6 +20,9 @@
 
 #include <vulkan/vulkan_raii.hpp>
 
+#include "allocator.hpp"
+#include "uniformBufferObject.hpp"
+
 class Renderer;
 
 class FrameData
@@ -35,19 +38,25 @@ private:
 		mutable vk::raii::Fence     inFlight       = nullptr;
 
 		vk::raii::CommandBuffer commandBuffer = nullptr;
+
+		Buffer uniformBuffer;
+
+		vk::DescriptorSet descriptorSet;
 	};
 
 	Renderer& root;
 
-	vk::raii::CommandPool commandPool = nullptr;
+	vk::raii::DescriptorPool descriptorPool = nullptr;
 
 	std::array<Data, MAX_FRAMES_IN_FLIGHT> data;
 
 	int currentFrame = 0;
 
-	void createCommandPool();
 	void createSyncObjects();
 	void createCommandBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
+	void createUniformBuffers();
 
 public:
 	FrameData(Renderer& root);
@@ -57,11 +66,20 @@ public:
 	int incrementFrame();
 	int getCurrentFrame() const;
 
-	vk::CommandPool   getCommandPool();
-	vk::Semaphore     getImageAvailable();
-	vk::Semaphore     getRenderFinished();
-	vk::Fence         getInFlight();
-	vk::CommandBuffer getCommandBuffer();
+	vk::Semaphore      getImageAvailable(size_t imageIndex);
+	vk::Semaphore      getRenderFinished(size_t imageIndex);
+	vk::Fence          getInFlight(size_t imageIndex);
+	vk::CommandBuffer  getCommandBuffer(size_t imageIndex);
+	vk::DescriptorSet  getDescriptorSet(size_t imageIndex);
+	Buffer&            getUniformBuffer(size_t imageIndex);
+
+	vk::Semaphore      getImageAvailable();
+	vk::Semaphore      getRenderFinished();
+	vk::Fence          getInFlight();
+	vk::CommandBuffer  getCommandBuffer();
+	vk::DescriptorPool getDescriptorPool();
+	vk::DescriptorSet  getDescriptorSet();
+	Buffer&            getUniformBuffer();
 
 	friend class Renderer;
 };

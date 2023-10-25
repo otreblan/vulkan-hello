@@ -95,6 +95,17 @@ private:
 	vk::raii::SurfaceKHR     surface        = nullptr;
 
 	Allocator allocator;
+
+	vk::raii::CommandPool commandPool = nullptr;
+
+	vk::raii::ImageView textureImageView = nullptr;
+	vk::raii::Sampler   textureSampler   = nullptr;
+
+	vk::raii::Image        textureImage       = nullptr;
+	vk::raii::DeviceMemory textureImageMemory = nullptr;
+
+	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
+
 	FrameData frameData;
 	Pipeline  pipeline;
 
@@ -103,14 +114,6 @@ private:
 	// Non owning reference to the current scene.
 	Scene*                  activeScene = nullptr;
 	std::vector<Renderable> renderables;
-
-	vk::raii::DescriptorSetLayout descriptorSetLayout = nullptr;
-
-	vk::raii::Image        textureImage       = nullptr;
-	vk::raii::DeviceMemory textureImageMemory = nullptr;
-
-	vk::raii::ImageView textureImageView = nullptr;
-	vk::raii::Sampler   textureSampler   = nullptr;
 
 	void initWindow();
 	void initVulkan();
@@ -127,6 +130,7 @@ private:
 	void createLogicalDevice();
 
 	void createSurface();
+	void createCommandPool();
 
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	SwapChainSupportDetails querySwapChainSupport(vk::PhysicalDevice device);
@@ -138,7 +142,7 @@ private:
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
 	void createDescriptorSetLayout();
-	void updateUniformBuffer(uint32_t currentImage);
+	void updateUniformBuffer();
 
 	void createTextureImage();
 	std::pair<vk::raii::Image, vk::raii::DeviceMemory> createImage(uint32_t width,

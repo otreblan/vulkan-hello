@@ -37,9 +37,6 @@ void Pipeline::create()
 	createRenderPass();
 	createGraphicsPipeline();
 	createFramebuffers();
-	createUniformBuffers();
-	createDescriptorPool();
-	createDescriptorSets();
 }
 
 void Pipeline::recreate()
@@ -63,8 +60,6 @@ void Pipeline::recreate()
 	renderPass.clear();
 	swapChainImageViews.clear();
 	swapChain.clear();
-	uniformBuffers.clear();
-	descriptorPool.clear();
 
 	create();
 };
@@ -229,87 +224,6 @@ void Pipeline::createFramebuffers()
 		swapChainFramebuffers.emplace_back(parent.device.createFramebuffer(framebufferInfo));
 	}
 }
-
-void Pipeline::createUniformBuffers()
-{
-	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
-
-	uniformBuffers.reserve(swapChainImages.size());
-
-	for(size_t i = 0; i < swapChainImages.size(); i++)
-	{
-		uniformBuffers.emplace_back(parent.allocator.createBuffer(
-			bufferSize,
-			vk::BufferUsageFlagBits::eUniformBuffer,
-			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
-		));
-	}
-}
-
-void Pipeline::createDescriptorPool()
-{
-	std::array<vk::DescriptorPoolSize, 2> poolSizes
-	{
-		vk::DescriptorPoolSize(
-			vk::DescriptorType::eUniformBuffer,
-			swapChainImages.size()
-		),
-		vk::DescriptorPoolSize(
-			vk::DescriptorType::eCombinedImageSampler,
-			swapChainImages.size()
-		)
-	};
-
-	vk::DescriptorPoolCreateInfo poolInfo({}, swapChainImages.size(), poolSizes);
-
-	descriptorPool = parent.device.createDescriptorPool(poolInfo);
-}
-
-void Pipeline::createDescriptorSets()
-{
-	std::vector<vk::DescriptorSetLayout> layouts(swapChainImages.size(), *parent.descriptorSetLayout);
-
-	vk::DescriptorSetAllocateInfo allocInfo(*descriptorPool, layouts);
-
-	descriptorSets = (*parent.device).allocateDescriptorSets(allocInfo);
-
-	for(size_t i = 0; i < swapChainImages.size(); i++)
-	{
-		vk::DescriptorBufferInfo bufferInfo(uniformBuffers[i].buffer, 0, sizeof(UniformBufferObject));
-
-		vk::DescriptorImageInfo imageInfo(
-			*parent.textureSampler,
-			*parent.textureImageView,
-			vk::ImageLayout::eShaderReadOnlyOptimal
-		);
-
-		std::array<vk::WriteDescriptorSet, 2> descriptorWrites
-		{
-			vk::WriteDescriptorSet(
-				descriptorSets[i],
-				0,
-				0,
-				vk::DescriptorType::eUniformBuffer,
-				nullptr,
-				bufferInfo,
-				nullptr
-			),
-			vk::WriteDescriptorSet(
-				descriptorSets[i],
-				1,
-				0,
-				vk::DescriptorType::eCombinedImageSampler,
-				imageInfo,
-				nullptr,
-				nullptr
-			)
-		};
-
-		parent.device.updateDescriptorSets(descriptorWrites, nullptr);
-	}
-}
-
-
 
 void Pipeline::createGraphicsPipeline()
 {
@@ -480,7 +394,7 @@ void Pipeline::recordCommandBuffer(vk::CommandBuffer commandBuffer, uint32_t ima
 
 		commandBuffer.bindVertexBuffers(0, vertexBuffers, offsets);
 		commandBuffer.bindIndexBuffer(r.indexBuffer, 0, vk::IndexType::eUint32);
-		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, descriptorSets[imageIndex], {});
+		commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, *pipelineLayout, 0, parent.frameData.getDescriptorSet(), {});
 		commandBuffer.drawIndexed(r.indexCount, 1, 0, 0, 0);
 	}
 	commandBuffer.endRenderPass();

@@ -47,10 +47,6 @@ public:
 	vk::raii::PipelineLayout           pipelineLayout   = nullptr;
 	vk::raii::Pipeline                 graphicsPipeline = nullptr;
 	std::vector<vk::raii::Framebuffer> swapChainFramebuffers;
-	std::vector<Buffer>                uniformBuffers;
-
-	vk::raii::DescriptorPool       descriptorPool = nullptr;
-	std::vector<vk::DescriptorSet> descriptorSets;
 
 	Pipeline(Renderer& parent);
 	void create();
@@ -66,8 +62,5 @@ private:
 	vk::raii::ShaderModule createShaderModule(std::span<char> code);
 	void createRenderPass();
 	void createFramebuffers();
-	void createUniformBuffers();
-	void createDescriptorPool();
-	void createDescriptorSets();
 	void createGraphicsPipeline();
 };

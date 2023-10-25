@@ -15,7 +15,6 @@
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "frameData.hpp"
-#include "queueFamilyIndices.hpp"
 #include "renderer.hpp"
 
 FrameData::FrameData(Renderer& root):
@@ -24,9 +23,11 @@ FrameData::FrameData(Renderer& root):
 
 void FrameData::create()
 {
-	createCommandPool();
 	createSyncObjects();
 	createCommandBuffers();
+	createDescriptorPool();
+	createUniformBuffers();
+	createDescriptorSets();
 }
 
 int FrameData::incrementFrame()
@@ -39,41 +40,69 @@ int FrameData::getCurrentFrame() const
 	return currentFrame;
 }
 
-vk::CommandPool FrameData::getCommandPool()
+vk::Semaphore FrameData::getImageAvailable(size_t imageIndex)
 {
-	return *commandPool;
+	return *data[imageIndex].imageAvailable;
+}
+
+vk::Semaphore FrameData::getRenderFinished(size_t imageIndex)
+{
+	return *data[imageIndex].renderFinished;
+}
+
+vk::Fence FrameData::getInFlight(size_t imageIndex)
+{
+	return *data[imageIndex].inFlight;
+}
+
+vk::CommandBuffer FrameData::getCommandBuffer(size_t imageIndex)
+{
+	return *data[imageIndex].commandBuffer;
+}
+
+vk::DescriptorSet FrameData::getDescriptorSet(size_t imageIndex)
+{
+	return data[imageIndex].descriptorSet;
+}
+
+Buffer& FrameData::getUniformBuffer(size_t imageIndex)
+{
+	return data[imageIndex].uniformBuffer;
 }
 
 vk::Semaphore FrameData::getImageAvailable()
 {
-	return *data[getCurrentFrame()].imageAvailable;
+	return getImageAvailable(getCurrentFrame());
 }
 
 vk::Semaphore FrameData::getRenderFinished()
 {
-	return *data[getCurrentFrame()].renderFinished;
+	return getRenderFinished(getCurrentFrame());
 }
 
 vk::Fence FrameData::getInFlight()
 {
-	return *data[getCurrentFrame()].inFlight;
+	return getInFlight(getCurrentFrame());
 }
 
 vk::CommandBuffer FrameData::getCommandBuffer()
 {
-	return *data[getCurrentFrame()].commandBuffer;
+	return getCommandBuffer(getCurrentFrame());
 }
 
-void FrameData::createCommandPool()
+vk::DescriptorPool FrameData::getDescriptorPool()
 {
-	QueueFamilyIndices queueFamilyIndices = root.findQueueFamilies(*root.physicalDevice);
+	return *descriptorPool;
+}
 
-	vk::CommandPoolCreateInfo poolInfo(
-		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
-		queueFamilyIndices.graphicsFamily.value()
-	);
+vk::DescriptorSet FrameData::getDescriptorSet()
+{
+	return getDescriptorSet(getCurrentFrame());
+}
 
-	commandPool = root.device.createCommandPool(poolInfo);
+Buffer& FrameData::getUniformBuffer()
+{
+	return getUniformBuffer(getCurrentFrame());
 }
 
 void FrameData::createSyncObjects()
@@ -93,7 +122,7 @@ void FrameData::createSyncObjects()
 void FrameData::createCommandBuffers()
 {
 	vk::CommandBufferAllocateInfo allocInfo(
-		*commandPool,
+		*root.commandPool,
 		vk::CommandBufferLevel::ePrimary,
 		data.size()
 	);
@@ -103,5 +132,87 @@ void FrameData::createCommandBuffers()
 	for(size_t i = 0; i < data.size(); i++)
 	{
 		data[i].commandBuffer = std::move(buffers[i]);
+	}
+}
+
+void FrameData::createDescriptorPool()
+{
+	std::array<vk::DescriptorPoolSize, 2> poolSizes
+	{
+		vk::DescriptorPoolSize(
+			vk::DescriptorType::eUniformBuffer,
+			MAX_FRAMES_IN_FLIGHT
+		),
+		vk::DescriptorPoolSize(
+			vk::DescriptorType::eCombinedImageSampler,
+			MAX_FRAMES_IN_FLIGHT
+		)
+	};
+
+	vk::DescriptorPoolCreateInfo poolInfo({}, MAX_FRAMES_IN_FLIGHT, poolSizes);
+
+	descriptorPool = root.device.createDescriptorPool(poolInfo);
+}
+
+void FrameData::createDescriptorSets()
+{
+	std::vector<vk::DescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, *root.descriptorSetLayout);
+
+	vk::DescriptorSetAllocateInfo allocInfo(*descriptorPool, layouts);
+
+	auto descriptorSets = (*root.device).allocateDescriptorSets(allocInfo);
+
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		data[i].descriptorSet = descriptorSets[i];
+	}
+
+	for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vk::DescriptorBufferInfo bufferInfo(data[i].uniformBuffer, 0, sizeof(UniformBufferObject));
+
+		vk::DescriptorImageInfo imageInfo(
+			*root.textureSampler,
+			*root.textureImageView,
+			vk::ImageLayout::eShaderReadOnlyOptimal
+		);
+
+		std::array<vk::WriteDescriptorSet, 2> descriptorWrites
+		{
+			vk::WriteDescriptorSet(
+				data[i].descriptorSet,
+				0,
+				0,
+				vk::DescriptorType::eUniformBuffer,
+				nullptr,
+				bufferInfo,
+				nullptr
+			),
+			vk::WriteDescriptorSet(
+				data[i].descriptorSet,
+				1,
+				0,
+				vk::DescriptorType::eCombinedImageSampler,
+				imageInfo,
+				nullptr,
+				nullptr
+			)
+		};
+
+		root.device.updateDescriptorSets(descriptorWrites, nullptr);
+	}
+}
+
+void FrameData::createUniformBuffers()
+{
+	vk::DeviceSize bufferSize = sizeof(UniformBufferObject);
+
+	for(size_t i = 0; i < data.size(); i++)
+	{
+		data[i].uniformBuffer = root.allocator.createBuffer(
+			bufferSize,
+			vk::BufferUsageFlagBits::eUniformBuffer,
+			vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+		);
 	}
 }

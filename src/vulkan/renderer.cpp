@@ -84,11 +84,12 @@ void Renderer::initVulkan()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	allocator.create();
-	frameData.create();
-	createDescriptorSetLayout();
+	createCommandPool();
+	createTextureSampler();
 	createTextureImage();
 	createTextureImageView();
-	createTextureSampler();
+	createDescriptorSetLayout();
+	frameData.create();
 	pipeline.create();
 }
 
@@ -362,6 +363,18 @@ void Renderer::createSurface()
 	surface = vk::raii::SurfaceKHR(instance, _surface);
 }
 
+void Renderer::createCommandPool()
+{
+	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(*physicalDevice);
+
+	vk::CommandPoolCreateInfo poolInfo(
+		vk::CommandPoolCreateFlagBits::eResetCommandBuffer,
+		queueFamilyIndices.graphicsFamily.value()
+	);
+
+	commandPool = device.createCommandPool(poolInfo);
+}
+
 bool Renderer::checkDeviceExtensionSupport([[maybe_unused]]vk::PhysicalDevice device)
 {
 	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
@@ -398,7 +411,7 @@ void Renderer::drawFrame()
 	else if (result != vk::Result::eSuccess && result != vk::Result::eSuboptimalKHR)
 		throw std::runtime_error("failed to acquire swap chain image!");
 
-	updateUniformBuffer(imageIndex);
+	updateUniformBuffer();
 
 	device.resetFences(frameData.getInFlight());
 
@@ -479,7 +492,7 @@ void Renderer::createDescriptorSetLayout()
 	descriptorSetLayout = device.createDescriptorSetLayout(layoutInfo);
 }
 
-void Renderer::updateUniformBuffer(uint32_t currentImage)
+void Renderer::updateUniformBuffer()
 {
 	using namespace std::chrono;
 	using namespace glm;
@@ -502,7 +515,7 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
 
 	ubo.projView = ubo.proj * ubo.view;
 
-	Buffer& uboBuffer = pipeline.uniformBuffers[currentImage];
+	Buffer& uboBuffer = frameData.getUniformBuffer();
 
 	memcpy(uboBuffer.allocationInfo.pMappedData, &ubo, sizeof(ubo));
 	uboBuffer.flush();
@@ -721,7 +734,7 @@ void Renderer::createTextureSampler()
 
 SingleCommand Renderer::makeSingleCommand()
 {
-	return {device, frameData.getCommandPool(), *graphicsQueue};
+	return {device, *commandPool, *graphicsQueue};
 }
 
 vk::Extent2D Renderer::getWindowSize() const
