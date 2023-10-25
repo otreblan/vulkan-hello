@@ -517,6 +517,10 @@ void Renderer::updateUniformBuffer()
 	auto currentTime = high_resolution_clock::now();
 	float dTime = duration<float, seconds::period>(currentTime - startTime).count();
 
+	auto& t = activeScene->registry.get<component::Transform>(activeScene->root);
+
+	t.matrix = rotate(mat4(1), dTime * radians(90.0f), vec3(0.0f, 1.0f, 0.0f));
+
 	UniformBufferObject ubo
 	{
 		.view  = lookAt(vec3(3.0f, 4.0f, 3.0f), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f)),
