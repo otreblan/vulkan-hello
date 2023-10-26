@@ -13,6 +13,7 @@
 * `glslc`
 * `libassimp-dev`
 * `libboost-container-dev`
+* `libbullet-dev`
 * `libglfw3-dev`
 * `libglm-dev`
 * `libstb-dev`

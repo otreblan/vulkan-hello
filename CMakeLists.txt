@@ -48,6 +48,7 @@ add_subdirectory(src) # Sources list
 pkg_check_modules(libraries REQUIRED
 	IMPORTED_TARGET
 		assimp
+		bullet
 		entt
 		glfw3
 		glm
