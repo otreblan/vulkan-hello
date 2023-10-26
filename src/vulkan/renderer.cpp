@@ -89,8 +89,6 @@ void Renderer::setActiveScene(Scene* scene)
 
 void Renderer::initWindow()
 {
-	glfwInit();
-
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -126,7 +124,6 @@ void Renderer::cleanup()
 #endif
 
 	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 void Renderer::createInstance()

@@ -23,10 +23,18 @@ Engine::Engine(const std::filesystem::path& mainScene):
 	mainScene(mainScene)
 {};
 
+Engine::~Engine()
+{
+	glfwTerminate();
+}
+
 int Engine::run()
 {
 	using namespace std::chrono;
 	using namespace ecs_system;
+
+	if(!glfwInit())
+		return EXIT_FAILURE;
 
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;

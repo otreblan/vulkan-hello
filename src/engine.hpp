@@ -25,6 +25,7 @@ class Engine
 {
 public:
 	Engine(const std::filesystem::path& mainScene);
+	~Engine();
 
 	/// Starts the engine and returns an exit code.
 	int run();
