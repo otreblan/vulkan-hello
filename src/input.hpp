@@ -31,10 +31,17 @@ private:
 	bool aPressed = false;
 	bool sPressed = false;
 	bool dPressed = false;
+
+	bool spacePressed = false;
+
+	void setPressed(bool& pressed, int action);
 public:
 	Input(Engine& engine);
 
 	glm::vec2 getAxis() const;
+
+	/// Returns true if space is pressed, false otherwise.
+	bool space() const;
 
 	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

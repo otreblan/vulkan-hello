@@ -70,6 +70,11 @@ Input& Engine::getInput()
 	return input;
 }
 
+Settings& Engine::getSettings()
+{
+	return settings;
+}
+
 void Engine::setRenderer(Renderer* renderer)
 {
 	activeRenderer = renderer;

@@ -30,6 +30,8 @@ private:
 
 	float rotationSpeed = 90.f;
 
+	// TODO: Make this more declarative in the input system
+	bool spacePressed = false;
 public:
 	Mawaru(Engine& engine);
 

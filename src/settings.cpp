@@ -14,24 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
+#include "settings.hpp"
 
-#include <vector>
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_raii.hpp>
-
-#include "../settings.hpp"
-
-struct SwapChainSupportDetails
+void Settings::flush()
 {
-	const Settings&                   settings;
-	vk::SurfaceCapabilitiesKHR        capabilities;
-	std::vector<vk::SurfaceFormatKHR> formats;
-	std::vector<vk::PresentModeKHR>   presentModes;
+	changed = true;
+}
 
-	SwapChainSupportDetails(const Settings& settings, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
-
-	vk::Extent2D getExtent(vk::Extent2D windowExtent) const;
-	vk::SurfaceFormatKHR getSurfaceFormat() const;
-	vk::PresentModeKHR getPresentMode() const;
-};
+bool Settings::hasChanged()
+{
+	if(changed)
+	{
+		changed = false;
+		return true;
+	}
+	else
+		return false;
+}

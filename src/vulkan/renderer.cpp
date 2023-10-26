@@ -390,7 +390,7 @@ bool Renderer::checkDeviceExtensionSupport([[maybe_unused]]vk::PhysicalDevice de
 
 SwapChainSupportDetails Renderer::querySwapChainSupport(vk::PhysicalDevice device)
 {
-	return {device, *surface};
+	return {engine.getSettings(), device, *surface};
 }
 
 void Renderer::drawFrame()
@@ -439,7 +439,7 @@ void Renderer::drawFrame()
 
 	result = presentQueue.presentKHR(presentInfo);
 
-	if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || framebufferResized)
+	if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR || framebufferResized || engine.getSettings().hasChanged())
 	{
 		framebufferResized = false;
 		pipeline.recreate();

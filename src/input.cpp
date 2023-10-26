@@ -27,6 +27,14 @@ Input::Input(Engine& engine):
 {
 }
 
+void Input::setPressed(bool& pressed, int action)
+{
+	if(action == GLFW_PRESS)
+		pressed = true;
+	else if(action == GLFW_RELEASE)
+		pressed = false;
+}
+
 glm::vec2 Input::getAxis() const
 {
 	return Axis;
@@ -37,31 +45,23 @@ void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 	switch(key)
 	{
 		case GLFW_KEY_W:
-			if(action == GLFW_PRESS)
-				wPressed = true;
-			else if(action == GLFW_RELEASE)
-				wPressed = false;
+			setPressed(wPressed, action);
 			break;
 
 		case GLFW_KEY_A:
-			if(action == GLFW_PRESS)
-				aPressed = true;
-			else if(action == GLFW_RELEASE)
-				aPressed = false;
+			setPressed(aPressed, action);
 			break;
 
 		case GLFW_KEY_S:
-			if(action == GLFW_PRESS)
-				sPressed = true;
-			else if(action == GLFW_RELEASE)
-				sPressed = false;
+			setPressed(sPressed, action);
 			break;
 
 		case GLFW_KEY_D:
-			if(action == GLFW_PRESS)
-				dPressed = true;
-			else if(action == GLFW_RELEASE)
-				dPressed = false;
+			setPressed(dPressed, action);
+			break;
+
+		case GLFW_KEY_SPACE:
+			setPressed(spacePressed, action);
 			break;
 	}
 
@@ -80,4 +80,9 @@ void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 		Axis.x = 0;
 
 	//TODO
+}
+
+bool Input::space() const
+{
+	return spacePressed;
 }

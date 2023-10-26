@@ -42,6 +42,22 @@ void Mawaru::update(float delta, void*)
 	float rotation = delta * engine.getInput().getAxis().x * glm::radians(rotationSpeed);
 
 	transform.matrix = glm::rotate(transform.matrix, rotation, glm::vec3(0, 1, 0));
+
+	if(engine.getInput().space())
+	{
+		if(!spacePressed)
+		{
+			spacePressed = true;
+			std::cout << "Click\n";
+
+			engine.getSettings().vsync = !engine.getSettings().vsync;
+			engine.getSettings().flush();
+		}
+	}
+	else
+	{
+		spacePressed = false;
+	}
 }
 
 }

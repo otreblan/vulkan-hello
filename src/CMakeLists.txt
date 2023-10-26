@@ -28,6 +28,7 @@ target_sources(${PROJECT_NAME}
 		main.cpp
 		mesh.cpp
 		scene.cpp
+		settings.cpp
 		stb_image.cpp
 		utils.cpp
 		vertex.cpp

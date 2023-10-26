@@ -18,7 +18,8 @@
 
 #include "swapChainSupportDetails.hpp"
 
-SwapChainSupportDetails::SwapChainSupportDetails(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface):
+SwapChainSupportDetails::SwapChainSupportDetails(const Settings& settings, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface):
+	settings(settings),
 	capabilities(physicalDevice.getSurfaceCapabilitiesKHR(surface)),
 	formats(physicalDevice.getSurfaceFormatsKHR(surface)),
 	presentModes(physicalDevice.getSurfacePresentModesKHR(surface))
@@ -56,7 +57,7 @@ vk::PresentModeKHR SwapChainSupportDetails::getPresentMode() const
 
 	for(const auto& availablePresentMode: presentModes)
 	{
-		if(availablePresentMode == eMailbox)
+		if(availablePresentMode == (settings.vsync ? eFifoRelaxed : eMailbox))
 			return availablePresentMode;
 	}
 

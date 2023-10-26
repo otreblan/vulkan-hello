@@ -16,22 +16,14 @@
 
 #pragma once
 
-#include <vector>
-#include <vulkan/vulkan.hpp>
-#include <vulkan/vulkan_raii.hpp>
-
-#include "../settings.hpp"
-
-struct SwapChainSupportDetails
+struct Settings
 {
-	const Settings&                   settings;
-	vk::SurfaceCapabilitiesKHR        capabilities;
-	std::vector<vk::SurfaceFormatKHR> formats;
-	std::vector<vk::PresentModeKHR>   presentModes;
+private:
+	bool changed = false;
 
-	SwapChainSupportDetails(const Settings& settings, vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
+public:
+	bool vsync = false;
 
-	vk::Extent2D getExtent(vk::Extent2D windowExtent) const;
-	vk::SurfaceFormatKHR getSurfaceFormat() const;
-	vk::PresentModeKHR getPresentMode() const;
+	void flush();
+	bool hasChanged();
 };

@@ -20,6 +20,7 @@
 
 #include "input.hpp"
 #include "scene.hpp"
+#include "settings.hpp"
 #include "vulkan/renderer.hpp"
 #include "window.hpp"
 
@@ -35,6 +36,7 @@ public:
 	Scene&      getActiveScene();
 	GLFWwindow* getWindow();
 	Input&      getInput();
+	Settings&   getSettings();
 	void        setRenderer(Renderer* renderer);
 
 	/// Stops the engine and exits
@@ -47,9 +49,10 @@ public:
 	}
 
 private:
-	Scene  mainScene;
-	Window window;
-	Input  input;
+	Scene    mainScene;
+	Window   window;
+	Input    input;
+	Settings settings;
 
 	/// Non owning reference
 	Renderer* activeRenderer;
