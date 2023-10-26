@@ -20,11 +20,14 @@
 #include "game.hpp"
 #include "mawaru.hpp"
 
-ecs_system::Game::Game(Engine& engine):
+namespace ecs::system
+{
+
+Game::Game(Engine& engine):
 	engine(engine)
 {}
 
-void ecs_system::Game::init()
+void Game::init()
 {
 	std::cout << "Game started\n";
 
@@ -32,7 +35,9 @@ void ecs_system::Game::init()
 	scheduler.attach<Mawaru>(engine);
 }
 
-void ecs_system::Game::update(float delta, void*)
+void Game::update(float delta, void*)
 {
 	scheduler.update(delta);
+}
+
 }

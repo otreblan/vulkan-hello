@@ -32,7 +32,7 @@ Engine::~Engine()
 int Engine::run()
 {
 	using namespace std::chrono;
-	using namespace ecs_system;
+	using namespace ecs::system;
 
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;

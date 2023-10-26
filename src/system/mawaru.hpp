@@ -20,7 +20,7 @@
 
 class Engine;
 
-namespace ecs_system
+namespace ecs::system
 {
 
 class Mawaru: public entt::process<Mawaru, float>
@@ -37,4 +37,4 @@ public:
 	void update(float delta, void*);
 };
 
-};
+}

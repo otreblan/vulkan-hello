@@ -41,7 +41,7 @@ struct Renderable
 
 struct Scene
 {
-	using Transform = component::Transform;
+	using Transform = ecs::component::Transform;
 	using pgroup_t  = group_t<const Transform, const Transform::Parent>;
 
 	Scene(const std::filesystem::path& scenePath);

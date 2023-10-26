@@ -22,21 +22,26 @@
 #include "../engine.hpp"
 #include "mawaru.hpp"
 
-ecs_system::Mawaru::Mawaru(Engine& engine):
+namespace ecs::system
+{
+
+Mawaru::Mawaru(Engine& engine):
 	engine(engine)
 {}
 
-void ecs_system::Mawaru::init()
+void Mawaru::init()
 {
 }
 
-void ecs_system::Mawaru::update(float delta, void*)
+void Mawaru::update(float delta, void*)
 {
-	using namespace glm;
+	using namespace ecs::component;
 
-	auto& transform = engine.get<component::Transform>(engine.getActiveScene().root);
+	auto& transform = engine.get<Transform>(engine.getActiveScene().root);
 
-	float rotation = delta * engine.getInput().getAxis().x * radians(rotationSpeed);
+	float rotation = delta * engine.getInput().getAxis().x * glm::radians(rotationSpeed);
 
-	transform.matrix = rotate(transform.matrix, rotation, vec3(0.0f, 1.0f, 0.0f));
+	transform.matrix = glm::rotate(transform.matrix, rotation, glm::vec3(0, 1, 0));
+}
+
 }

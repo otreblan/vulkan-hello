@@ -18,7 +18,7 @@
 
 #include <string>
 
-namespace component
+namespace ecs::component
 {
 
 struct alignas(64) Properties

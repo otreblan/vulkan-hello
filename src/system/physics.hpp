@@ -23,7 +23,7 @@
 
 class Engine;
 
-namespace ecs_system
+namespace ecs::system
 {
 
 class Physics: public entt::process<Physics, float>
@@ -44,4 +44,4 @@ public:
 	void update(float delta, void*);
 };
 
-};
+}

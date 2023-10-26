@@ -18,7 +18,7 @@
 
 #include <boost/container/small_vector.hpp>
 
-namespace component
+namespace ecs::component
 {
 
 struct alignas(64) MeshInstance

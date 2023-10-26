@@ -62,7 +62,7 @@ void Scene::loadMeshes(const std::span<aiMesh*> newMeshes)
 
 entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 {
-	using namespace component;
+	using namespace ecs::component;
 
 	if(node == nullptr)
 		return entt::null;
@@ -93,7 +93,7 @@ entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 
 std::vector<Renderable> Scene::getRenderables() const
 {
-	using namespace component;
+	using namespace ecs::component;
 
 	std::vector<Renderable> renderables;
 	auto view = registry.view<MeshInstance>();

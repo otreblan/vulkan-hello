@@ -21,7 +21,7 @@
 
 #include "../utils.hpp"
 
-namespace component
+namespace ecs::component
 {
 
 struct Transform

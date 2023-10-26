@@ -19,11 +19,14 @@
 #include "../engine.hpp"
 #include "physics.hpp"
 
-ecs_system::Physics::Physics(Engine& engine):
+namespace ecs::system
+{
+
+Physics::Physics(Engine& engine):
 	engine(engine)
 {}
 
-void ecs_system::Physics::init()
+void Physics::init()
 {
 	std::cout << "Physics started\n";
 
@@ -42,7 +45,7 @@ void ecs_system::Physics::init()
 	// TODO: Upload rigidbodies
 }
 
-void ecs_system::Physics::update(float delta, void*)
+void Physics::update(float delta, void*)
 {
 	world->stepSimulation(delta, 10);
 
@@ -63,4 +66,6 @@ void ecs_system::Physics::update(float delta, void*)
 
 		// TODO: Update engine transforms
 	}
+}
+
 }
