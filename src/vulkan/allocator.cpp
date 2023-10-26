@@ -41,13 +41,7 @@ Buffer& Buffer::operator=(Buffer&& other) noexcept
 
 Buffer::~Buffer()
 {
-	if(buffer)
-	{
-		vmaDestroyBuffer(allocatorRef, buffer, allocation);
-	}
-	buffer       = nullptr;
-	allocation   = nullptr;
-	allocatorRef = nullptr;
+	clear();
 }
 
 Buffer::operator vk::Buffer&()
@@ -58,6 +52,16 @@ Buffer::operator vk::Buffer&()
 vk::Result Buffer::flush()
 {
 	return (vk::Result)vmaFlushAllocation(allocatorRef, allocation, 0, VK_WHOLE_SIZE);
+}
+
+void Buffer::clear()
+{
+	if(buffer)
+		vmaDestroyBuffer(allocatorRef, buffer, allocation);
+
+	buffer       = nullptr;
+	allocation   = nullptr;
+	allocatorRef = nullptr;
 }
 
 Allocator::Allocator(Renderer& root):

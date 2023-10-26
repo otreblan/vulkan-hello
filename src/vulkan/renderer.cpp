@@ -37,24 +37,47 @@
 #include "shaderStorageBufferObject.hpp"
 #include "uniformBufferObject.hpp"
 
-Renderer::Renderer():
+Renderer::Renderer(Scene* activeScene):
 	allocator(*this),
 	frameData(*this),
-	pipeline(*this)
+	pipeline(*this),
+	activeScene(activeScene)
 {}
 
-void Renderer::run()
+Renderer::~Renderer() noexcept
+{
+	cleanup();
+	if(activeScene)
+	{
+		for(auto& mesh: activeScene->meshes)
+		{
+			mesh.vertexBuffer.clear();
+			mesh.indexBuffer.clear();
+		}
+	}
+}
+
+void Renderer::init()
 {
 	initWindow();
 	initVulkan();
 
-	if(activeScene)
-	{
-		activeScene->uploadToGpu(*this);
-		mainLoop();
-	}
+	if(!activeScene)
+		fail();
 
-	cleanup();
+	activeScene->uploadToGpu(*this);
+}
+
+void Renderer::update([[maybe_unused]] float delta, void*)
+{
+	if(glfwWindowShouldClose(window))
+		succeed();
+
+	glfwPollEvents();
+	renderables = activeScene->getRenderables();
+	drawFrame();
+
+	device.waitIdle();
 }
 
 void Renderer::setActiveScene(Scene* scene)
@@ -92,18 +115,6 @@ void Renderer::initVulkan()
 	createDescriptorSetLayout();
 	frameData.create();
 	pipeline.create();
-}
-
-void Renderer::mainLoop()
-{
-	while (!glfwWindowShouldClose(window))
-	{
-		glfwPollEvents();
-		renderables = activeScene->getRenderables();
-		drawFrame();
-	}
-
-	device.waitIdle();
 }
 
 void Renderer::cleanup()

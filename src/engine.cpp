@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <chrono>
+
 #include "engine.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
@@ -22,8 +24,24 @@ Engine::Engine(const std::filesystem::path& mainScene):
 
 int Engine::run()
 {
-	renderer.setActiveScene(&mainScene);
-	renderer.run();
+	using namespace std::chrono;
+
+	auto currentTime = high_resolution_clock::now();
+	float delta      = 1.f/60;
+
+	entt::basic_scheduler<float> scheduler;
+
+	scheduler.attach<Renderer>(&mainScene);
+
+	while(!scheduler.empty())
+	{
+		auto lastTime = currentTime;
+
+		scheduler.update(delta);
+
+		currentTime = high_resolution_clock::now();
+		delta       = duration<float, seconds::period>(currentTime - lastTime).count();
+	}
 
 	return EXIT_SUCCESS;
 }

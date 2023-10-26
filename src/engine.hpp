@@ -30,6 +30,5 @@ public:
 	int run();
 
 private:
-	Renderer renderer;
-	Scene    mainScene;
+	Scene mainScene;
 };

@@ -27,10 +27,9 @@
 struct aiMesh;
 class Renderer;
 
-// TODO: Make this data-oriented
-class Mesh
+// TODO: Make this data-oriented and fix Buffer ownership
+struct Mesh
 {
-private:
 	std::vector<Vertex>   vertices;
 	std::vector<uint32_t> indices;
 
@@ -43,7 +42,6 @@ private:
 	Buffer uploadVertices(Renderer& root) const;
 	Buffer uploadIndices(Renderer& root) const;
 
-public:
 	Mesh(const aiMesh& mesh);
 
 	bool load();

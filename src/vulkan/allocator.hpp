@@ -40,6 +40,7 @@ struct Buffer
 
 	operator vk::Buffer&();
 	vk::Result flush();
+	void clear();
 };
 
 class Allocator

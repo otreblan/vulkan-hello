@@ -33,14 +33,16 @@
 #include "singleCommand.hpp"
 #include "frameData.hpp"
 
-class Renderer
+class Renderer: public entt::process<Renderer, float>
 {
 	using path = std::filesystem::path;
 
 public:
-	Renderer();
+	Renderer(Scene* activeScene);
+	~Renderer() noexcept;
 
-	void run();
+	void init();
+	void update(float delta, void*);
 	void setActiveScene(Scene* scene);
 
 private:
@@ -117,7 +119,6 @@ private:
 
 	void initWindow();
 	void initVulkan();
-	void mainLoop();
 	void cleanup();
 
 	void createInstance();
