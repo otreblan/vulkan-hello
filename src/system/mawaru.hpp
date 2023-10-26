@@ -14,25 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <iostream>
+#pragma once
 
-#include "../engine.hpp"
-#include "game.hpp"
-#include "mawaru.hpp"
+#include <entt/entt.hpp>
 
-ecs_system::Game::Game(Engine& engine):
-	engine(engine)
-{}
+class Engine;
 
-void ecs_system::Game::init()
+namespace ecs_system
 {
-	std::cout << "Game started\n";
 
-	// Asign more systems here:
-	scheduler.attach<Mawaru>(engine);
-}
-
-void ecs_system::Game::update(float delta, void*)
+class Mawaru: public entt::process<Mawaru, float>
 {
-	scheduler.update(delta);
-}
+private:
+	Engine& engine;
+
+	float rotationSpeed = 90.f;
+
+public:
+	Mawaru(Engine& engine);
+
+	void init();
+	void update(float delta, void*);
+};
+
+};

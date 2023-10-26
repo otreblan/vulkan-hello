@@ -16,23 +16,27 @@
 
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "../engine.hpp"
-#include "game.hpp"
 #include "mawaru.hpp"
 
-ecs_system::Game::Game(Engine& engine):
+ecs_system::Mawaru::Mawaru(Engine& engine):
 	engine(engine)
 {}
 
-void ecs_system::Game::init()
+void ecs_system::Mawaru::init()
 {
-	std::cout << "Game started\n";
-
-	// Asign more systems here:
-	scheduler.attach<Mawaru>(engine);
 }
 
-void ecs_system::Game::update(float delta, void*)
+void ecs_system::Mawaru::update(float delta, void*)
 {
-	scheduler.update(delta);
+	using namespace glm;
+
+	Scene& scene    = engine.getActiveScene();
+	auto& transform = scene.registry.get<component::Transform>(scene.root);
+
+	transform.matrix = rotate(transform.matrix, delta * radians(rotationSpeed), vec3(0.0f, 1.0f, 0.0f));
+
 }
