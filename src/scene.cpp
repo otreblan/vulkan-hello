@@ -32,9 +32,9 @@ Scene::Scene(const std::filesystem::path& scenePath)
 
 	const aiScene* scene = importer.ReadFile(
 		scenePath,
+		aiProcess_GenBoundingBoxes |
 		aiProcess_ImproveCacheLocality |
 		aiProcess_JoinIdenticalVertices |
-		aiProcess_RemoveRedundantMaterials |
 		aiProcess_Triangulate
 	);
 

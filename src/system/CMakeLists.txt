@@ -18,4 +18,5 @@ target_sources(${PROJECT_NAME}
 	PRIVATE
 		game.cpp
 		mawaru.cpp
+		physics.cpp
 )

@@ -18,6 +18,7 @@
 
 #include "engine.hpp"
 #include "system/game.hpp"
+#include "system/physics.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
 	mainScene(mainScene),
@@ -38,6 +39,7 @@ int Engine::run()
 
 	scheduler.attach([](auto...){glfwPollEvents();});
 	scheduler.attach<Game>(*this);
+	scheduler.attach<Physics>(*this);
 	scheduler.attach<Renderer>(*this);
 
 	while(!scheduler.empty() && !shouldStop)
