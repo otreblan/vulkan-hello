@@ -17,6 +17,7 @@
 #include <assimp/matrix4x4.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
+#include <entt/entt.hpp>
 #include <glm/mat4x4.hpp>
 
 template <typename T, std::size_t N>
