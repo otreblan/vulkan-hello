@@ -36,11 +36,25 @@ void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 {
 	switch(key)
 	{
+		case GLFW_KEY_W:
+			if(action == GLFW_PRESS)
+				wPressed = true;
+			else if(action == GLFW_RELEASE)
+				wPressed = false;
+			break;
+
 		case GLFW_KEY_A:
 			if(action == GLFW_PRESS)
 				aPressed = true;
 			else if(action == GLFW_RELEASE)
 				aPressed = false;
+			break;
+
+		case GLFW_KEY_S:
+			if(action == GLFW_PRESS)
+				sPressed = true;
+			else if(action == GLFW_RELEASE)
+				sPressed = false;
 			break;
 
 		case GLFW_KEY_D:
@@ -50,6 +64,13 @@ void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 				dPressed = false;
 			break;
 	}
+
+	if(wPressed && !sPressed)
+		Axis.y = 1;
+	else if(!wPressed && sPressed)
+		Axis.y = -1;
+	else
+		Axis.y = 0;
 
 	if(aPressed && !dPressed)
 		Axis.x = -1;

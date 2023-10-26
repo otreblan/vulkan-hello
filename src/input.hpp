@@ -27,7 +27,9 @@ private:
 	Engine& engine;
 	glm::vec2 Axis;
 
+	bool wPressed = false;
 	bool aPressed = false;
+	bool sPressed = false;
 	bool dPressed = false;
 public:
 	Input(Engine& engine);
