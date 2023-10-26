@@ -40,6 +40,12 @@ public:
 	/// Stops the engine and exits
 	void stop();
 
+	template<typename... Type>
+	[[nodiscard]] decltype(auto) get(const entt::entity entt)
+	{
+		return getActiveScene().registry.get<Type...>(entt);
+	}
+
 private:
 	Scene  mainScene;
 	Window window;

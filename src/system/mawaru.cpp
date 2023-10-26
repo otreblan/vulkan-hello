@@ -34,8 +34,7 @@ void ecs_system::Mawaru::update(float delta, void*)
 {
 	using namespace glm;
 
-	Scene& scene    = engine.getActiveScene();
-	auto& transform = scene.registry.get<component::Transform>(scene.root);
+	auto& transform = engine.get<component::Transform>(engine.getActiveScene().root);
 
 	float rotation = delta * engine.getInput().getAxis().x * radians(rotationSpeed);
 
