@@ -17,6 +17,7 @@
 #include <chrono>
 
 #include "engine.hpp"
+#include "system/game.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
 	mainScene(mainScene)
@@ -25,10 +26,12 @@ Engine::Engine(const std::filesystem::path& mainScene):
 int Engine::run()
 {
 	using namespace std::chrono;
+	using namespace ecs_system;
 
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;
 
+	scheduler.attach<Game>(*this);
 	scheduler.attach<Renderer>(*this);
 
 	while(!scheduler.empty() && !shouldStop)
