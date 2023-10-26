@@ -30,6 +30,7 @@
 #include <stb/stb_image.h>
 
 #include "../config.hpp"
+#include "../engine.hpp"
 #include "../scene.hpp"
 #include "../utils.hpp"
 #include "../vertex.hpp"
@@ -37,11 +38,11 @@
 #include "shaderStorageBufferObject.hpp"
 #include "uniformBufferObject.hpp"
 
-Renderer::Renderer(Scene* activeScene):
+Renderer::Renderer(Engine& engine):
 	allocator(*this),
 	frameData(*this),
 	pipeline(*this),
-	activeScene(activeScene)
+	engine(engine)
 {}
 
 Renderer::~Renderer() noexcept
@@ -55,6 +56,8 @@ Renderer::~Renderer() noexcept
 			mesh.indexBuffer.clear();
 		}
 	}
+
+	engine.stop();
 }
 
 void Renderer::init()
@@ -62,8 +65,7 @@ void Renderer::init()
 	initWindow();
 	initVulkan();
 
-	if(!activeScene)
-		fail();
+	activeScene = &engine.getActiveScene();
 
 	activeScene->uploadToGpu(*this);
 }

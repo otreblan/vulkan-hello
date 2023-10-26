@@ -26,9 +26,18 @@ class Engine
 public:
 	Engine(const std::filesystem::path& mainScene);
 
-	// Starts the engine and returns an exit code.
+	/// Starts the engine and returns an exit code.
 	int run();
+
+	Scene& getActiveScene();
+
+	/// Stops the engine and exits
+	void stop();
 
 private:
 	Scene mainScene;
+
+	entt::basic_scheduler<float> scheduler;
+
+	bool shouldStop = false;
 };

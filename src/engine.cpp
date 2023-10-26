@@ -29,11 +29,9 @@ int Engine::run()
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;
 
-	entt::basic_scheduler<float> scheduler;
+	scheduler.attach<Renderer>(*this);
 
-	scheduler.attach<Renderer>(&mainScene);
-
-	while(!scheduler.empty())
+	while(!scheduler.empty() && !shouldStop)
 	{
 		auto lastTime = currentTime;
 
@@ -44,4 +42,14 @@ int Engine::run()
 	}
 
 	return EXIT_SUCCESS;
+}
+
+Scene& Engine::getActiveScene()
+{
+	return mainScene;
+}
+
+void Engine::stop()
+{
+	shouldStop = true;
 }

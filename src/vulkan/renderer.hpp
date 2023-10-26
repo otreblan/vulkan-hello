@@ -33,12 +33,14 @@
 #include "singleCommand.hpp"
 #include "frameData.hpp"
 
+class Engine;
+
 class Renderer: public entt::process<Renderer, float>
 {
 	using path = std::filesystem::path;
 
 public:
-	Renderer(Scene* activeScene);
+	Renderer(Engine& engine);
 	~Renderer() noexcept;
 
 	void init();
@@ -115,6 +117,7 @@ private:
 
 	// Non owning reference to the current scene.
 	Scene*                  activeScene = nullptr;
+	Engine&                 engine;
 	std::vector<Renderable> renderables;
 
 	void initWindow();
