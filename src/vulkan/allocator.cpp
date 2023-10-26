@@ -89,6 +89,7 @@ void Allocator::create()
 		.device           = *root.device,
 		.pVulkanFunctions = &vulkanFunctions,
 		.instance         = *root.instance,
+		.vulkanApiVersion = VK_API_VERSION_1_3,
 	};
 
 	vmaCreateAllocator(&allocatorCreateInfo, &allocator);
