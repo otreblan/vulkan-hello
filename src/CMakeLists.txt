@@ -30,6 +30,7 @@ target_sources(${PROJECT_NAME}
 		stb_image.cpp
 		utils.cpp
 		vertex.cpp
+		window.cpp
 )
 
 add_subdirectory(system)

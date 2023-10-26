@@ -72,7 +72,7 @@ void Renderer::init()
 
 void Renderer::update([[maybe_unused]] float delta, void*)
 {
-	if(glfwWindowShouldClose(window))
+	if(glfwWindowShouldClose(engine.getWindow()))
 		succeed();
 
 	renderables = activeScene->getRenderables();
@@ -88,13 +88,8 @@ void Renderer::setActiveScene(Scene* scene)
 
 void Renderer::initWindow()
 {
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	//glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-	window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
-
-	glfwSetWindowUserPointer(window, this);
-	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+	glfwSetWindowUserPointer(engine.getWindow(), this);
+	glfwSetFramebufferSizeCallback(engine.getWindow(), framebufferResizeCallback);
 }
 
 void Renderer::initVulkan()
@@ -121,8 +116,6 @@ void Renderer::cleanup()
 #ifdef VK_DEBUG
 	DestroyDebugUtilsMessengerEXT(*instance, debugMessenger, nullptr);
 #endif
-
-	glfwDestroyWindow(window);
 }
 
 void Renderer::createInstance()
@@ -371,7 +364,7 @@ void Renderer::createLogicalDevice()
 void Renderer::createSurface()
 {
 	VkSurfaceKHR _surface;
-	if (glfwCreateWindowSurface(*instance, window, nullptr, &_surface) != VK_SUCCESS)
+	if (glfwCreateWindowSurface(*instance, engine.getWindow(), nullptr, &_surface) != VK_SUCCESS)
 		throw std::runtime_error("failed to create window surface!");
 
 	surface = vk::raii::SurfaceKHR(instance, _surface);
@@ -774,7 +767,7 @@ SingleCommand Renderer::makeSingleCommand()
 vk::Extent2D Renderer::getWindowSize() const
 {
 	int width, height;
-	glfwGetWindowSize(window, &width, &height);
+	glfwGetWindowSize(engine.getWindow(), &width, &height);
 
 	return vk::Extent2D(width, height);
 }

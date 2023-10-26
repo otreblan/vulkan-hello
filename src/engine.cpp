@@ -21,20 +21,15 @@
 
 Engine::Engine(const std::filesystem::path& mainScene):
 	mainScene(mainScene)
-{};
+{}
 
 Engine::~Engine()
-{
-	glfwTerminate();
-}
+{}
 
 int Engine::run()
 {
 	using namespace std::chrono;
 	using namespace ecs_system;
-
-	if(!glfwInit())
-		return EXIT_FAILURE;
 
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;
@@ -59,6 +54,11 @@ int Engine::run()
 Scene& Engine::getActiveScene()
 {
 	return mainScene;
+}
+
+GLFWwindow* Engine::getWindow()
+{
+	return window.getWindow();
 }
 
 void Engine::stop()

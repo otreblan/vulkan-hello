@@ -14,34 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#pragma once
-
-#include <filesystem>
-
-#include "scene.hpp"
-#include "vulkan/renderer.hpp"
 #include "window.hpp"
 
-class Engine
+Window::Window()
 {
-public:
-	Engine(const std::filesystem::path& mainScene);
-	~Engine();
+	if(!glfwInit())
+		throw;
 
-	/// Starts the engine and returns an exit code.
-	int run();
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-	Scene& getActiveScene();
-	GLFWwindow* getWindow();
+	window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+}
 
-	/// Stops the engine and exits
-	void stop();
+Window::~Window()
+{
+	glfwDestroyWindow(window);
+	glfwTerminate();
+}
 
-private:
-	Scene  mainScene;
-	Window window;
-
-	entt::basic_scheduler<float> scheduler;
-
-	bool shouldStop = false;
-};
+GLFWwindow* Window::getWindow()
+{
+	return window;
+}

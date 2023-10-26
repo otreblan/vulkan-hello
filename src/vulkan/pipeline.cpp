@@ -17,6 +17,7 @@
 #include <fstream>
 
 #include "../config.hpp"
+#include "../engine.hpp"
 #include "../scene.hpp"
 #include "../vertex.hpp"
 #include "pipeline.hpp"
@@ -42,11 +43,11 @@ void Pipeline::create()
 void Pipeline::recreate()
 {
 	int width = 0, height = 0;
-	glfwGetFramebufferSize(parent.window, &width, &height);
+	glfwGetFramebufferSize(parent.engine.getWindow(), &width, &height);
 
 	while (width == 0 || height == 0)
 	{
-		glfwGetFramebufferSize(parent.window, &width, &height);
+		glfwGetFramebufferSize(parent.engine.getWindow(), &width, &height);
 		glfwWaitEvents();
 	}
 

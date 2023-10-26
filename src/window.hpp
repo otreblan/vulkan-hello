@@ -16,32 +16,19 @@
 
 #pragma once
 
-#include <filesystem>
+#include <GLFW/glfw3.h>
 
-#include "scene.hpp"
-#include "vulkan/renderer.hpp"
-#include "window.hpp"
-
-class Engine
+class Window
 {
-public:
-	Engine(const std::filesystem::path& mainScene);
-	~Engine();
-
-	/// Starts the engine and returns an exit code.
-	int run();
-
-	Scene& getActiveScene();
-	GLFWwindow* getWindow();
-
-	/// Stops the engine and exits
-	void stop();
-
 private:
-	Scene  mainScene;
-	Window window;
+	const int width  = 800;
+	const int height = 600;
 
-	entt::basic_scheduler<float> scheduler;
+	GLFWwindow* window;
 
-	bool shouldStop = false;
+public:
+	Window();
+	~Window();
+
+	GLFWwindow* getWindow();
 };

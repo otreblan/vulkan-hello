@@ -49,10 +49,6 @@ public:
 
 private:
 	static const int MAX_FRAMES_IN_FLIGHT = FrameData::MAX_FRAMES_IN_FLIGHT;
-	GLFWwindow* window;
-
-	const int width = 800;
-	const int height = 600;
 
 	const std::vector<const char*> deviceExtensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
