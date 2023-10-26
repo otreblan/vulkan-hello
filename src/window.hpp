@@ -18,6 +18,8 @@
 
 #include <GLFW/glfw3.h>
 
+class Engine;
+
 class Window
 {
 private:
@@ -25,9 +27,10 @@ private:
 	const int height = 600;
 
 	GLFWwindow* window;
+	Engine&     engine;
 
 public:
-	Window();
+	Window(Engine& engine);
 	~Window();
 
 	GLFWwindow* getWindow();

@@ -47,6 +47,8 @@ public:
 	void update(float delta, void*);
 	void setActiveScene(Scene* scene);
 
+	void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+
 private:
 	static const int MAX_FRAMES_IN_FLIGHT = FrameData::MAX_FRAMES_IN_FLIGHT;
 
@@ -116,7 +118,6 @@ private:
 	Engine&                 engine;
 	std::vector<Renderable> renderables;
 
-	void initWindow();
 	void initVulkan();
 	void cleanup();
 
@@ -138,7 +139,6 @@ private:
 	vk::raii::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor);
 
 	void drawFrame();
-	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	void copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size);
 
 	void createDescriptorSetLayout();
@@ -165,7 +165,7 @@ private:
 	friend class Allocator;
 	friend class Depth;
 	friend class FrameData;
-	friend class Mesh;
+	friend struct Mesh;
 	friend struct Pipeline;
 
 protected:

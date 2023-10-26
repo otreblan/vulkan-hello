@@ -62,11 +62,11 @@ Renderer::~Renderer() noexcept
 
 void Renderer::init()
 {
-	initWindow();
 	initVulkan();
 
-	activeScene = &engine.getActiveScene();
+	engine.setRenderer(this);
 
+	activeScene = &engine.getActiveScene();
 	activeScene->uploadToGpu(*this);
 }
 
@@ -84,12 +84,6 @@ void Renderer::update([[maybe_unused]] float delta, void*)
 void Renderer::setActiveScene(Scene* scene)
 {
 	activeScene = scene;
-}
-
-void Renderer::initWindow()
-{
-	glfwSetWindowUserPointer(engine.getWindow(), this);
-	glfwSetFramebufferSizeCallback(engine.getWindow(), framebufferResizeCallback);
 }
 
 void Renderer::initVulkan()
@@ -458,8 +452,7 @@ void Renderer::drawFrame()
 
 void Renderer::framebufferResizeCallback(GLFWwindow* window, int, int)
 {
-	auto app = reinterpret_cast<Renderer*>(glfwGetWindowUserPointer(window));
-	app->framebufferResized = true;
+	framebufferResized = true;
 }
 
 void Renderer::copyBuffer(vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size)

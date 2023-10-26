@@ -20,7 +20,9 @@
 #include "system/game.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
-	mainScene(mainScene)
+	mainScene(mainScene),
+	window(*this),
+	input(*this)
 {}
 
 Engine::~Engine()
@@ -61,7 +63,27 @@ GLFWwindow* Engine::getWindow()
 	return window.getWindow();
 }
 
+void Engine::setRenderer(Renderer* renderer)
+{
+	activeRenderer = renderer;
+}
+
 void Engine::stop()
 {
 	shouldStop = true;
+}
+
+void Engine::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+	auto engine = reinterpret_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+	if(engine->activeRenderer)
+		engine->activeRenderer->framebufferResizeCallback(window, width, height);
+}
+
+void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	auto engine = reinterpret_cast<Engine*>(glfwGetWindowUserPointer(window));
+
+	engine->input.keyCallback(window, key, scancode, action, mods);
 }

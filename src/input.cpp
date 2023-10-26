@@ -14,32 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "engine.hpp"
-#include "window.hpp"
+#include <iostream>
 
-Window::Window(Engine& engine):
+#include <GLFW/glfw3.h>
+
+#include "input.hpp"
+#include "engine.hpp"
+
+Input::Input(Engine& engine):
 	engine(engine)
 {
-	if(!glfwInit())
-		throw;
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-	window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
-
-	glfwSetWindowUserPointer(engine.getWindow(), &engine);
-
-	glfwSetFramebufferSizeCallback(engine.getWindow(), Engine::framebufferResizeCallback);
-	glfwSetKeyCallback(engine.getWindow(),             Engine::KeyCallback);
 }
 
-Window::~Window()
+void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	glfwDestroyWindow(window);
-	glfwTerminate();
-}
-
-GLFWwindow* Window::getWindow()
-{
-	return window;
+	//TODO
 }

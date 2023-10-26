@@ -24,6 +24,7 @@ target_sources(${PROJECT_NAME}
 		config.cpp
 		engine.cpp
 		exePath.cpp
+		input.cpp
 		main.cpp
 		mesh.cpp
 		scene.cpp
