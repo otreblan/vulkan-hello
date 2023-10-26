@@ -75,7 +75,6 @@ void Renderer::update([[maybe_unused]] float delta, void*)
 	if(glfwWindowShouldClose(window))
 		succeed();
 
-	glfwPollEvents();
 	renderables = activeScene->getRenderables();
 	drawFrame();
 

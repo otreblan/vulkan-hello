@@ -39,6 +39,7 @@ int Engine::run()
 	auto currentTime = high_resolution_clock::now();
 	float delta      = 1.f/60;
 
+	scheduler.attach([](auto...){glfwPollEvents();});
 	scheduler.attach<Game>(*this);
 	scheduler.attach<Renderer>(*this);
 
