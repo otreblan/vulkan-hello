@@ -37,6 +37,7 @@ void ecs_system::Mawaru::update(float delta, void*)
 	Scene& scene    = engine.getActiveScene();
 	auto& transform = scene.registry.get<component::Transform>(scene.root);
 
-	transform.matrix = rotate(transform.matrix, delta * radians(rotationSpeed), vec3(0.0f, 1.0f, 0.0f));
+	float rotation = delta * engine.getInput().getAxis().x * radians(rotationSpeed);
 
+	transform.matrix = rotate(transform.matrix, rotation, vec3(0.0f, 1.0f, 0.0f));
 }

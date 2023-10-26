@@ -32,9 +32,10 @@ public:
 	/// Starts the engine and returns an exit code.
 	int run();
 
-	Scene& getActiveScene();
+	Scene&      getActiveScene();
 	GLFWwindow* getWindow();
-	void setRenderer(Renderer* renderer);
+	Input&      getInput();
+	void        setRenderer(Renderer* renderer);
 
 	/// Stops the engine and exits
 	void stop();

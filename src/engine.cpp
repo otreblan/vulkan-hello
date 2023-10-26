@@ -63,6 +63,11 @@ GLFWwindow* Engine::getWindow()
 	return window.getWindow();
 }
 
+Input& Engine::getInput()
+{
+	return input;
+}
+
 void Engine::setRenderer(Renderer* renderer)
 {
 	activeRenderer = renderer;

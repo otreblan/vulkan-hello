@@ -22,11 +22,41 @@
 #include "engine.hpp"
 
 Input::Input(Engine& engine):
-	engine(engine)
+	engine(engine),
+	Axis(0, 0)
 {
+}
+
+glm::vec2 Input::getAxis() const
+{
+	return Axis;
 }
 
 void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	switch(key)
+	{
+		case GLFW_KEY_A:
+			if(action == GLFW_PRESS)
+				aPressed = true;
+			else if(action == GLFW_RELEASE)
+				aPressed = false;
+			break;
+
+		case GLFW_KEY_D:
+			if(action == GLFW_PRESS)
+				dPressed = true;
+			else if(action == GLFW_RELEASE)
+				dPressed = false;
+			break;
+	}
+
+	if(aPressed && !dPressed)
+		Axis.x = -1;
+	else if(!aPressed && dPressed)
+		Axis.x = 1;
+	else
+		Axis.x = 0;
+
 	//TODO
 }

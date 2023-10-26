@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <glm/glm.hpp>
+
 class Engine;
 struct GLFWwindow;
 
@@ -23,9 +25,14 @@ class Input
 {
 private:
 	Engine& engine;
+	glm::vec2 Axis;
 
+	bool aPressed = false;
+	bool dPressed = false;
 public:
 	Input(Engine& engine);
+
+	glm::vec2 getAxis() const;
 
 	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };
