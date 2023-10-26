@@ -30,3 +30,4 @@ using group_t = decltype(((entt::registry*)nullptr)->group<T...>());
 #pragma GCC diagnostic pop
 
 glm::mat4x4 toGlm(const aiMatrix4x4& m);
+glm::vec3 toGlm(const aiVector3D& v);

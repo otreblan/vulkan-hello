@@ -27,3 +27,8 @@ glm::mat4x4 toGlm(const aiMatrix4x4& m)
 
 	return _m;
 }
+
+glm::vec3 toGlm(const aiVector3D& v)
+{
+	return {v.x, v.y, v.z};
+}

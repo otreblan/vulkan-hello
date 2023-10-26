@@ -38,9 +38,29 @@ void ecs_system::Physics::init()
 		solver.get(),
 		collisionConfiguration.get()
 	);
+
+	// TODO: Upload rigidbodies
 }
 
 void ecs_system::Physics::update(float delta, void*)
 {
 	world->stepSimulation(delta, 10);
+
+	for(int i = world->getNumCollisionObjects()-1; i >= 0; i--)
+	{
+		btCollisionObject* obj  = world->getCollisionObjectArray()[i];
+		btRigidBody*       body = btRigidBody::upcast(obj);
+
+		btTransform transform;
+		if(body && body->getMotionState())
+		{
+			body->getMotionState()->getWorldTransform(transform);
+		}
+		else
+		{
+			transform = obj->getWorldTransform();
+		}
+
+		// TODO: Update engine transforms
+	}
 }
