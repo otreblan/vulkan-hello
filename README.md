@@ -27,3 +27,6 @@
 cmake -B build
 cmake --build build
 ```
+
+## Screenshots
+![imagen](https://github.com/otreblan/vulkan-hello/assets/39320840/ca15a598-d4c9-4d0e-a087-b847358a1ffc)
