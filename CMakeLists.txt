@@ -17,7 +17,7 @@
 cmake_minimum_required(VERSION 3.13.0)
 
 project(vulkan-hello
-	VERSION 0.0.0
+	VERSION 1.0.0
 	DESCRIPTION "Vulkan"
 	HOMEPAGE_URL "https://github.com/otreblan/hello"
 )
