@@ -25,8 +25,15 @@
 
 Mesh::Mesh(const aiMesh& mesh)
 {
+	loadAABB(mesh);
 	loadVertices(mesh);
 	loadIndices(mesh);
+}
+
+void Mesh::loadAABB(const aiMesh& mesh)
+{
+	aabbMin = toGlm(mesh.mAABB.mMin);
+	aabbMax = toGlm(mesh.mAABB.mMax);
 }
 
 void Mesh::loadVertices(const aiMesh& mesh)

@@ -20,6 +20,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "component/collider.hpp"
 #include "component/meshInstance.hpp"
 #include "component/properties.hpp"
 #include "component/transform.hpp"
@@ -73,11 +74,27 @@ entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 		root = entity;
 
 	registry.emplace<Transform>(entity, toGlm(node->mTransformation));
-	registry.emplace<Properties>(entity, node->mName.C_Str());
 	registry.emplace<Transform::Parent>(entity, parent);
 
+	const auto& name = registry.emplace<Properties>(entity, node->mName.C_Str()).name;
+
 	if(node->mNumMeshes > 0)
-		registry.emplace<MeshInstance>(entity, MeshInstance({node->mMeshes, node->mMeshes+node->mNumMeshes}));
+	{
+		std::span indexSpan(node->mMeshes, node->mMeshes+node->mNumMeshes);
+
+		registry.emplace<MeshInstance>(entity, MeshInstance({indexSpan.begin(), indexSpan.end()}));
+
+		glm::vec3 aabbMin(std::numeric_limits<glm::vec3::value_type>::max());
+		glm::vec3 aabbMax(std::numeric_limits<glm::vec3::value_type>::min());
+
+		for(auto i: indexSpan)
+		{
+			aabbMin = glm::min(aabbMin, meshes[i].aabbMin);
+			aabbMax = glm::max(aabbMax, meshes[i].aabbMax);
+		}
+
+		registry.emplace<Collider>(entity, Collider(aabbMin, aabbMax, name == "Plane" ? 0 : 1));
+	}
 
 	entt::entity children[node->mNumChildren];
 

@@ -16,35 +16,19 @@
 
 #pragma once
 
-#include <btBulletDynamicsCommon.h>
 #include <entt/entt.hpp>
+#include <glm/mat4x4.hpp>
 
-#include <memory>
-
-class Engine;
-
-namespace ecs::system
+namespace ecs::component
 {
 
-class Physics: public entt::process<Physics, float>
+struct Collider
 {
-private:
-	Engine& engine;
+	glm::vec3 min;
+	glm::vec3 max;
 
-	std::unique_ptr<btCollisionConfiguration> collisionConfiguration;
-	std::unique_ptr<btDispatcher>             dispatcher;
-	std::unique_ptr<btBroadphaseInterface>    overlappingPairCache;
-	std::unique_ptr<btConstraintSolver>       solver;
-	std::unique_ptr<btDynamicsWorld>          world;
-
-	btAlignedObjectArray<btCollisionShape*> collisionShapes;
-
-public:
-	Physics(Engine& engine);
-	~Physics();
-
-	void init();
-	void update(float delta, void*);
+	// TODO: Move this into a rigidbody
+	float mass;
 };
 
 }

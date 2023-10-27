@@ -36,6 +36,10 @@ struct Mesh
 	Buffer vertexBuffer;
 	Buffer indexBuffer;
 
+	glm::vec3 aabbMin;
+	glm::vec3 aabbMax;
+
+	void loadAABB(const aiMesh& mesh);
 	void loadVertices(const aiMesh& mesh);
 	void loadIndices(const aiMesh& mesh);
 
