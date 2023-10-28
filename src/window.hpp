@@ -18,16 +18,20 @@
 
 #include <GLFW/glfw3.h>
 
+#include <memory>
+
 class Engine;
 
 class Window
 {
 private:
+	using window_ptr = std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)>;
+
 	const int width  = 800;
 	const int height = 600;
 
-	GLFWwindow* window;
-	Engine&     engine;
+	window_ptr window;
+	Engine&    engine;
 
 public:
 	Window(Engine& engine);

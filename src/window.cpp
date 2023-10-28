@@ -18,6 +18,7 @@
 #include "window.hpp"
 
 Window::Window(Engine& engine):
+	window(nullptr, nullptr),
 	engine(engine)
 {
 	if(!glfwInit())
@@ -25,7 +26,7 @@ Window::Window(Engine& engine):
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-	window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+	window = window_ptr(glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr), &glfwDestroyWindow);
 
 	glfwSetWindowUserPointer(engine.getWindow(), &engine);
 
@@ -35,11 +36,10 @@ Window::Window(Engine& engine):
 
 Window::~Window()
 {
-	glfwDestroyWindow(window);
 	glfwTerminate();
 }
 
 GLFWwindow* Window::getWindow()
 {
-	return window;
+	return window.get();
 }
