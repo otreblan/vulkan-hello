@@ -29,6 +29,8 @@
 
 Scene::Scene(const std::filesystem::path& scenePath)
 {
+	using namespace ecs::component;
+
 	Assimp::Importer importer;
 
 	const aiScene* scene = importer.ReadFile(
@@ -43,6 +45,13 @@ Scene::Scene(const std::filesystem::path& scenePath)
 		throw importer.GetErrorString();
 
 	name = scene->mName.C_Str();
+
+	entt::sigh_helper{registry}
+		.with<Transform>()
+			.on_construct<&entt::registry::emplace<Transform::Relationship>>()
+		.with<Transform::Relationship>()
+			.on_destroy<&Scene::updateHierarchy>()
+	;
 
 	loadMeshes({scene->mMeshes, scene->mNumMeshes});
 	loadHierarchy(scene->mRootNode, entt::null);
@@ -74,7 +83,6 @@ entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 		root = entity;
 
 	registry.emplace<Transform>(entity, toGlm(node->mTransformation));
-	registry.emplace<Transform::Parent>(entity, parent);
 
 	const auto& name = registry.emplace<Properties>(entity, node->mName.C_Str()).name;
 
@@ -103,7 +111,10 @@ entt::entity Scene::loadHierarchy(const aiNode* node, entt::entity parent)
 		children[i] = loadHierarchy(node->mChildren[i], entity);
 	}
 
-	registry.emplace<Transform::Children>(entity, Transform::Children({children, children+node->mNumChildren}));
+	auto& tRelationship = registry.get<Transform::Relationship>(entity);
+
+	tRelationship.parent = parent;
+	tRelationship.children.insert(children, children+node->mNumChildren);
 
 	return entity;
 }
@@ -119,7 +130,7 @@ std::vector<Renderable> Scene::getRenderables() const
 	{
 		glm::mat4 matrix(1);
 
-		for(auto e = entity; e != entt::null; e = pGroup.get<Transform::Parent>(e).entity)
+		for(auto e = entity; e != entt::null; e = pGroup.get<Transform::Relationship>(e).parent)
 		{
 			matrix = pGroup.get<Transform>(e).matrix * matrix;
 		}
@@ -143,5 +154,29 @@ void Scene::uploadToGpu(Renderer& renderer)
 	for(auto& mesh: meshes)
 	{
 		mesh.uploadToGpu(renderer);
+	}
+}
+
+void Scene::updateHierarchy(entt::registry& registry, entt::entity entity)
+{
+	using namespace ecs::component;
+
+	auto trView = registry.view<Transform::Relationship>();
+
+	const auto&& [self] = trView.get(entity);
+
+	if(self.parent != entt::null)
+	{
+		auto&& [parent] = trView.get(self.parent);
+
+		parent.children.erase(entity);
+		parent.children.insert(self.children.begin(), self.children.end());
+	}
+
+	for(entt::entity e: self.children)
+	{
+		auto&& [children] = trView.get(e);
+
+		children.parent = self.parent;
 	}
 }

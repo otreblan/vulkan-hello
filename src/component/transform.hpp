@@ -26,14 +26,10 @@ namespace ecs::component
 
 struct Transform
 {
-	struct Parent
+	struct Relationship
 	{
-		entt::entity entity;
-	};
-
-	struct Children
-	{
-		small_flat_set<entt::entity, 8> entities;
+		small_flat_set<entt::entity, 8> children;
+		entt::entity parent;
 	};
 
 	glm::mat4 matrix;

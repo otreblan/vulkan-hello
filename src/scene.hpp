@@ -42,7 +42,7 @@ struct Renderable
 struct Scene
 {
 	using Transform = ecs::component::Transform;
-	using pgroup_t  = group_t<const Transform, const Transform::Parent>;
+	using pgroup_t  = group_t<const Transform, const Transform::Relationship>;
 
 	Scene(const std::filesystem::path& scenePath);
 
@@ -52,12 +52,15 @@ struct Scene
 	entt::registry    registry;
 	std::vector<Mesh> meshes;
 
-	const pgroup_t pGroup = registry.group<const Transform, const Transform::Parent>();
+	const pgroup_t pGroup = registry.group<const Transform, const Transform::Relationship>();
 
 	std::vector<Renderable> getRenderables() const;
 	void uploadToGpu(Renderer& renderer);
 
 private:
 	void loadMeshes(const std::span<aiMesh*> newMeshes);
+
 	entt::entity loadHierarchy(const aiNode* node, entt::entity parent);
+
+	static void updateHierarchy(entt::registry& registry, entt::entity entity);
 };
