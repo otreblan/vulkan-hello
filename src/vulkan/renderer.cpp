@@ -21,8 +21,8 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
-#include <set>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -378,14 +378,32 @@ void Renderer::createCommandPool()
 
 bool Renderer::checkDeviceExtensionSupport([[maybe_unused]]vk::PhysicalDevice device)
 {
-	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+	std::vector<std::string> required;
+	std::vector<std::string> available;
+	std::vector<std::string> missing;
+
+	for(const auto& extension: deviceExtensions)
+	{
+		required.emplace_back(extension);
+	}
 
 	for(const auto& extension: device.enumerateDeviceExtensionProperties())
 	{
-		requiredExtensions.erase(extension.extensionName);
+		available.emplace_back((const char*)extension.extensionName);
 	}
 
-	return requiredExtensions.empty();
+	std::sort(required.begin(), required.end());
+	std::sort(available.begin(), available.end());
+
+	std::set_difference(
+		required.begin(),
+		required.end(),
+		available.begin(),
+		available.end(),
+		std::inserter(missing, missing.begin())
+	);
+
+	return missing.empty();
 }
 
 SwapChainSupportDetails Renderer::querySwapChainSupport(vk::PhysicalDevice device)
