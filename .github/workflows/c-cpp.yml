@@ -27,6 +27,7 @@ jobs:
         --removemake
         entt
         git
+        imgui
         vulkan-memory-allocator
 
     - uses: actions/checkout@v4
