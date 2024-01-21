@@ -56,6 +56,7 @@ pkg_check_modules(libraries REQUIRED
 )
 
 find_package(VulkanMemoryAllocator REQUIRED)
+find_package(imgui REQUIRED)
 
 find_package(Boost REQUIRED
 	COMPONENTS
@@ -76,6 +77,7 @@ target_link_libraries(${PROJECT_NAME}
 		PkgConfig::libraries
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
+		imgui::imgui
 )
 
 # Defining some macros
