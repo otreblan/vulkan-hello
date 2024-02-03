@@ -51,11 +51,11 @@ pkg_check_modules(libraries REQUIRED
 		bullet
 		entt
 		glfw3
-		glm
 		vulkan
 )
 
 find_package(VulkanMemoryAllocator REQUIRED)
+find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 
 find_package(Boost REQUIRED
@@ -77,6 +77,7 @@ target_link_libraries(${PROJECT_NAME}
 		PkgConfig::libraries
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
+		glm::glm
 		imgui::imgui
 )
 
