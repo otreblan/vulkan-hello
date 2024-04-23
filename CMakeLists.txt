@@ -77,7 +77,7 @@ target_link_libraries(${PROJECT_NAME}
 		PkgConfig::libraries
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
-		glm::glm
+		glm::glm-header-only
 		imgui::imgui
 )
 
