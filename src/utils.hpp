@@ -19,11 +19,17 @@
 #include <assimp/matrix4x4.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
+#include <boost/align/aligned_allocator.hpp>
 #include <entt/entt.hpp>
 #include <glm/mat4x4.hpp>
 
+static const size_t cache_line = 64;
+
 template <typename T, std::size_t N>
-using small_flat_set = boost::container::flat_set<T, std::less<T>, boost::container::small_vector<T, N>>;
+using small_aligned_vector = boost::container::small_vector<T, N, boost::alignment::aligned_allocator<T, cache_line>>;
+
+template <typename T, std::size_t N>
+using small_flat_set = boost::container::flat_set<T, std::less<T>, small_aligned_vector<T, N>>;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnonnull"
