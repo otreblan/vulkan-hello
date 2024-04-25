@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with vulkan-hello.  If not, see <http://www.gnu.org/licenses/>.
 
+#pragma once
+
 #include <assimp/matrix4x4.h>
 #include <boost/container/flat_set.hpp>
 #include <boost/container/small_vector.hpp>
