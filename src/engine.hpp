@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <filesystem>
 
 #include "input.hpp"
@@ -39,9 +40,6 @@ public:
 	Settings&   getSettings();
 	void        setRenderer(Renderer* renderer);
 
-	/// Stops the engine and exits
-	void stop();
-
 	template<typename... Type>
 	[[nodiscard]] decltype(auto) get(const entt::entity entt)
 	{
@@ -58,8 +56,6 @@ private:
 	Renderer* activeRenderer;
 
 	entt::basic_scheduler<float> scheduler;
-
-	bool shouldStop = false;
 
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

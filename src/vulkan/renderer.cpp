@@ -56,8 +56,6 @@ Renderer::~Renderer() noexcept
 			mesh.indexBuffer.clear();
 		}
 	}
-
-	engine.stop();
 }
 
 void Renderer::init()
@@ -72,9 +70,6 @@ void Renderer::init()
 
 void Renderer::update([[maybe_unused]] float delta, void*)
 {
-	if(glfwWindowShouldClose(engine.getWindow()))
-		succeed();
-
 	renderables = activeScene->getRenderables();
 	drawFrame();
 

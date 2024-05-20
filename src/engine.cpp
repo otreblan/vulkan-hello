@@ -16,6 +16,8 @@
 
 #include <chrono>
 
+#include <taskflow/taskflow.hpp>
+
 #include "engine.hpp"
 #include "system/game.hpp"
 #include "system/physics.hpp"
@@ -35,18 +37,59 @@ int Engine::run()
 	using namespace ecs::system;
 
 	auto currentTime = high_resolution_clock::now();
+	auto lastTime = currentTime;
+
 	float delta      = 1.f/60;
 
-	scheduler.attach([](auto...){glfwPollEvents();});
-	scheduler.attach<Game>(*this);
-	scheduler.attach<Physics>(*this);
-	scheduler.attach<Renderer>(*this);
+	tf::Executor executor(1);
+	tf::Taskflow gameloop_taskflow;
 
-	while(!scheduler.empty() && !shouldStop)
+	Game     game(*this);
+	Physics  physics(*this);
+	Renderer renderer(*this);
+
+	// Tasks
+	tf::Task start = gameloop_taskflow.placeholder();
+
+	tf::Task game_task     = gameloop_taskflow.emplace([&](){game.update(delta, nullptr);});
+	tf::Task physics_task  = gameloop_taskflow.emplace([&](){physics.update(delta, nullptr);});
+	tf::Task renderer_task = gameloop_taskflow.emplace([&](){renderer.update(delta, nullptr);});
+
+	tf::Task end = gameloop_taskflow.placeholder();
+
+	// Names
+	gameloop_taskflow.name("Game loop");
+	start.name("Start");
+
+	game_task.name("Game");
+	physics_task.name("Physics");
+	renderer_task.name("Renderer");
+
+	end.name("End");
+
+	// Dependencies
+	start.precede(end);
+
+	start.precede(game_task);
+	game_task.precede(physics_task);
+	physics_task.precede(renderer_task);
+
+	renderer_task.precede(end);
+
+	//gameloop_taskflow.dump(std::cout);
+	//exit(EXIT_FAILURE);
+
+	// TODO: Wrap this in a new custom executor
+	game.init();
+	physics.init();
+	renderer.init();
+
+	while(!glfwWindowShouldClose(getWindow()))
 	{
-		auto lastTime = currentTime;
+		lastTime = currentTime;
 
-		scheduler.update(delta);
+		glfwPollEvents();
+		executor.run(gameloop_taskflow).wait();
 
 		currentTime = high_resolution_clock::now();
 		delta       = duration<float, seconds::period>(currentTime - lastTime).count();
@@ -78,11 +121,6 @@ Settings& Engine::getSettings()
 void Engine::setRenderer(Renderer* renderer)
 {
 	activeRenderer = renderer;
-}
-
-void Engine::stop()
-{
-	shouldStop = true;
 }
 
 void Engine::framebufferResizeCallback(GLFWwindow* window, int width, int height)
