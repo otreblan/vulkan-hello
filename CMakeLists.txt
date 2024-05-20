@@ -54,6 +54,7 @@ pkg_check_modules(libraries REQUIRED
 		vulkan
 )
 
+find_package(Taskflow REQUIRED)
 find_package(VulkanMemoryAllocator REQUIRED)
 find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
@@ -75,6 +76,7 @@ target_link_libraries(${PROJECT_NAME}
 		Boost::container
 		GPUOpen::VulkanMemoryAllocator
 		PkgConfig::libraries
+		Taskflow::Taskflow
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
 		glm::glm-header-only

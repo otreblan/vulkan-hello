@@ -25,6 +25,7 @@ jobs:
         --noconfirm
         --noprogressbar
         --removemake
+        cpp-taskflow
         entt
         git
         imgui

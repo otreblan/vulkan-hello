@@ -21,6 +21,7 @@ depends=(
 makedepends=(
 	'boost'
 	'cmake'
+	'cpp-taskflow'
 	'entt'
 	'git'
 	'glm'
