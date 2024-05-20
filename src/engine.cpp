@@ -41,7 +41,7 @@ int Engine::run()
 
 	float delta      = 1.f/60;
 
-	tf::Executor executor(1);
+	tf::Executor executor;
 	tf::Taskflow gameloop_taskflow;
 
 	Game     game(*this);
@@ -51,8 +51,9 @@ int Engine::run()
 	// Tasks
 	tf::Task start = gameloop_taskflow.placeholder();
 
+	// TODO: Pass subflow in a better way
 	tf::Task game_task     = gameloop_taskflow.emplace([&](){game.update(delta, nullptr);});
-	tf::Task physics_task  = gameloop_taskflow.emplace([&](){physics.update(delta, nullptr);});
+	tf::Task physics_task  = gameloop_taskflow.emplace([&](tf::Subflow& sbf){physics.update(delta, &sbf);});
 	tf::Task renderer_task = gameloop_taskflow.emplace([&](){renderer.update(delta, nullptr);});
 
 	tf::Task end = gameloop_taskflow.placeholder();

@@ -16,6 +16,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <taskflow/algorithm/for_each.hpp>
 
 #include <iostream>
 
@@ -114,16 +115,18 @@ void Physics::init()
 	}
 }
 
-void Physics::update(float delta, void*)
+void Physics::update(float delta, void* sbf_p)
 {
 	using namespace ecs::component;
+
+	tf::Subflow* sbf = (tf::Subflow*)sbf_p;
 
 	world->stepSimulation(delta, 10);
 
 	// TODO: Update physics transform from world transform
 
-	for(int i = world->getNumCollisionObjects()-1; i >= 0; i--)
-	{
+	sbf->for_each_index(world->getNumCollisionObjects()-1, -1, -1,
+		[this](int i){
 		btCollisionObject* obj  = world->getCollisionObjectArray()[i];
 		btRigidBody*       body = btRigidBody::upcast(obj);
 
@@ -140,7 +143,7 @@ void Physics::update(float delta, void*)
 		Transform* transform = (Transform*)obj->getUserPointer();
 
 		_transform.getOpenGLMatrix(glm::value_ptr(transform->matrix));
-	}
+	});
 }
 
 }
