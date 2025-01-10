@@ -72,9 +72,11 @@ int Engine::run()
 	start.precede(end);
 
 	start.precede(game_task);
-	game_task.precede(physics_task);
-	physics_task.precede(renderer_task);
+	start.precede(physics_task);
+	start.precede(renderer_task);
 
+	game_task.precede(end);
+	physics_task.precede(end);
 	renderer_task.precede(end);
 
 	//gameloop_taskflow.dump(std::cout);

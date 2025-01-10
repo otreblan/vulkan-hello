@@ -16,6 +16,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 
 #include <iostream>
