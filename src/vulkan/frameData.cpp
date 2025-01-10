@@ -165,7 +165,7 @@ void FrameData::createDescriptorPool()
 		)
 	};
 
-	vk::DescriptorPoolCreateInfo poolInfo({}, MAX_FRAMES_IN_FLIGHT, poolSizes);
+	vk::DescriptorPoolCreateInfo poolInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, MAX_FRAMES_IN_FLIGHT, poolSizes);
 
 	descriptorPool = root.device.createDescriptorPool(poolInfo);
 }
