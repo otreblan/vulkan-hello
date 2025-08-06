@@ -60,6 +60,7 @@ find_package(glm REQUIRED)
 find_package(imgui REQUIRED)
 
 find_package(Boost REQUIRED
+	CONFIG
 	COMPONENTS
 		container
 )
