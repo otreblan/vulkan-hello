@@ -7,6 +7,6 @@ source PKGBUILD || true
 pacman -Sy
 pacman -U --noconfirm /var/cache/makepkg/pkg/*
 
-printf "%s\n" "${depends[@]}" "${makedepends[@]}" |\
+printf "%s\n" "${depends[@]}" "${makedepends[@]}" vulkan-validation-layers |\
 grep -vxFf <(pacman -Qi -p /var/cache/makepkg/pkg/* | awk '/Name/ {print $3}') |\
 xargs -- pacman -Syu --noconfirm --needed

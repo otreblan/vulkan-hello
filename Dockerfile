@@ -12,7 +12,6 @@ COPY ./pkg/arch .
 RUN --mount=type=bind,from=dependencies,source=/var/cache/makepkg/pkg/,target=/var/cache/makepkg/pkg/ \
 	./install-deps.sh
 WORKDIR /vulkan-hello
-COPY ./pkg/arch ./pkg/arch
 COPY . .
 RUN cmake -B build
 RUN cmake --build build --parallel $(nproc)
