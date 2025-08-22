@@ -27,6 +27,7 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+include(FetchContent)
 include(CPack)
 include(FindPkgConfig)
 include(GNUInstallDirs)
@@ -44,6 +45,54 @@ add_subdirectory(pkg)
 add_subdirectory(share)
 add_subdirectory(src) # Sources list
 
+FetchContent_Declare(
+	imgui
+	GIT_REPOSITORY https://github.com/ocornut/imgui
+	GIT_TAG        origin/docking
+	GIT_SHALLOW    ON
+	GIT_PROGRESS   ON
+)
+
+FetchContent_MakeAvailable(imgui)
+
+add_library(imgui)
+
+# C++ version
+set_target_properties(imgui
+	PROPERTIES
+		CXX_STANDARD 23
+)
+
+# imgui fails when unity builds are active
+set_target_properties(imgui
+	PROPERTIES
+		UNITY_BUILD OFF
+)
+
+target_compile_definitions(imgui
+	PRIVATE
+		$<$<CONFIG:DEBUG>:VK_DEBUG>
+		$<$<NOT:$<CONFIG:DEBUG>>:NDEBUG>
+		GLFW_INCLUDE_VULKAN
+)
+
+target_sources(imgui
+	PRIVATE
+		${imgui_SOURCE_DIR}/imgui.cpp
+		${imgui_SOURCE_DIR}/imgui_demo.cpp
+		${imgui_SOURCE_DIR}/imgui_draw.cpp
+		${imgui_SOURCE_DIR}/imgui_tables.cpp
+		${imgui_SOURCE_DIR}/imgui_widgets.cpp
+		${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+		${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
+		${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+)
+
+target_include_directories(imgui
+	PUBLIC
+		${imgui_SOURCE_DIR}
+)
+
 # Shared libraries
 pkg_check_modules(libraries REQUIRED
 	IMPORTED_TARGET
@@ -57,7 +106,6 @@ pkg_check_modules(libraries REQUIRED
 find_package(Taskflow REQUIRED)
 find_package(VulkanMemoryAllocator REQUIRED)
 find_package(glm REQUIRED)
-find_package(imgui REQUIRED)
 
 find_package(Boost REQUIRED
 	CONFIG
@@ -81,7 +129,7 @@ target_link_libraries(${PROJECT_NAME}
 		XdgUtils::BaseDir
 		XdgUtils::DesktopEntry
 		glm::glm-header-only
-		imgui::imgui
+		imgui
 )
 
 # Defining some macros

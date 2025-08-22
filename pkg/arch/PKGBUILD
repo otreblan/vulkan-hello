@@ -1,7 +1,7 @@
 # Maintainer: Otreblan <otreblain@gmail.com>
 
 pkgname=vulkan-hello-git
-pkgver=1.0.0.r13.gdffe7b5
+pkgver=1.0.0.r19.g2920909
 pkgrel=1
 epoch=
 pkgdesc="Vulkan"
@@ -14,7 +14,6 @@ depends=(
 	'boost-libs'
 	'bullet'
 	'glfw'
-	'imgui'
 	'vulkan-driver'
 	'vulkan-icd-loader'
 )

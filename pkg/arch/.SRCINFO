@@ -1,0 +1,31 @@
+pkgbase = vulkan-hello-git
+	pkgdesc = Vulkan
+	pkgver = 1.0.0.r19.g2920909
+	pkgrel = 1
+	url = https://github.com/otreblan/hello
+	arch = x86_64
+	license = GPL3
+	makedepends = boost
+	makedepends = cmake
+	makedepends = cpp-taskflow
+	makedepends = entt
+	makedepends = git
+	makedepends = glm
+	makedepends = shaderc
+	makedepends = stb
+	makedepends = vulkan-headers
+	makedepends = vulkan-memory-allocator
+	makedepends = xdg-utils-cxx
+	depends = assimp
+	depends = boost-libs
+	depends = bullet
+	depends = glfw
+	depends = imgui
+	depends = vulkan-driver
+	depends = vulkan-icd-loader
+	provides = vulkan-hello
+	conflicts = vulkan-hello
+	source = vulkan-hello-git::git+file:///home/aru/code/vulkan-hello#commit=29209098888f800681123007446e43bc0b8a2a22
+	md5sums = SKIP
+
+pkgname = vulkan-hello-git
