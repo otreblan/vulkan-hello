@@ -19,13 +19,14 @@
 #include <atomic>
 #include <filesystem>
 
+#include "injector.hpp"
 #include "input.hpp"
 #include "scene.hpp"
 #include "settings.hpp"
 #include "vulkan/renderer.hpp"
 #include "window.hpp"
 
-class Engine
+class Engine: public Injector
 {
 public:
 	Engine(const std::filesystem::path& mainScene);

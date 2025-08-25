@@ -44,9 +44,9 @@ int Engine::run()
 	tf::Executor executor;
 	tf::Taskflow gameloop_taskflow;
 
-	Game     game(*this);
-	Physics  physics(*this);
-	Renderer renderer(*this);
+	auto& game     = emplace_injectable<Game>(*this);
+	auto& physics  = emplace_injectable<Physics>(*this);
+	auto& renderer = emplace_injectable<Renderer>(*this);
 
 	// Tasks
 	tf::Task start = gameloop_taskflow.placeholder();
