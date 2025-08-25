@@ -27,7 +27,8 @@ namespace ecs::system
 {
 
 Mawaru::Mawaru(Engine& engine):
-	engine(engine)
+	engine(engine),
+	input(engine.inject<Input>())
 {}
 
 void Mawaru::init()
@@ -37,8 +38,6 @@ void Mawaru::init()
 void Mawaru::update(float delta, void*)
 {
 	using namespace ecs::component;
-
-	auto& input = engine.inject<Input>();
 
 	auto& transform = engine.get<Transform>(engine.getActiveScene().root);
 

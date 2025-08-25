@@ -19,6 +19,7 @@
 #include <entt/entt.hpp>
 
 class Engine;
+class Input;
 
 namespace ecs::system
 {
@@ -27,6 +28,7 @@ class Mawaru: public entt::process<Mawaru, float>
 {
 private:
 	Engine& engine;
+	Input& input;
 
 	float rotationSpeed = 90.f;
 
