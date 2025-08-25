@@ -19,14 +19,16 @@
 #include <taskflow/taskflow.hpp>
 
 #include "engine.hpp"
+#include "input.hpp"
 #include "system/game.hpp"
 #include "system/physics.hpp"
 
 Engine::Engine(const std::filesystem::path& mainScene):
 	mainScene(mainScene),
-	window(*this),
-	input(*this)
-{}
+	window(*this)
+{
+	emplace_injectable<Input>(*this);
+}
 
 Engine::~Engine()
 {}
@@ -111,11 +113,6 @@ GLFWwindow* Engine::getWindow()
 	return window.getWindow();
 }
 
-Input& Engine::getInput()
-{
-	return input;
-}
-
 Settings& Engine::getSettings()
 {
 	return settings;
@@ -138,5 +135,5 @@ void Engine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, 
 {
 	auto engine = reinterpret_cast<Engine*>(glfwGetWindowUserPointer(window));
 
-	engine->input.keyCallback(window, key, scancode, action, mods);
+	engine->inject<Input>().keyCallback(window, key, scancode, action, mods);
 }

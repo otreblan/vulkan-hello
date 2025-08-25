@@ -20,6 +20,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../engine.hpp"
+#include "../input.hpp"
 #include "mawaru.hpp"
 
 namespace ecs::system
@@ -37,13 +38,15 @@ void Mawaru::update(float delta, void*)
 {
 	using namespace ecs::component;
 
+	auto& input = engine.inject<Input>();
+
 	auto& transform = engine.get<Transform>(engine.getActiveScene().root);
 
-	float rotation = delta * engine.getInput().getAxis().x * glm::radians(rotationSpeed);
+	float rotation = delta * input.getAxis().x * glm::radians(rotationSpeed);
 
 	transform.matrix = glm::rotate(transform.matrix, rotation, glm::vec3(0, 1, 0));
 
-	if(engine.getInput().space())
+	if(input.space())
 	{
 		if(!spacePressed)
 		{
