@@ -36,7 +36,7 @@ public:
 	}
 
 	template<typename Type>
-	[[nodiscard]] const Type& inject() {
+	[[nodiscard]] const Type& inject() const {
 		return registry.ctx().get<Type>();
 	}
 
